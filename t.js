@@ -122,6 +122,11 @@
 
     let allSections = [];
 
+    // 섹션별 채널 데이터 Map: sectionId → Map<channelKey, {cd, element}>
+    const sectionChannelMaps = new Map();
+    // 섹션별 가상 리스트 인스턴스: sectionId → SidebarVirtualList
+    const sectionVirtualLists = new Map();
+
     const WEB_PLAYER_SCROLL_LEFT = isSidebarMinimized ? 52 : 240;
     const qualityNameToInternalType = {
         sd: "LOW",
@@ -934,6 +939,12 @@ html:not([dark="true"]) #toggleButton5 {
     font-size: 14px;
     margin-top: 6px;
     margin-bottom: 2px;
+}
+.users-section .vl-spacer-top,
+.users-section .vl-spacer-bottom {
+    display: block;
+    width: 100%;
+    flex-shrink: 0;
 }
 .users-section .user.show-more {
     max-height: 0;
@@ -3212,28 +3223,122 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
         setTimeout(updateScrollButtonsVisibility, 100);
     };
 
+    // ----------------------------------------------------------------
+    // 채널 고유 키 생성: Map 및 가상 리스트에서 배열 인덱스 대신 사용
+    // ----------------------------------------------------------------
+    const getChannelKey = (cd) => {
+        const { channel, type, args } = cd;
+        switch (type) {
+            case "soop_live":
+                return `live_${channel.broad_no}`;
+            case "soop_feed":
+                return `feed_${channel.user_id}_${args[0]?.reg_timestamp ?? 0}`;
+            case "soop_offline":
+                return `off_${channel.user_id}`;
+            case "soop_vod":
+                return `vod_${channel.title_no}`;
+            case "chzzk":
+                return `chz_${channel.channel?.channelId}`;
+            default:
+                return `unk_${String(channel.user_id ?? Math.random()).slice(0, 20)}`;
+        }
+    };
+
+    // element 기반 비교 함수 (가상 리스트 아이템용)
+    const compareWatchersByEl = (a, b) => compareWatchers(a.element, b.element);
+
+    // {key, element} 배열을 sortFollowSection 로직으로 정렬
+    const sortFollowSectionItems = (items) => {
+        const elToKey = new Map(items.map(({ key, element }) => [element, key]));
+        const sortedEls = sortFollowSection(items.map((i) => i.element));
+        return sortedEls.map((el) => ({ key: elToKey.get(el), element: el }));
+    };
+
+    // 기존 채널 엘리먼트의 시청자 수만 갱신 (재생성 없이 Map 기반 업데이트)
+    const updateChannelElement = (element, cd) => {
+        const { channel, type } = cd;
+        let newViewerCount;
+        switch (type) {
+            case "soop_live":
+                newViewerCount = channel.total_view_cnt;
+                break;
+            case "chzzk": {
+                const liveInfo = channel.liveInfo;
+                newViewerCount = liveInfo ? liveInfo.concurrentUserCount : channel.concurrentUserCount;
+                break;
+            }
+            default:
+                return; // feed/offline/vod은 시청자 수 갱신 불필요
+        }
+        if (newViewerCount == null) return;
+        element.setAttribute("data-watchers", newViewerCount);
+        const watchersEl = element.querySelector(".watchers");
+        if (watchersEl) {
+            const dotEl = watchersEl.querySelector(".dot");
+            watchersEl.textContent = addNumberSeparator(newViewerCount);
+            if (dotEl) watchersEl.prepend(dotEl);
+        }
+    };
+
+    // ----------------------------------------------------------------
+    // 채널 목록 렌더러 (Map diff 기반, 가상화 없음)
+    // ----------------------------------------------------------------
+    class SidebarVirtualList {
+        constructor({ container, allItems, displayLimit, onAfterRender }) {
+            this.container = container;
+            this.allItems = allItems; // [{key, element}, ...] 정렬된 전체 목록
+            this.displayLimit = displayLimit;
+            this.onAfterRender = onAfterRender || null;
+            this._render();
+        }
+
+        _visibleItems() {
+            return this.allItems.slice(0, this.displayLimit);
+        }
+
+        _render() {
+            const items = this._visibleItems();
+
+            // 기존 DOM 비우기
+            while (this.container.firstChild) {
+                this.container.removeChild(this.container.firstChild);
+            }
+
+            // 전체 아이템 순서대로 추가
+            for (const item of items) {
+                this.container.appendChild(item.element);
+            }
+
+            if (this.onAfterRender) this.onAfterRender();
+        }
+
+        updateItems(newAllItems, newDisplayLimit) {
+            this.allItems = newAllItems;
+            if (newDisplayLimit !== undefined) this.displayLimit = newDisplayLimit;
+            this._render();
+        }
+
+        setDisplayLimit(newLimit) {
+            this.displayLimit = newLimit;
+            this._render();
+        }
+
+        destroy() {
+            // scroll listener 없음
+        }
+    }
+
     /**
-     * 범용 사이드바 섹션 생성 및 채우기 함수 (DOM 재활용 및 정렬 기능 내장)
-     * @param {object} config - 섹션 설정 객체
-     * @param {string} config.id - 섹션 ID (예: 'follow', 'top')
-     * @param {string} config.title - 섹션 제목 (예: '즐겨찾기 채널')
-     * @param {string} config.href - 섹션 제목 링크
-     * @param {string} config.iconHtml - 최소화 시 보일 아이콘 HTML
-     * @param {string} config.containerSelector - 채널 목록이 들어갈 컨테이너의 CSS 선택자
-     * @param {function(): Promise<Array>} config.fetchData - 채널 데이터 배열을 반환하는 비동기 함수
-     * @param {function(object, ...any): HTMLElement} config.createElement - 단일 채널 요소를 생성하는 함수
-     * @param {string} config.showMoreButtonId - '더 보기' 버튼에 사용할 ID
-     * @param {number} config.displayCount - 초기에 보여줄 채널 수
-     * @param {boolean} [update=false] - 전체 업데이트 여부
+     * 범용 사이드바 섹션 생성 및 채우기 함수
+     * Map 기반 채널 추적 + 가상 리스트로 뷰포트 내 아이템만 렌더링
      */
     const createAndPopulateSection = async (config, update = false) => {
         const { id, containerSelector, fetchData, createElement, displayCount, showMoreButtonId } = config;
 
         const sectionContainer = document.querySelector(containerSelector);
         if (!sectionContainer) {
-            // 최초 로딩 시 컨테이너가 없을 수 있으므로 이 부분은 유지
             const sidebar = document.getElementById("sidebar");
-            if (!sidebar || update) return; // 업데이트 시에는 컨테이너가 반드시 있어야 함
+            if (!sidebar || update) return;
 
             const { title, href, iconHtml } = config;
             const sectionHtml = `
@@ -3269,17 +3374,17 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
             sectionParentNode = sidebar.querySelector(`.section-wrapper.${id}`);
         }
 
-        // [추가] 즐겨찾기 그룹 탭 생성
         if (id === "follow" && !update) {
             await createFavoriteGroupTabs(sectionParentNode);
         }
-
-        // [추가] 인기 채널 카테고리 탭 생성
         if (id === "top" && !update) {
             await createCategoryTabs(sectionParentNode);
         }
 
-        // --- 최초 로딩 로직 ---
+        const sidebar = document.getElementById("sidebar");
+        const afterRenderCb = isThumbnailTooltipEnabled ? () => makeThumbnailTooltip() : null;
+
+        // --- 최초 로딩 ---
         if (!update) {
             try {
                 const channels = await fetchData();
@@ -3287,81 +3392,107 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
                     container.innerHTML = "";
                     return;
                 }
-
                 if (topSection) topSection.style.display = "";
 
-                let userElements = channels.map((cd) => createElement(cd.channel, cd.type, ...cd.args)).filter(Boolean);
+                // 채널 Map 구성: key → {cd, element}
+                const channelMap = new Map();
+                channels.forEach((cd) => {
+                    const key = getChannelKey(cd);
+                    const element = createElement(cd.channel, cd.type, ...cd.args);
+                    if (element) channelMap.set(key, { cd, element });
+                });
+                sectionChannelMaps.set(id, channelMap);
 
-                // 정렬
-                if (id === "follow") userElements = sortFollowSection(userElements);
-                else if (id === "myplus" && !myplusOrder) userElements.sort(compareWatchers);
-                else if (id === "top" || id === "myplusvod") userElements.sort(compareWatchers);
-
-                const fragment = document.createDocumentFragment();
-                userElements.forEach((el) => fragment.appendChild(el));
+                // 정렬된 아이템 배열 구성
+                let allItems = [...channelMap.entries()].map(([key, { element }]) => ({ key, element }));
+                if (id === "follow") allItems = sortFollowSectionItems(allItems);
+                else if (id === "myplus" && !myplusOrder) allItems.sort(compareWatchersByEl);
+                else if (id === "top" || id === "myplusvod") allItems.sort(compareWatchersByEl);
 
                 container.innerHTML = "";
-                container.appendChild(fragment);
 
-                const allUsers = Array.from(container.children);
-                const limit = displayCount;
-                allUsers.slice(limit).forEach((el) => el.classList.add("show-more"));
+                const vl = new SidebarVirtualList({
+                    container,
+                    sidebar,
+                    allItems,
+                    displayLimit: displayCount,
+                    onAfterRender: afterRenderCb,
+                });
+                sectionVirtualLists.set(id, vl);
 
-                if (allUsers.length > limit) {
-                    const hiddenCount = allUsers.length - limit;
-                    createShowMoreButton(container, showMoreButtonId, hiddenCount, limit);
+                if (allItems.length > displayCount) {
+                    const hiddenCount = allItems.length - displayCount;
+                    createShowMoreButton(container, showMoreButtonId, hiddenCount, displayCount, id);
                 }
-                if (isThumbnailTooltipEnabled) makeThumbnailTooltip();
             } catch (error) {
                 customLog.error(`[${id}] 섹션 로딩 실패:`, error);
                 container.innerHTML = `<div class="error-indicator">오류: ${error.message}</div>`;
             }
         }
-        // --- 업데이트 로직 (컨테이너 교체 방식) ---
+        // --- 업데이트: Map 기반 diff —변경된 채널만 처리 ---
         else {
-            const openListCount = container.querySelectorAll(".user:not(.show-more)").length;
+            const existingMap = sectionChannelMaps.get(id) || new Map();
+            const existingVl = sectionVirtualLists.get(id);
+            const currentLimit = existingVl ? existingVl.displayLimit : displayCount;
 
             try {
                 const newChannelsData = await fetchData();
 
-                // 1. 새로운 컨테이너를 메모리상에 생성
-                const newContainer = container.cloneNode(false); // 자식 노드 없이 껍데기만 복제
-
                 if (!newChannelsData || newChannelsData.length === 0) {
-                    newContainer.innerHTML = "";
-                } else {
-                    if (topSection) topSection.style.display = "";
-
-                    let userElements = newChannelsData
-                        .map((cd) => createElement(cd.channel, cd.type, ...cd.args))
-                        .filter(Boolean);
-
-                    // 2. 정렬
-                    if (id === "follow") userElements = sortFollowSection(userElements);
-                    else if (id === "myplus" && !myplusOrder) userElements.sort(compareWatchers);
-                    else if (id === "top" || id === "myplusvod") userElements.sort(compareWatchers);
-
-                    const fragment = document.createDocumentFragment();
-                    userElements.forEach((el) => fragment.appendChild(el));
-                    newContainer.appendChild(fragment);
-
-                    // 3. 새 컨테이너에 '더 보기/접기' 상태 적용
-                    const allUsers = Array.from(newContainer.children);
-                    const limit = openListCount > displayCount ? openListCount : displayCount;
-
-                    allUsers.slice(limit).forEach((el) => el.classList.add("show-more"));
-
-                    if (allUsers.length > displayCount) {
-                        const hiddenCount = allUsers.filter((el) => el.classList.contains("show-more")).length;
-                        createShowMoreButton(newContainer, showMoreButtonId, hiddenCount, displayCount);
-                    }
+                    sectionChannelMaps.set(id, new Map());
+                    if (existingVl) existingVl.updateItems([], displayCount);
+                    const existingBtn = document.getElementById(showMoreButtonId);
+                    if (existingBtn) existingBtn.remove();
+                    return;
                 }
 
-                // 4. 모든 준비가 끝난 새 컨테이너로 기존 컨테이너를 교체
-                container.parentNode.replaceChild(newContainer, container);
+                if (topSection) topSection.style.display = "";
 
-                // 툴팁은 교체된 새 컨테이너의 요소들에 대해 다시 실행
-                if (isThumbnailTooltipEnabled) makeThumbnailTooltip();
+                // diff: 기존 엘리먼트 재사용, 신규만 생성, 없어진 것은 자동 제거
+                const newMap = new Map();
+                newChannelsData.forEach((cd) => {
+                    const key = getChannelKey(cd);
+                    if (existingMap.has(key)) {
+                        const existing = existingMap.get(key);
+                        updateChannelElement(existing.element, cd);
+                        newMap.set(key, { cd, element: existing.element });
+                    } else {
+                        const element = createElement(cd.channel, cd.type, ...cd.args);
+                        if (element) newMap.set(key, { cd, element });
+                    }
+                });
+                sectionChannelMaps.set(id, newMap);
+
+                // 정렬된 아이템 배열 재구성
+                let allItems = [...newMap.entries()].map(([key, { element }]) => ({ key, element }));
+                if (id === "follow") allItems = sortFollowSectionItems(allItems);
+                else if (id === "myplus" && !myplusOrder) allItems.sort(compareWatchersByEl);
+                else if (id === "top" || id === "myplusvod") allItems.sort(compareWatchersByEl);
+
+                const newDisplayLimit = Math.max(currentLimit, displayCount);
+
+                if (existingVl) {
+                    existingVl.onAfterRender = afterRenderCb;
+                    existingVl.updateItems(allItems, newDisplayLimit);
+                } else {
+                    container.innerHTML = "";
+                    const vl = new SidebarVirtualList({
+                        container,
+                        sidebar,
+                        allItems,
+                        displayLimit: newDisplayLimit,
+                        onAfterRender: afterRenderCb,
+                    });
+                    sectionVirtualLists.set(id, vl);
+                }
+
+                // 더 보기 버튼 갱신
+                const existingBtn = document.getElementById(showMoreButtonId);
+                if (existingBtn) existingBtn.remove();
+                if (allItems.length > displayCount) {
+                    const hiddenCount = allItems.length - newDisplayLimit;
+                    createShowMoreButton(container, showMoreButtonId, hiddenCount, displayCount, id);
+                }
             } catch (error) {
                 customLog.error(`[${id}] 섹션 업데이트 실패:`, error);
             }
@@ -4418,7 +4549,7 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
      * @param {number} hiddenCount - 현재 숨겨진 항목의 수
      * @param {number} initialDisplayCount - 초기에 표시되는 항목의 수 (접기 시 기준)
      */
-    const createShowMoreButton = (container, buttonId, hiddenCount, initialDisplayCount) => {
+    const createShowMoreButton = (container, buttonId, hiddenCount, initialDisplayCount, sectionId) => {
         const existingButton = document.getElementById(buttonId);
         if (existingButton) existingButton.remove();
 
@@ -4426,7 +4557,6 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
         toggleButton.id = buttonId;
         toggleButton.title = "좌클릭: 더 보기/접기, 우클릭: 초기화";
 
-        // (핵심 수정) hiddenCount가 0이면 '접기'로 초기 텍스트 설정
         if (hiddenCount > 0) {
             toggleButton.textContent = `더 보기 (${hiddenCount})`;
         } else {
@@ -4438,26 +4568,26 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
         const displayPerClick = 10;
 
         toggleButton.addEventListener("click", () => {
+            const vl = sectionVirtualLists.get(sectionId);
+            if (!vl) return;
+            const total = vl.allItems.length;
             if (toggleButton.textContent === "접기") {
-                const allUsers = Array.from(container.querySelectorAll(".user"));
-                allUsers.slice(initialDisplayCount).forEach((user) => {
-                    user.classList.add("show-more");
-                });
-                const newHiddenCount = allUsers.length - initialDisplayCount;
-                toggleButton.textContent = `더 보기 (${newHiddenCount})`;
+                vl.setDisplayLimit(initialDisplayCount);
+                toggleButton.textContent = `더 보기 (${total - initialDisplayCount})`;
             } else {
-                const hiddenUsers = Array.from(container.querySelectorAll(".user.show-more"));
-                hiddenUsers.slice(0, displayPerClick).forEach((user) => user.classList.remove("show-more"));
-                const remainingHiddenCount = hiddenUsers.length - displayPerClick;
-                toggleButton.textContent = remainingHiddenCount > 0 ? `더 보기 (${remainingHiddenCount})` : "접기";
+                const newLimit = Math.min(vl.displayLimit + displayPerClick, total);
+                vl.setDisplayLimit(newLimit);
+                const remaining = total - newLimit;
+                toggleButton.textContent = remaining > 0 ? `더 보기 (${remaining})` : "접기";
             }
         });
 
         toggleButton.addEventListener("contextmenu", (event) => {
             event.preventDefault();
-            const allUsers = Array.from(container.querySelectorAll(".user"));
-            allUsers.slice(initialDisplayCount).forEach((user) => user.classList.add("show-more"));
-            toggleButton.textContent = `더 보기 (${allUsers.length - initialDisplayCount})`;
+            const vl = sectionVirtualLists.get(sectionId);
+            if (!vl) return;
+            vl.setDisplayLimit(initialDisplayCount);
+            toggleButton.textContent = `더 보기 (${vl.allItems.length - initialDisplayCount})`;
         });
     };
 
