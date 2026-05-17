@@ -96,7 +96,9 @@
     let ishideButtonsAboveChatInputEnabled = GM_getValue("ishideButtonsAboveChatInputEnabled", 0);
     let isRemoveShadowsFromCatchEnabled = GM_getValue("isRemoveShadowsFromCatchEnabled", 0);
     let isChzzkTopChannelsEnabled = GM_getValue("isChzzkTopChannelsEnabled", 0);
+    let isTopDuplicateRemovalEnabled = GM_getValue("isTopDuplicateRemovalEnabled", 1);
     let isChzzkFollowChannelsEnabled = GM_getValue("isChzzkFollowChannelsEnabled", 0);
+    let pinnedChzzkUsers = GM_getValue("pinnedChzzkUsers", []);
     let isAdaptiveSpeedControlEnabled = GM_getValue("isAdaptiveSpeedControlEnabled", 0);
     let isNoAutoVODEnabled = GM_getValue("isNoAutoVODEnabled", 1);
     let isAutoResumeVideoEnabled = GM_getValue("isAutoResumeVideoEnabled", 0);
@@ -151,6 +153,7 @@
     let previousTitle = "";
     let latestBufferTime = "";
     let latestViewerSuffix = "";
+    let isLeader = false;
 
     // 플레이어 클릭 이벤트 설정
     const USER_CLICK_CONFIG = {
@@ -299,7 +302,6 @@ html:not([dark="true"]) .left_nav_button {
     height: 100%;
     overflow: hidden;
     background-color: rgba(0, 0, 0, 0.72);
-    backdrop-filter: blur(4px);
     font-family: var(--font-family-v8xK4z);
     color: var(--primary-text-v8xK4z);
 }
@@ -867,6 +869,17 @@ html[dark="true"] #openModalBtn > button.btn-settings-ui {
     top: 13px;
     left: 200px;
 }
+#sidebar.max .button-fold-sidebar .sidebar-refresh-countdown {
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: #888;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+}
 #sidebar.max .button-unfold-sidebar {
     display:none;
 }
@@ -921,7 +934,7 @@ html:not([dark="true"]) #toggleButton5 {
     overflow-y: auto;
     position: fixed;
     scrollbar-width: none; /* 파이어폭스 */
-    transition: all 0.1s ease-in-out; /* 부드러운 전환 효과 */
+    transition: width 0.1s ease-in-out; /* 접기/펼치기 전환 효과 */
 }
 #sidebar::-webkit-scrollbar {
     display: none;  /* Chrome, Safari, Edge */
@@ -961,10 +974,44 @@ html:not([dark="true"]) #toggleButton5 {
     max-height: 50px;
     opacity: 1;
     overflow: hidden;
-    transition: opacity 0.7s ease;
+    content-visibility: auto;
+    contain-intrinsic-size: 0 60px;
 }
 .users-section .user:hover {
     cursor: pointer;
+}
+.users-section .user {
+    position: relative;
+}
+.users-section .user .chzzk-pin-btn {
+    display: none;
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(30, 30, 35, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    line-height: 1;
+    color: #c8c8cc;
+    z-index: 2;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    transition: background 0.12s, border-color 0.12s;
+}
+.users-section .user:hover .chzzk-pin-btn {
+    display: block;
+}
+.users-section .user .chzzk-pin-btn:hover {
+    background: rgba(50, 50, 60, 0.95);
+    border-color: rgba(255, 255, 255, 0.45);
+    color: #ffffff;
+}
+.users-section .user .chzzk-pin-btn.pinned {
+    color: #ffd700;
+    border-color: rgba(255, 215, 0, 0.5);
 }
 .users-section .user .profile-picture {
     grid-area: profile-picture;
@@ -1417,7 +1464,6 @@ html[dark="true"] .statistics-icon_54334 { color: white; background-image: url("
     height: 100%;
     overflow: hidden;
     background-color: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(5px);
 }
 
 .preview-modal-content {
@@ -3622,16 +3668,26 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
                 ? "https://live.sooplive.com/api/main_broad_list_api.php?selectType=action&orderType=view_cnt&pageNo=1&lang=ko_KR"
                 : `https://live.sooplive.com/api/main_broad_list_api.php?selectType=cate&selectValue=${selectedPinnedCategoryIdx}&orderType=view_cnt&pageNo=1&lang=ko_KR`;
 
-        const [hiddenBjList, soopData, chzzkData] = await Promise.all([
+        const [hiddenBjList, soopData, chzzkData, chzzkFollowData] = await Promise.all([
             getHiddenbjList(),
             fetchBroadList(soopApiUrl, 100),
             isChzzkTopChannelsEnabled
                 ? fetchBroadList("https://api.chzzk.naver.com/service/v1/lives?size=50&sortType=POPULAR", 100)
                 : Promise.resolve(null),
+            isChzzkTopChannelsEnabled && isTopDuplicateRemovalEnabled
+                ? fetchBroadList("https://api.chzzk.naver.com/service/v1/channels/followings/live", 50)
+                : Promise.resolve(null),
         ]);
 
         HIDDEN_BJ_LIST.length = 0;
         HIDDEN_BJ_LIST.push(...hiddenBjList);
+
+        // 치지직 팔로우 채널 ID Set 구성
+        const chzzkFollowIdSet = new Set(
+            isTopDuplicateRemovalEnabled
+                ? (chzzkFollowData?.content?.followingList?.map((item) => item.channel.channelId) ?? [])
+                : [],
+        );
 
         let combinedList = [];
 
@@ -3640,7 +3696,8 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
                 const isBlocked =
                     HIDDEN_BJ_LIST.includes(channel.user_id) ||
                     isCategoryBlocked(channel.broad_cate_no) ||
-                    isUserBlocked(channel.user_id);
+                    isUserBlocked(channel.user_id) ||
+                    (isTopDuplicateRemovalEnabled && allFollowUserIds.includes(channel.user_id));
                 if (!isBlocked) {
                     combinedList.push({ channel, args: [0, 0], type: "soop_live" });
                 }
@@ -3649,7 +3706,7 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
 
         if (selectedPinnedCategoryIdx === "all" && chzzkData?.content?.data) {
             chzzkData.content.data.forEach((channel) => {
-                const isBlocked = false;
+                const isBlocked = chzzkFollowIdSet.has(channel.channel?.channelId);
                 if (!isBlocked) {
                     combinedList.push({ channel, args: [0], type: "chzzk" });
                 }
@@ -4047,6 +4104,7 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
         const category = liveInfo ? liveInfo?.liveCategoryValue : liveCategoryValue;
         const viewerNumber = liveInfo ? liveInfo?.concurrentUserCount : concurrentUserCount;
         const titleText = liveInfo ? liveInfo?.liveTitle : liveTitle;
+        const isPinned = pinnedChzzkUsers.includes(userId);
 
         const userElement = document.createElement("a");
         userElement.className = "user";
@@ -4060,7 +4118,7 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
         userElement.setAttribute("user_id", userId);
         userElement.setAttribute("broad_start", openDate ?? "NotAvailable");
         userElement.setAttribute("is_mobile_push", is_mobile_push === "Y" ? "Y" : "N");
-        userElement.setAttribute("is_pin", "N");
+        userElement.setAttribute("is_pin", isPinned ? "Y" : "N");
         userElement.setAttribute("broad_cate_no", category);
 
         const profilePicture = document.createElement("img");
@@ -4076,8 +4134,9 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
             window.open(targetUrl, "_self");
         });
 
-        const usernameText = is_mobile_push === "Y" ? `🖈${channelInfo.channelName}` : channelInfo.channelName;
-        const usernameTitle = is_mobile_push === "Y" ? "고정됨(알림 받기 켜짐)" : "";
+        const usernameText =
+            isPinned || is_mobile_push === "Y" ? `🖈${channelInfo.channelName}` : channelInfo.channelName;
+        const usernameTitle = isPinned ? "고정됨" : is_mobile_push === "Y" ? "고정됨(알림 받기 켜짐)" : "";
 
         userElement.innerHTML = `
         <span class="username" title="${usernameTitle}">${usernameText}</span>
@@ -4087,6 +4146,26 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
         </span>
     `;
         userElement.prepend(profilePicture);
+
+        // 핀 버튼 추가
+        const pinBtn = document.createElement("button");
+        pinBtn.type = "button";
+        pinBtn.className = "chzzk-pin-btn" + (isPinned ? " pinned" : "");
+        pinBtn.title = isPinned ? "고정 해제" : "상단 고정";
+        pinBtn.textContent = "🖈";
+        pinBtn.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            if (pinnedChzzkUsers.includes(userId)) {
+                pinnedChzzkUsers = pinnedChzzkUsers.filter((id) => id !== userId);
+            } else {
+                pinnedChzzkUsers = [userId, ...pinnedChzzkUsers];
+            }
+            GM_setValue("pinnedChzzkUsers", pinnedChzzkUsers);
+            generateBroadcastElements(0);
+        });
+        userElement.appendChild(pinBtn);
 
         return userElement;
     };
@@ -4211,7 +4290,7 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
 
     const insertFoldButton = () => {
         const foldButton = `
-        <div class="button-fold-sidebar" role="button"></div>
+        <div class="button-fold-sidebar" role="button"><span class="sidebar-refresh-countdown"></span></div>
         <div class="button-unfold-sidebar" role="button"></div>
         `;
 
@@ -4268,6 +4347,11 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
             }
             const hoverTimeouts = new Map();
 
+            // mouseleave의 O(n) 순회를 O(1)로 단축하기 위한 Set
+            const onlineElementSet = new Set(
+                Array.from(elements).filter((el) => el.getAttribute("data-tooltip-listener") !== "false"),
+            );
+
             elements.forEach((element) => {
                 const isOffline = element.getAttribute("data-tooltip-listener") === "false";
                 if (isOffline) return;
@@ -4299,10 +4383,7 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
                         }
 
                         const to = e.relatedTarget;
-                        const isGoingToAnotherElement = elementsArray.some((el) => {
-                            const isOffline = el.getAttribute("data-tooltip-listener") === "false";
-                            return el !== element && el.contains(to) && !isOffline;
-                        });
+                        const isGoingToAnotherElement = to && onlineElementSet.has(to.closest("a.user"));
                         if (!isGoingToAnotherElement) {
                             tooltipContainer.classList.remove("visible");
                             tooltipContainer.removeAttribute("data-tooltip-id");
@@ -4443,9 +4524,11 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
                     </div>
                 `;
 
-                tooltipContainer.style.left = `${offsetX}px`;
+                // left를 먼저 확정한 뒤 visible 전에 top 계산 → reflow 1회로 합치기
+                tooltipContainer.style.cssText += `left:${offsetX}px;top:-9999px;`;
                 tooltipContainer.classList.add("visible");
 
+                // offsetHeight 1회 읽기 (visible 후 DOM에 렌더됐을 때)
                 const tooltipHeight = tooltipContainer.offsetHeight || 220;
                 const viewportHeight = window.innerHeight;
                 let top = elementRect.top + elementRect.height / 2 - tooltipHeight / 2;
@@ -4819,6 +4902,13 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
                         <label for="removeDuplicates">[👍🏻추천채널] 즐겨찾기 🗐 중복 제거</label>
                         <label class="switch_v8xK4z">
                             <input type="checkbox" id="removeDuplicates">
+                            <span class="slider_v8xK4z round"></span>
+                        </label>
+                    </div>
+                    <div class="option_v8xK4z customSidebarOptionsContainer">
+                        <label for="switchTopDuplicateRemoval">[🔥인기채널] 즐겨찾기 🗐 중복 제거</label>
+                        <label class="switch_v8xK4z">
+                            <input type="checkbox" id="switchTopDuplicateRemoval">
                             <span class="slider_v8xK4z round"></span>
                         </label>
                     </div>
@@ -5416,6 +5506,7 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
         setCheckboxAndSaveValue("switchAutoChangeQuality", isAutoChangeQualityEnabled, "isAutoChangeQualityEnabled");
         setCheckboxAndSaveValue("mpSortByViewers", myplusOrder, "myplusOrder");
         setCheckboxAndSaveValue("removeDuplicates", isDuplicateRemovalEnabled, "isDuplicateRemovalEnabled");
+        setCheckboxAndSaveValue("switchTopDuplicateRemoval", isTopDuplicateRemovalEnabled, "isTopDuplicateRemovalEnabled");
         setCheckboxAndSaveValue("openInNewTab", isOpenNewtabEnabled, "isOpenNewtabEnabled");
         setCheckboxAndSaveValue("mouseOverSideBar", showSidebarOnScreenMode, "showSidebarOnScreenMode");
         setCheckboxAndSaveValue(
@@ -5761,7 +5852,7 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
                 thumbsBoxLink.dataset.loading = "true";
 
                 if (!thumbsBoxLink.dataset.imageLoaded) {
-                    imgElement.style.filter = "grayscale(100%) blur(2px)";
+                    imgElement.style.filter = "grayscale(100%)";
                     imgElement.style.transition = "filter 0.5s ease";
                 }
 
@@ -6717,8 +6808,37 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
     }
 
     const checkSidebarVisibility = () => {
+        // --- 단일 탭 리더 선출 (Web Locks API — atomic, race condition 없음) ---
+        // navigator.locks 는 브라우저가 OS 레벨에서 원자적으로 관리하므로
+        // 두 탭이 동시에 리더가 되는 race condition이 원천 차단됨.
+        // 탭이 닫히면 락이 자동 해제되어 다음 대기 탭이 리더를 이어받음.
+        // --- 리더 선출 끝 ---
+
         let intervalId = null;
+        let countdownId = null;
         let lastExecutionTime = Date.now(); // 마지막 실행 시점 기록
+        const POLL_SEC = 30;
+
+        const updateCountdownEl = (text) => {
+            const el = document.querySelector(".sidebar-refresh-countdown");
+            if (el) el.textContent = text;
+        };
+
+        const startCountdown = () => {
+            if (countdownId) clearInterval(countdownId);
+            let remaining = POLL_SEC;
+            updateCountdownEl(remaining + "s");
+            countdownId = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(countdownId);
+                    countdownId = null;
+                    updateCountdownEl("...");
+                } else {
+                    updateCountdownEl(remaining + "s");
+                }
+            }, 1000);
+        };
 
         const handleVisibilityChange = () => {
             const body = document.body;
@@ -6753,13 +6873,18 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
             const currentTime = Date.now();
             const timeSinceLastExecution = (currentTime - lastExecutionTime) / 1000; // 초 단위로 변환
 
-            if (document.visibilityState === "visible" && timeSinceLastExecution >= 60) {
+            if (document.visibilityState === "visible" && timeSinceLastExecution >= 30) {
+                if (!isLeader) {
+                    customLog.log("리더 탭 아님: 갱신 건너뜀");
+                    lastExecutionTime = currentTime;
+                    return;
+                }
                 customLog.log("탭 활성화됨");
                 generateBroadcastElements(1);
                 lastExecutionTime = currentTime; // 갱신 시점 기록
                 restartInterval(); // 인터벌 재시작
             } else if (document.visibilityState === "visible") {
-                customLog.log("60초 미만 경과: 방송 목록 갱신하지 않음");
+                customLog.log("30초 미만 경과: 방송 목록 갱신하지 않음");
             } else {
                 customLog.log(`탭 비활성화됨: 마지막 갱신 = ${parseInt(timeSinceLastExecution)}초 전`);
             }
@@ -6767,17 +6892,36 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
 
         const restartInterval = () => {
             if (intervalId) clearInterval(intervalId); // 기존 인터벌 중단
+            if (!isLeader) {
+                updateCountdownEl("-");
+                return; // 리더 탭만 인터벌 실행
+            }
 
+            startCountdown();
             intervalId = setInterval(() => {
                 handleVisibilityChange();
-            }, 60 * 1000); // 60초마다 실행
+            }, 30 * 1000); // 30초마다 실행
         };
 
         (async () => {
             const sidebarDiv = await waitForElementAsync("#sidebar");
             observeClassChanges("body", handleVisibilityChange);
-            restartInterval(); // 인터벌 시작
             document.addEventListener("visibilitychange", handleVisibilityChange);
+
+            if (typeof navigator?.locks?.request === "function") {
+                // Web Locks API: 한 탭만 락을 점유 → 리더
+                // promise가 resolve되지 않는 한 탭이 닫힐 때까지 락 유지
+                navigator.locks.request("soop_ext_leader", { mode: "exclusive" }, async () => {
+                    isLeader = true;
+                    customLog.log("리더 탭 선출됨 (Web Locks)");
+                    restartInterval();
+                    return new Promise(() => {}); // 탭 닫힐 때까지 유지
+                });
+            } else {
+                // Web Locks 미지원 환경 fallback: 단순히 리더로 동작
+                isLeader = true;
+                restartInterval();
+            }
         })();
     };
     const processStreamers = () => {
@@ -7120,6 +7264,7 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
 
         // video의 onprogress 이벤트 핸들러
         video.onprogress = () => {
+            if (!isLeader) return;
             const remainingBufferTime = getRemainingBufferTime(video); // remainingBufferTime 계산
             if (emptyChat && remainingBufferTime !== "") {
                 emptyChat.innerText = `${remainingBufferTime}s 지연됨`;
