@@ -153,7 +153,6 @@
     let previousTitle = "";
     let latestBufferTime = "";
     let latestViewerSuffix = "";
-    let isLeader = false;
 
     // 플레이어 클릭 이벤트 설정
     const USER_CLICK_CONFIG = {
@@ -6845,17 +6844,19 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
 
         let intervalId = null;
         let countdownId = null;
-        let lastExecutionTime = Date.now(); // 마지막 실행 시점 기록
         const POLL_SEC = 30;
+        const SHARED_POLL_KEY = "soop_last_poll_time";
+        const getSharedLastPollTime = () => GM_getValue(SHARED_POLL_KEY, 0);
+        const setSharedLastPollTime = (t) => GM_setValue(SHARED_POLL_KEY, t);
 
         const updateCountdownEl = (text) => {
             const el = document.querySelector(".sidebar-refresh-countdown");
             if (el) el.textContent = text;
         };
 
-        const startCountdown = () => {
+        const startCountdown = (fromSec = POLL_SEC) => {
             if (countdownId) clearInterval(countdownId);
-            let remaining = POLL_SEC;
+            let remaining = Math.ceil(fromSec);
             updateCountdownEl(remaining + "s");
             countdownId = setInterval(() => {
                 remaining--;
@@ -6869,12 +6870,11 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
             }, 1000);
         };
 
+        // CSS 전용: 스크린 모드 사이드바 표시/숨김 처리
         const handleVisibilityChange = () => {
             const body = document.body;
             const isScreenmode = body.classList.contains("screen_mode");
             const isShowSidebar = body.classList.contains("showSidebar");
-            const isFullScreenmode = body.classList.contains("fullScreen_mode");
-            const isSidebarHidden = (isScreenmode ? !isShowSidebar : false) || isFullScreenmode;
             const webplayer = document.getElementById("webplayer");
             const webplayerStyle = webplayer?.style;
             const sidebar = document.getElementById("sidebar");
@@ -6893,43 +6893,35 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
                 webplayerStyle.removeProperty("width");
                 webplayerStyle.removeProperty("left");
             }
+        };
 
-            if (document.visibilityState === "visible" && isSidebarHidden) {
-                customLog.log("#sidebar는 숨겨져 있음");
-                return;
-            }
-
+        // 고정 30초 주기 폴링 (show/hide와 무관하게 항상 일정 간격으로 갱신)
+        const doPoll = () => {
             const currentTime = Date.now();
-            const timeSinceLastExecution = (currentTime - lastExecutionTime) / 1000; // 초 단위로 변환
-
-            if (document.visibilityState === "visible" && timeSinceLastExecution >= 30) {
-                if (!isLeader) {
-                    customLog.log("리더 탭 아님: 갱신 건너뜀");
-                    lastExecutionTime = currentTime;
-                    return;
-                }
-                customLog.log("탭 활성화됨");
+            const timeSinceLastExecution = (currentTime - getSharedLastPollTime()) / 1000;
+            if (timeSinceLastExecution >= POLL_SEC) {
+                customLog.log("사이드바 갱신");
+                setSharedLastPollTime(currentTime);
                 generateBroadcastElements(1);
-                lastExecutionTime = currentTime; // 갱신 시점 기록
-                restartInterval(); // 인터벌 재시작
-            } else if (document.visibilityState === "visible") {
-                customLog.log("30초 미만 경과: 방송 목록 갱신하지 않음");
             } else {
-                customLog.log(`탭 비활성화됨: 마지막 갱신 = ${parseInt(timeSinceLastExecution)}초 전`);
+                customLog.log(`다른 탭 최근 폴링(${Math.ceil(timeSinceLastExecution)}s): 방송 목록 갱신하지 않음`);
             }
+            startCountdown(POLL_SEC);
         };
 
         const restartInterval = () => {
             if (intervalId) clearInterval(intervalId); // 기존 인터벌 중단
-            if (!isLeader) {
-                updateCountdownEl("-");
-                return; // 리더 탭만 인터벌 실행
-            }
+            // 공통 저장소 기준으로 남은 시간 계산 (다른 탭이 최근에 폴링했을 수 있음)
+            const elapsed = (Date.now() - getSharedLastPollTime()) / 1000;
+            const waitSec = Math.max(0, POLL_SEC - elapsed);
 
-            startCountdown();
-            intervalId = setInterval(() => {
-                handleVisibilityChange();
-            }, 30 * 1000); // 30초마다 실행
+            startCountdown(waitSec > 0 ? waitSec : POLL_SEC);
+
+            // 남은 시간 후 첫 폴링, 이후 30초 간격 반복
+            intervalId = setTimeout(() => {
+                doPoll();
+                intervalId = setInterval(doPoll, POLL_SEC * 1000);
+            }, waitSec * 1000);
         };
 
         (async () => {
@@ -6937,20 +6929,7 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
             observeClassChanges("body", handleVisibilityChange);
             document.addEventListener("visibilitychange", handleVisibilityChange);
 
-            if (typeof navigator?.locks?.request === "function") {
-                // Web Locks API: 한 탭만 락을 점유 → 리더
-                // promise가 resolve되지 않는 한 탭이 닫힐 때까지 락 유지
-                navigator.locks.request("soop_ext_leader", { mode: "exclusive" }, async () => {
-                    isLeader = true;
-                    customLog.log("리더 탭 선출됨 (Web Locks)");
-                    restartInterval();
-                    return new Promise(() => {}); // 탭 닫힐 때까지 유지
-                });
-            } else {
-                // Web Locks 미지원 환경 fallback: 단순히 리더로 동작
-                isLeader = true;
-                restartInterval();
-            }
+            restartInterval();
         })();
     };
     const processStreamers = () => {
@@ -7293,7 +7272,6 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
 
         // video의 onprogress 이벤트 핸들러
         video.onprogress = () => {
-            if (!isLeader) return;
             const remainingBufferTime = getRemainingBufferTime(video); // remainingBufferTime 계산
             if (emptyChat && remainingBufferTime !== "") {
                 emptyChat.innerText = `${remainingBufferTime}s 지연됨`;
