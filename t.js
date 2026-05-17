@@ -3300,22 +3300,30 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
         return sortedEls.map((el) => ({ key: elToKey.get(el), element: el }));
     };
 
-    // 기존 채널 엘리먼트의 시청자 수만 갱신 (재생성 없이 Map 기반 업데이트)
+    // 기존 채널 엘리먼트의 시청자 수, 제목, 카테고리 갱신 (재생성 없이 Map 기반 업데이트)
     const updateChannelElement = (element, cd) => {
         const { channel, type } = cd;
         let newViewerCount;
+        let newTitle;
+        let newCategory;
+
         switch (type) {
             case "soop_live":
                 newViewerCount = channel.total_view_cnt;
+                newTitle = channel.broad_title;
+                newCategory = channel.category_name || getCategoryName(channel.broad_cate_no);
                 break;
             case "chzzk": {
                 const liveInfo = channel.liveInfo;
                 newViewerCount = liveInfo ? liveInfo.concurrentUserCount : channel.concurrentUserCount;
+                newTitle = liveInfo ? liveInfo.liveTitle : channel.liveTitle;
+                newCategory = liveInfo ? liveInfo.liveCategoryValue : channel.liveCategoryValue;
                 break;
             }
             default:
                 return; // feed/offline/vod은 시청자 수 갱신 불필요
         }
+
         if (newViewerCount == null) return;
         element.setAttribute("data-watchers", newViewerCount);
         const watchersEl = element.querySelector(".watchers");
@@ -3323,6 +3331,23 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
             const dotEl = watchersEl.querySelector(".dot");
             watchersEl.textContent = addNumberSeparator(newViewerCount);
             if (dotEl) watchersEl.prepend(dotEl);
+        }
+
+        if (newTitle != null) {
+            element.setAttribute("tooltip", newTitle);
+        }
+
+        if (newCategory != null) {
+            const descEl = element.querySelector(".description");
+            if (descEl) {
+                descEl.textContent = newCategory;
+                descEl.title = newCategory;
+            }
+            if (type === "soop_live" && channel.broad_cate_no != null) {
+                element.setAttribute("broad_cate_no", channel.broad_cate_no);
+            } else if (type === "chzzk") {
+                element.setAttribute("broad_cate_no", newCategory);
+            }
         }
     };
 
@@ -5506,7 +5531,11 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
         setCheckboxAndSaveValue("switchAutoChangeQuality", isAutoChangeQualityEnabled, "isAutoChangeQualityEnabled");
         setCheckboxAndSaveValue("mpSortByViewers", myplusOrder, "myplusOrder");
         setCheckboxAndSaveValue("removeDuplicates", isDuplicateRemovalEnabled, "isDuplicateRemovalEnabled");
-        setCheckboxAndSaveValue("switchTopDuplicateRemoval", isTopDuplicateRemovalEnabled, "isTopDuplicateRemovalEnabled");
+        setCheckboxAndSaveValue(
+            "switchTopDuplicateRemoval",
+            isTopDuplicateRemovalEnabled,
+            "isTopDuplicateRemovalEnabled",
+        );
         setCheckboxAndSaveValue("openInNewTab", isOpenNewtabEnabled, "isOpenNewtabEnabled");
         setCheckboxAndSaveValue("mouseOverSideBar", showSidebarOnScreenMode, "showSidebarOnScreenMode");
         setCheckboxAndSaveValue(
