@@ -3629,9 +3629,9 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
                 : `https://myapi.sooplive.com/api/favorite/${selectedFavoriteGroupIdx}`;
 
         const [soopData, chzzkData, feedData] = await Promise.all([
-            fetchBroadList(soopApiUrl, 50), // 수정된 URL 사용
+            fetchBroadList(soopApiUrl, 25), // 수정된 URL 사용
             isChzzkFollowChannelsEnabled
-                ? fetchBroadList("https://api.chzzk.naver.com/service/v1/channels/followings/live", 50)
+                ? fetchBroadList("https://api.chzzk.naver.com/service/v1/channels/followings/live", 25)
                 : Promise.resolve(null),
             isChannelFeedEnabled ? getStationFeed() : Promise.resolve([]),
         ]);
@@ -3694,12 +3694,12 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
 
         const [hiddenBjList, soopData, chzzkData, chzzkFollowData] = await Promise.all([
             getHiddenbjList(),
-            fetchBroadList(soopApiUrl, 100),
+            fetchBroadList(soopApiUrl, 25),
             isChzzkTopChannelsEnabled
-                ? fetchBroadList("https://api.chzzk.naver.com/service/v1/lives?size=50&sortType=POPULAR", 100)
+                ? fetchBroadList("https://api.chzzk.naver.com/service/v1/lives?size=50&sortType=POPULAR", 25)
                 : Promise.resolve(null),
             isChzzkTopChannelsEnabled && isTopDuplicateRemovalEnabled
-                ? fetchBroadList("https://api.chzzk.naver.com/service/v1/channels/followings/live", 50)
+                ? fetchBroadList("https://api.chzzk.naver.com/service/v1/channels/followings/live", 25)
                 : Promise.resolve(null),
         ]);
 
@@ -3747,7 +3747,7 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
     const fetchDataForMyplusSection = async () => {
         const response = await fetchBroadList(
             "https://live.sooplive.com/api/myplus/preferbjLiveVodController.php?nInitCnt=6&szRelationType=C",
-            100,
+            25,
         );
 
         if (!response || typeof response !== "object" || response.RESULT === -1 || !response.DATA) {
@@ -6870,31 +6870,6 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
             }, 1000);
         };
 
-        // CSS 전용: 스크린 모드 사이드바 표시/숨김 처리
-        const handleVisibilityChange = () => {
-            const body = document.body;
-            const isScreenmode = body.classList.contains("screen_mode");
-            const isShowSidebar = body.classList.contains("showSidebar");
-            const webplayer = document.getElementById("webplayer");
-            const webplayerStyle = webplayer?.style;
-            const sidebar = document.getElementById("sidebar");
-
-            // 스크린 모드에서 사이드바 항상 보이는 옵션
-            if (webplayer && isScreenmode && showSidebarOnScreenModeAlways && !isShowSidebar) {
-                body.classList.add("showSidebar");
-                webplayer.style.left = "0px";
-                webplayer.style.left = sidebar.offsetWidth + "px";
-                webplayer.style.width = `calc(100vw - ${sidebar.offsetWidth}px)`;
-            }
-
-            // 사이드바가 보이는 상태에서 스크린 모드 종료할 때
-            if (webplayer && !isScreenmode && isShowSidebar) {
-                body.classList.remove("showSidebar");
-                webplayerStyle.removeProperty("width");
-                webplayerStyle.removeProperty("left");
-            }
-        };
-
         // 고정 30초 주기 폴링 (show/hide와 무관하게 항상 일정 간격으로 갱신)
         const doPoll = () => {
             const currentTime = Date.now();
@@ -6922,6 +6897,45 @@ body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_conten
                 doPoll();
                 intervalId = setInterval(doPoll, POLL_SEC * 1000);
             }, waitSec * 1000);
+        };
+
+        // 스크린 모드에서 사이드바가 표시 상태인지 추적 (중복 폴링 방지)
+        let prevScreenmodeSidebarVisible = false;
+
+        // CSS 전용: 스크린 모드 사이드바 표시/숨김 처리
+        const handleVisibilityChange = () => {
+            const body = document.body;
+            const isScreenmode = body.classList.contains("screen_mode");
+            const isShowSidebar = body.classList.contains("showSidebar");
+            const webplayer = document.getElementById("webplayer");
+            const webplayerStyle = webplayer?.style;
+            const sidebar = document.getElementById("sidebar");
+
+            // 스크린 모드에서 사이드바가 새로 보이게 될 때: 즉시 요청 후 30초 재시작
+            if (isScreenmode && isShowSidebar && !prevScreenmodeSidebarVisible) {
+                prevScreenmodeSidebarVisible = true;
+                doPoll();
+                restartInterval();
+                return;
+            }
+            if (!isScreenmode || !isShowSidebar) {
+                prevScreenmodeSidebarVisible = false;
+            }
+
+            // 스크린 모드에서 사이드바 항상 보이는 옵션
+            if (webplayer && isScreenmode && showSidebarOnScreenModeAlways && !isShowSidebar) {
+                body.classList.add("showSidebar");
+                webplayer.style.left = "0px";
+                webplayer.style.left = sidebar.offsetWidth + "px";
+                webplayer.style.width = `calc(100vw - ${sidebar.offsetWidth}px)`;
+            }
+
+            // 사이드바가 보이는 상태에서 스크린 모드 종료할 때
+            if (webplayer && !isScreenmode && isShowSidebar) {
+                body.classList.remove("showSidebar");
+                webplayerStyle.removeProperty("width");
+                webplayerStyle.removeProperty("left");
+            }
         };
 
         (async () => {
