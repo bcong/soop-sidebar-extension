@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260523233703
+// @version      20260523234007
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -12677,7 +12677,7 @@
             isPinned && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "pin-badge", children: "🖈" })
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "username", children: [
-            isNotified && !isPinned && /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-bell", style: { marginRight: 3, fontSize: 11 } }),
+            isNotified && /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-bell", style: { marginRight: 3, fontSize: 11 } }),
             channel.user_nick
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: channel.category_name || getCategoryName(channel.broad_cate_no) || "" }),
@@ -13548,7 +13548,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260523233703";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260523234007";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {

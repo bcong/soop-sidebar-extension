@@ -128,7 +128,7 @@ const ChannelItem: React.FC<ChannelItemProps> = observer(({ data }) => {
                 {isPinned && <span className="pin-badge">🖈</span>}
             </div>
             <span className="username">
-                {isNotified && !isPinned && <i className="fa fa-bell" style={{ marginRight: 3, fontSize: 11 }} />}
+                {isNotified && <i className="fa fa-bell" style={{ marginRight: 3, fontSize: 11 }} />}
                 {channel.user_nick}
             </span>
             <span className="description">{channel.category_name || getCategoryName(channel.broad_cate_no) || ""}</span>
