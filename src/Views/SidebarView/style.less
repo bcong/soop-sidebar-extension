@@ -1,0 +1,142 @@
+// SidebarView 스타일 — #sidebar 레이아웃, fold/unfold 버튼
+
+#sidebar {
+    top: 64px;
+    left: 0;
+    display: flex !important;
+    flex-direction: column !important;
+    grid-area: sidebar;
+    padding-bottom: 360px;
+    height: 100vh;
+    overflow-y: auto;
+    position: fixed;
+    scrollbar-width: none;
+    transition: width 0.1s ease-in-out;
+    z-index: 1401;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    // ── 확장 상태 ────────────────────────────────────────
+    &.max {
+        width: 240px;
+
+        .button-fold-sidebar {
+            background-size: 7px 11px;
+            background-repeat: no-repeat;
+            width: 26px;
+            height: 26px;
+            background-position: center;
+            position: absolute;
+            top: 13px;
+            left: 200px;
+
+            .sidebar-refresh-countdown {
+                position: absolute;
+                right: 30px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 10px;
+                color: #888;
+                white-space: nowrap;
+                pointer-events: none;
+                user-select: none;
+            }
+        }
+
+        .button-unfold-sidebar {
+            display: none;
+        }
+
+        .top-section span.min {
+            display: none;
+        }
+    }
+
+    // ── 축소 상태 ────────────────────────────────────────
+    &.min {
+        width: 52px;
+
+        .button-fold-sidebar {
+            display: none;
+        }
+
+        .button-unfold-sidebar {
+            background-size: 7px 11px;
+            background-repeat: no-repeat;
+            width: 26px;
+            height: 26px;
+            background-position: center;
+            position: relative;
+            top: 8px;
+            left: 12px;
+            padding-top: 16px;
+            padding-bottom: 12px;
+        }
+
+        .top-section span.max {
+            display: none;
+        }
+
+        .users-section {
+            a.user span {
+                display: none;
+            }
+            button {
+                font-size: 12px;
+                padding: 4px;
+            }
+        }
+    }
+}
+
+// ── dark ─────────────────────────────────────────────────
+html[dark="true"] #sidebar {
+    color: white;
+    background-color: #1f1f23;
+
+    .top-section > span {
+        color: #dedee3;
+        > a {
+            color: #dedee3;
+        }
+    }
+
+    &.max .button-fold-sidebar {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none slice' viewBox='0 0 7 11'%3e%3cpath fill='%23f9f9f9' d='M5.87 11.01L.01 5.51 5.87.01l1.08 1.01-4.74 4.45L7 9.96 5.87 11z'/%3e%3c/svg%3e");
+    }
+
+    &.min .button-unfold-sidebar {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none slice' viewBox='0 0 7 11'%3e%3cpath fill='%23f9f9f9' d='M1.13 11.01l5.86-5.5L1.13.01.05 1.02l4.74 4.45L0 9.96 1.13 11z'/%3e%3c/svg%3e");
+    }
+}
+
+// ── light ────────────────────────────────────────────────
+html:not([dark="true"]) #sidebar {
+    color: white;
+    background-color: #efeff1;
+
+    .top-section > span {
+        color: #0e0e10;
+        > a {
+            color: #0e0e10;
+        }
+    }
+
+    &.max .button-fold-sidebar {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none slice' viewBox='0 0 7 11'%3e%3cpath fill='%23888' d='M5.87 11.01L.01 5.51 5.87.01l1.08 1.01-4.74 4.45L7 9.96 5.87 11z'/%3e%3c/svg%3e");
+    }
+
+    &.min .button-unfold-sidebar {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none slice' viewBox='0 0 7 11'%3e%3cpath fill='%23888' d='M1.13 11.01l5.86-5.5L1.13.01.05 1.02l4.74 4.45L0 9.96 1.13 11z'/%3e%3c/svg%3e");
+    }
+}
+
+// screen_mode 시 fold/unfold 버튼 숨김 (playerCommonStyles에서 이동)
+.customSidebar.screen_mode #sidebar {
+    .button-fold-sidebar,
+    .button-unfold-sidebar {
+        display: none !important;
+    }
+}

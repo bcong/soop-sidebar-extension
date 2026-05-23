@@ -5,7 +5,7 @@ import SidebarSection from "@Components/SidebarSection";
 import { FavoriteGroupTabs, CategoryGroupTabs } from "@Components/GroupTabs";
 import TooltipPreview, { showTooltip, hideTooltip } from "@Components/TooltipPreview";
 import { fetchFavoriteGroups, loadCategoryData } from "@Utils/api";
-import "./style.module.less";
+import "./style.less";
 
 const SidebarView: React.FC = observer(() => {
     const settings = useSettingsStore();
