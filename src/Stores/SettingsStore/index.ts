@@ -47,7 +47,6 @@ export class SettingsStore {
     isBroadTitleTextEllipsisEnabled: boolean;
 
     // LIVE 플레이어
-    isAutoReloadLiveEnabled: boolean;
     isNoAutoVODEnabled: boolean;
     isAutoReloadAfterBroadcastEndEnabled: boolean;
     isRedirectLiveEnabled: boolean;
@@ -72,8 +71,6 @@ export class SettingsStore {
     isChatPositionEnabled: boolean;
     isAutoScreenModeEnabled: boolean;
 
-    // LIVE 플레이어 추가
-    isAdaptiveSpeedControlEnabled: boolean;
     isClickToMuteEnabled: boolean;
 
     // VOD 플레이어
@@ -141,7 +138,6 @@ export class SettingsStore {
         this.isRemoveCarouselEnabled = GM_getValue("isRemoveCarouselEnabled", true);
         this.isBroadTitleTextEllipsisEnabled = GM_getValue("isBroadTitleTextEllipsisEnabled", false);
 
-        this.isAutoReloadLiveEnabled = GM_getValue("isAutoReloadLiveEnabled", true);
         this.isNoAutoVODEnabled = GM_getValue("isNoAutoVODEnabled", true);
         this.isAutoReloadAfterBroadcastEndEnabled = GM_getValue("isAutoReloadAfterBroadcastEndEnabled", true);
         this.isRedirectLiveEnabled = GM_getValue("isRedirectLiveEnabled", false);
@@ -165,7 +161,6 @@ export class SettingsStore {
         this.isMouseOverSideBarEnabled = GM_getValue("showSidebarOnScreenMode", true);
         this.isChatPositionEnabled = GM_getValue("isBottomChatEnabled", false);
         this.isAutoScreenModeEnabled = GM_getValue("isAutoScreenModeEnabled", false);
-        this.isAdaptiveSpeedControlEnabled = GM_getValue("isAdaptiveSpeedControlEnabled", false);
         this.isClickToMuteEnabled = GM_getValue("isClickToMuteEnabled", false);
 
         this.isSelectBestQualityEnabled = GM_getValue("isSelectBestQualityEnabled", false);
@@ -225,7 +220,6 @@ export class SettingsStore {
             isThumbnailTooltipEnabled: observable,
             isRemoveCarouselEnabled: observable,
             isBroadTitleTextEllipsisEnabled: observable,
-            isAutoReloadLiveEnabled: observable,
             isNoAutoVODEnabled: observable,
             isAutoReloadAfterBroadcastEndEnabled: observable,
             isRedirectLiveEnabled: observable,
@@ -249,7 +243,6 @@ export class SettingsStore {
             isMouseOverSideBarEnabled: observable,
             isChatPositionEnabled: observable,
             isAutoScreenModeEnabled: observable,
-            isAdaptiveSpeedControlEnabled: observable,
             isClickToMuteEnabled: observable,
             isSelectBestQualityEnabled: observable,
             isRemoveShadowsFromCatchEnabled: observable,

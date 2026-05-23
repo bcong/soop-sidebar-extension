@@ -45,7 +45,6 @@ const EXPORT_KEYS = [
     "isThumbnailTooltipEnabled",
     "isRemoveCarouselEnabled",
     "isBroadTitleTextEllipsisEnabled",
-    "isAutoReloadLiveEnabled",
     "isNoAutoVODEnabled",
     "isAutoReloadAfterBroadcastEndEnabled",
     "isRedirectLiveEnabled",
@@ -69,7 +68,6 @@ const EXPORT_KEYS = [
     "isMouseOverSideBarEnabled",
     "isChatPositionEnabled",
     "isAutoScreenModeEnabled",
-    "isAdaptiveSpeedControlEnabled",
     "isClickToMuteEnabled",
     "isSelectBestQualityEnabled",
     "isRemoveShadowsFromCatchEnabled",
@@ -773,13 +771,6 @@ const SettingModal: React.FC = observer(() => {
                                 checked={s.isAutoReloadAfterBroadcastEndEnabled}
                                 onChange={(v) => s.setSetting("isAutoReloadAfterBroadcastEndEnabled", v)}
                             />
-                            <Opt
-                                id="switchAutoReloadLive"
-                                badge="live"
-                                label="LIVE 방송 자동 새로고침"
-                                checked={s.isAutoReloadLiveEnabled}
-                                onChange={(v) => s.setSetting("isAutoReloadLiveEnabled", v)}
-                            />
                             {/* redirectLive — label 내부에 select 포함 (sample.js 동일) */}
                             <div className="option_v8xK4z" id="redirectLiveOptionContainer">
                                 <label htmlFor="switchRedirectLive">
@@ -1011,13 +1002,6 @@ const SettingModal: React.FC = observer(() => {
                                 label="VOD 하이라이트(별별랭킹) 타임라인 활성화"
                                 checked={s.isVODHighlightEnabled}
                                 onChange={(v) => s.setSetting("isVODHighlightEnabled", v)}
-                            />
-                            <Opt
-                                id="switchAdaptiveSpeedControl"
-                                badge="vod"
-                                label="적응형 재생 속도 조절"
-                                checked={s.isAdaptiveSpeedControlEnabled}
-                                onChange={(v) => s.setSetting("isAdaptiveSpeedControlEnabled", v)}
                             />
                         </section>
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260523115252
+// @version      20260523120925
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -11477,7 +11477,6 @@
       __publicField(this, "isRemoveCarouselEnabled");
       __publicField(this, "isBroadTitleTextEllipsisEnabled");
       // LIVE 플레이어
-      __publicField(this, "isAutoReloadLiveEnabled");
       __publicField(this, "isNoAutoVODEnabled");
       __publicField(this, "isAutoReloadAfterBroadcastEndEnabled");
       __publicField(this, "isRedirectLiveEnabled");
@@ -11501,8 +11500,6 @@
       __publicField(this, "isMouseOverSideBarEnabled");
       __publicField(this, "isChatPositionEnabled");
       __publicField(this, "isAutoScreenModeEnabled");
-      // LIVE 플레이어 추가
-      __publicField(this, "isAdaptiveSpeedControlEnabled");
       __publicField(this, "isClickToMuteEnabled");
       // VOD 플레이어
       __publicField(this, "isSelectBestQualityEnabled");
@@ -11560,7 +11557,6 @@
       this.isThumbnailTooltipEnabled = _GM_getValue("isThumbnailTooltipEnabled", true);
       this.isRemoveCarouselEnabled = _GM_getValue("isRemoveCarouselEnabled", true);
       this.isBroadTitleTextEllipsisEnabled = _GM_getValue("isBroadTitleTextEllipsisEnabled", false);
-      this.isAutoReloadLiveEnabled = _GM_getValue("isAutoReloadLiveEnabled", true);
       this.isNoAutoVODEnabled = _GM_getValue("isNoAutoVODEnabled", true);
       this.isAutoReloadAfterBroadcastEndEnabled = _GM_getValue("isAutoReloadAfterBroadcastEndEnabled", true);
       this.isRedirectLiveEnabled = _GM_getValue("isRedirectLiveEnabled", false);
@@ -11584,7 +11580,6 @@
       this.isMouseOverSideBarEnabled = _GM_getValue("showSidebarOnScreenMode", true);
       this.isChatPositionEnabled = _GM_getValue("isBottomChatEnabled", false);
       this.isAutoScreenModeEnabled = _GM_getValue("isAutoScreenModeEnabled", false);
-      this.isAdaptiveSpeedControlEnabled = _GM_getValue("isAdaptiveSpeedControlEnabled", false);
       this.isClickToMuteEnabled = _GM_getValue("isClickToMuteEnabled", false);
       this.isSelectBestQualityEnabled = _GM_getValue("isSelectBestQualityEnabled", false);
       this.isRemoveShadowsFromCatchEnabled = _GM_getValue("isRemoveShadowsFromCatchEnabled", false);
@@ -11638,7 +11633,6 @@
         isThumbnailTooltipEnabled: observable,
         isRemoveCarouselEnabled: observable,
         isBroadTitleTextEllipsisEnabled: observable,
-        isAutoReloadLiveEnabled: observable,
         isNoAutoVODEnabled: observable,
         isAutoReloadAfterBroadcastEndEnabled: observable,
         isRedirectLiveEnabled: observable,
@@ -11662,7 +11656,6 @@
         isMouseOverSideBarEnabled: observable,
         isChatPositionEnabled: observable,
         isAutoScreenModeEnabled: observable,
-        isAdaptiveSpeedControlEnabled: observable,
         isClickToMuteEnabled: observable,
         isSelectBestQualityEnabled: observable,
         isRemoveShadowsFromCatchEnabled: observable,
@@ -13337,7 +13330,6 @@
     "isThumbnailTooltipEnabled",
     "isRemoveCarouselEnabled",
     "isBroadTitleTextEllipsisEnabled",
-    "isAutoReloadLiveEnabled",
     "isNoAutoVODEnabled",
     "isAutoReloadAfterBroadcastEndEnabled",
     "isRedirectLiveEnabled",
@@ -13361,7 +13353,6 @@
     "isMouseOverSideBarEnabled",
     "isChatPositionEnabled",
     "isAutoScreenModeEnabled",
-    "isAdaptiveSpeedControlEnabled",
     "isClickToMuteEnabled",
     "isSelectBestQualityEnabled",
     "isRemoveShadowsFromCatchEnabled",
@@ -13554,7 +13545,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260523115252";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260523120925";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -14063,16 +14054,6 @@
                     onChange: (v2) => s.setSetting("isAutoReloadAfterBroadcastEndEnabled", v2)
                   }
                 ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  Opt,
-                  {
-                    id: "switchAutoReloadLive",
-                    badge: "live",
-                    label: "LIVE 방송 자동 새로고침",
-                    checked: s.isAutoReloadLiveEnabled,
-                    onChange: (v2) => s.setSetting("isAutoReloadLiveEnabled", v2)
-                  }
-                ),
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z", id: "redirectLiveOptionContainer", children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "switchRedirectLive", children: [
                     /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "live" }),
@@ -14371,16 +14352,6 @@
                     label: "VOD 하이라이트(별별랭킹) 타임라인 활성화",
                     checked: s.isVODHighlightEnabled,
                     onChange: (v2) => s.setSetting("isVODHighlightEnabled", v2)
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  Opt,
-                  {
-                    id: "switchAdaptiveSpeedControl",
-                    badge: "vod",
-                    label: "적응형 재생 속도 조절",
-                    checked: s.isAdaptiveSpeedControlEnabled,
-                    onChange: (v2) => s.setSetting("isAdaptiveSpeedControlEnabled", v2)
                   }
                 )
               ] }),
