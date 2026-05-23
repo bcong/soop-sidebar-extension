@@ -61,11 +61,21 @@ const ChannelItemChzzk: React.FC<ChannelItemChzzkProps> = observer(({ data }) =>
             data-live-image-url={liveImageUrl}
             data-open-date={openDate}
         >
-            {profileUrl && <img className="profile-picture" src={profileUrl} alt={channelName} loading="lazy" />}
-            <span className="username">
-                {isPinned && <i className="fa fa-thumb-tack" style={{ marginRight: 3 }} />}
-                {channelName}
-            </span>
+            <div className="profile-picture-container">
+                {profileUrl && (
+                    <img
+                        className="profile-picture"
+                        src={profileUrl}
+                        alt={channelName}
+                        loading="lazy"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
+                        }}
+                    />
+                )}
+                {isPinned && <span className="pin-badge">🖈</span>}
+            </div>
+            <span className="username">{channelName}</span>
             <span className="description">{category}</span>
             <span className="watchers">
                 <span className="dot greendot">●</span>
