@@ -86,7 +86,7 @@ const ChannelItemChzzk: React.FC<ChannelItemChzzkProps> = observer(({ data }) =>
                 onClick={handlePinClick}
                 title={isPinned ? "고정 해제" : "상단 고정"}
             >
-                <i className="fa fa-thumb-tack" />
+                🖈
             </button>
         </a>
     );
