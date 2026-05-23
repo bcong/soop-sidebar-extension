@@ -223,15 +223,6 @@ const VodPage: React.FC = observer(() => {
         };
     }, [settings.isSelectBestQualityEnabled]);
 
-    // 캐치 그림자 제거
-    useEffect(() => {
-        if (!settings.isRemoveShadowsFromCatchEnabled) return;
-        const style = document.createElement("style");
-        style.textContent = `[class*="shadow"], [class*="vignette"] { display: none !important; }`;
-        document.head.appendChild(style);
-        return () => style.remove();
-    }, [settings.isRemoveShadowsFromCatchEnabled]);
-
     // VOD 하이라이트 버튼 표시
     useEffect(() => {
         if (!settings.isVODHighlightEnabled) return;

@@ -8,7 +8,6 @@ import NavBar from "@Components/NavBar";
 import SettingModal from "@Components/SettingModal";
 import ReactDOM from "react-dom";
 import { isUserTyping, customLog, sleep, waitForElementAsync, observeUrlChanges } from "@Utils/index";
-import { fetchBroadList } from "@Utils/api";
 
 // dev 모드에서 unsafeWindow가 정의되지 않으므로 window로 대체
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,24 +60,6 @@ function addStyle(css: string) {
         style.textContent = css;
         document.head.appendChild(style);
     }
-}
-
-// ── 즐겨찾기에서 라이브 방송 우선순위 목록 반환 ────────────────────
-function getPrioritizedLiveBroadcasts(favoriteData: any): any[] {
-    if (!favoriteData?.data?.length) return [];
-    const pinned: any[] = [];
-    const notified: any[] = [];
-    const normal: any[] = [];
-    favoriteData.data.forEach((item: any) => {
-        if (item.is_live !== true) return;
-        const broadInfo = item.broad_info?.[0];
-        if (!broadInfo) return;
-        if (item.is_pin === true) pinned.push(broadInfo);
-        else if (item.is_mobile_push === "Y") notified.push(broadInfo);
-        else normal.push(broadInfo);
-    });
-    const cmp = (a: any, b: any) => (b.total_view_cnt ?? 0) - (a.total_view_cnt ?? 0);
-    return [...pinned.sort(cmp), ...notified.sort(cmp), ...normal.sort(cmp)];
 }
 
 const PlayerPage: React.FC = observer(() => {
@@ -827,66 +808,9 @@ const PlayerPage: React.FC = observer(() => {
         };
     }, [settings.isAutoReloadAfterBroadcastEndEnabled]);
 
-    // ─── VOD 자동 재생 방지 / 라이브 자동 전환 ───────────────────────
+    // ─── VOD 자동 재생 방지 ───────────────────────────────────────────
     useEffect(() => {
         if (!settings.isNoAutoVODEnabled) return;
-
-        let retryTimer: ReturnType<typeof setTimeout> | null = null;
-
-        const redirectLiveWithTabCheck = async (retryCount = 0) => {
-            const MAX_RETRIES = 100;
-            const RETRY_DELAY_MS = 10000;
-            const LOCK_KEY = "auto_redirect_lock";
-            const LOCK_TIMEOUT_MS = 10000;
-
-            if (retryCount >= MAX_RETRIES) return;
-
-            try {
-                const now = Date.now();
-                const lockTs = localStorage.getItem(LOCK_KEY);
-                if (lockTs && now - parseInt(lockTs, 10) < LOCK_TIMEOUT_MS) {
-                    retryTimer = setTimeout(() => redirectLiveWithTabCheck(retryCount + 1), RETRY_DELAY_MS);
-                    return;
-                }
-                localStorage.setItem(LOCK_KEY, now.toString());
-
-                const favoriteData = await fetchBroadList("https://myapi.sooplive.com/api/favorite", 50);
-                const targets = getPrioritizedLiveBroadcasts(favoriteData);
-
-                if (!targets.length) {
-                    localStorage.removeItem(LOCK_KEY);
-                    return;
-                }
-
-                switch (settings.redirectLiveSortOption) {
-                    case "mostViewers":
-                        targets.sort((a, b) => (b.total_view_cnt ?? 0) - (a.total_view_cnt ?? 0));
-                        break;
-                    case "leastViewers":
-                        targets.sort((a, b) => (a.total_view_cnt ?? 0) - (b.total_view_cnt ?? 0));
-                        break;
-                    case "random":
-                        for (let i = targets.length - 1; i > 0; i--) {
-                            const j = Math.floor(Math.random() * (i + 1));
-                            [targets[i], targets[j]] = [targets[j], targets[i]];
-                        }
-                        break;
-                }
-
-                for (const target of targets) {
-                    const { user_id, broad_no } = target;
-                    if (!user_id || !broad_no) continue;
-                    const lv = _uw.liveView ?? (window as any).liveView;
-                    lv?.playerController?.sendLoadBroad(user_id, broad_no);
-                    return;
-                }
-
-                localStorage.removeItem(LOCK_KEY);
-            } catch (err) {
-                customLog.error("자동 전환 실패:", err);
-                localStorage.removeItem(LOCK_KEY);
-            }
-        };
 
         const disableAutoVOD = () => {
             const lv = _uw.liveView ?? (window as any).liveView;
@@ -895,20 +819,11 @@ const PlayerPage: React.FC = observer(() => {
                 setTimeout(disableAutoVOD, 3000);
                 return;
             }
-            if (settings.isRedirectLiveEnabled) {
-                container.autoPlayVodBanner.show = () => redirectLiveWithTabCheck();
-                customLog.log("[VOD 방지] 자동 LIVE 전환 활성화");
-            } else {
-                container.autoPlayVodBanner.show = () => {};
-            }
+            container.autoPlayVodBanner.show = () => {};
         };
 
         disableAutoVOD();
-
-        return () => {
-            if (retryTimer) clearTimeout(retryTimer);
-        };
-    }, [settings.isNoAutoVODEnabled, settings.isRedirectLiveEnabled, settings.redirectLiveSortOption]);
+    }, [settings.isNoAutoVODEnabled]);
 
     // ─── cBox-list 방송 링크 클릭 → sendLoadBroad ──────────────────
     useEffect(() => {

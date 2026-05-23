@@ -49,8 +49,6 @@ export class SettingsStore {
     // LIVE 플레이어
     isNoAutoVODEnabled: boolean;
     isAutoReloadAfterBroadcastEndEnabled: boolean;
-    isRedirectLiveEnabled: boolean;
-    redirectLiveSortOption: string;
     isHideEsportsInfoEnabled: boolean;
     isShowPauseButtonEnabled: boolean;
     isCaptureButtonEnabled: boolean;
@@ -75,7 +73,6 @@ export class SettingsStore {
 
     // VOD 플레이어
     isSelectBestQualityEnabled: boolean;
-    isRemoveShadowsFromCatchEnabled: boolean;
     isVODHighlightEnabled: boolean;
 
     // 채팅창
@@ -140,8 +137,6 @@ export class SettingsStore {
 
         this.isNoAutoVODEnabled = GM_getValue("isNoAutoVODEnabled", true);
         this.isAutoReloadAfterBroadcastEndEnabled = GM_getValue("isAutoReloadAfterBroadcastEndEnabled", true);
-        this.isRedirectLiveEnabled = GM_getValue("isRedirectLiveEnabled", false);
-        this.redirectLiveSortOption = GM_getValue("redirectLiveSortOption", "custom");
         this.isHideEsportsInfoEnabled = GM_getValue("isHideEsportsInfoEnabled", false);
         this.isShowPauseButtonEnabled = GM_getValue("isMakePauseButtonEnabled", true);
         this.isCaptureButtonEnabled = GM_getValue("isCaptureButtonEnabled", false);
@@ -164,7 +159,6 @@ export class SettingsStore {
         this.isClickToMuteEnabled = GM_getValue("isClickToMuteEnabled", false);
 
         this.isSelectBestQualityEnabled = GM_getValue("isSelectBestQualityEnabled", false);
-        this.isRemoveShadowsFromCatchEnabled = GM_getValue("isRemoveShadowsFromCatchEnabled", false);
         this.isVODHighlightEnabled = GM_getValue("isVODHighlightEnabled", true);
 
         this.isHideSupporterBadgeEnabled = GM_getValue("isHideSupporterBadgeEnabled", false);
@@ -222,8 +216,6 @@ export class SettingsStore {
             isBroadTitleTextEllipsisEnabled: observable,
             isNoAutoVODEnabled: observable,
             isAutoReloadAfterBroadcastEndEnabled: observable,
-            isRedirectLiveEnabled: observable,
-            redirectLiveSortOption: observable,
             isHideEsportsInfoEnabled: observable,
             isShowPauseButtonEnabled: observable,
             isCaptureButtonEnabled: observable,
@@ -245,7 +237,6 @@ export class SettingsStore {
             isAutoScreenModeEnabled: observable,
             isClickToMuteEnabled: observable,
             isSelectBestQualityEnabled: observable,
-            isRemoveShadowsFromCatchEnabled: observable,
             isVODHighlightEnabled: observable,
             isHideSupporterBadgeEnabled: observable,
             isHideFanBadgeEnabled: observable,

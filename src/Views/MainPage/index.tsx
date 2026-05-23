@@ -101,7 +101,183 @@ const MainPage: React.FC = observer(() => {
         return () => document.removeEventListener("click", handleClick, true);
     }, [settings.isSendLoadBroadEnabled]);
 
-    // 사이드바 컨테이너: body에 즉시 추가 후 #soop-gnb 뒤로 이동 시도
+    // 연령 제한 썸네일 마우스오버 보기
+    useEffect(() => {
+        if (!settings.isReplaceEmptyThumbnailEnabled) return;
+
+        // HLS.js 동적 로드 (한 번만)
+        const _uw: any = (() => {
+            try {
+                return unsafeWindow;
+            } catch {
+                return window;
+            }
+        })();
+        if (!document.querySelector("script[data-hls-loader]")) {
+            const hlsScript = document.createElement("script");
+            hlsScript.src = "https://cdn.jsdelivr.net/npm/hls.js@latest";
+            hlsScript.dataset.hlsLoader = "1";
+            document.head.appendChild(hlsScript);
+        }
+
+        const getBroadM3u8Domain = async (broadNumber: string): Promise<string | null> => {
+            const params = new URLSearchParams({
+                return_type: "gs_cdn_pc_web",
+                use_cors: "true",
+                cors_origin_url: "play.sooplive.com",
+                broad_key: `${broadNumber}-common-master-hls`,
+                player_mode: "landing",
+                time: "0",
+            });
+            try {
+                const res = await fetch(`https://livestream-manager.sooplive.com/broad_stream_assign.html?${params}`, {
+                    credentials: "include",
+                    cache: "no-store",
+                });
+                if (!res.ok) return null;
+                const data = await res.json();
+                return data.result === "1" && data.view_url ? data.view_url : null;
+            } catch {
+                return null;
+            }
+        };
+
+        const getBroadAid = async (id: string, broadNumber: string): Promise<string | null> => {
+            const payload = new URLSearchParams({
+                bid: id,
+                bno: broadNumber,
+                from_api: "0",
+                mode: "landing",
+                player_type: "html5",
+                stream_type: "common",
+                quality: "sd",
+                type: "aid",
+                pwd: "",
+            });
+            try {
+                const res = await fetch("https://live.sooplive.com/afreeca/player_live_api.php", {
+                    method: "POST",
+                    body: payload,
+                    credentials: "include",
+                    cache: "no-store",
+                });
+                const data = await res.json();
+                return data?.CHANNEL?.AID ?? null;
+            } catch {
+                return null;
+            }
+        };
+
+        const captureFrame = (video: HTMLVideoElement): Promise<string> =>
+            new Promise((resolve) => {
+                const canvas = document.createElement("canvas");
+                canvas.width = 480;
+                canvas.height = 270;
+                const ctx = canvas.getContext("2d")!;
+                const vr = video.videoWidth / video.videoHeight;
+                const cr = 480 / 270;
+                let dw = 480,
+                    dh = 270,
+                    ox = 0,
+                    oy = 0;
+                if (vr > cr) {
+                    dh = 480 / vr;
+                    oy = (270 - dh) / 2;
+                } else {
+                    dw = 270 * vr;
+                    ox = (480 - dw) / 2;
+                }
+                ctx.fillStyle = "black";
+                ctx.fillRect(0, 0, 480, 270);
+                ctx.drawImage(video, ox, oy, dw, dh);
+                resolve(canvas.toDataURL("image/webp"));
+            });
+
+        const loadFrame = async (id: string, broadNumber: string): Promise<string | null> => {
+            const Hls = _uw.Hls;
+            if (!Hls?.isSupported()) return null;
+            const [aid, baseUrl] = await Promise.all([getBroadAid(id, broadNumber), getBroadM3u8Domain(broadNumber)]);
+            if (!aid || !baseUrl) return null;
+            const m3u8 = `${baseUrl}?aid=${aid}`;
+            const video = document.createElement("video");
+            video.playbackRate = 16;
+            const hls = new Hls();
+            hls.loadSource(m3u8);
+            hls.attachMedia(video);
+            return new Promise((resolve) => {
+                video.addEventListener(
+                    "canplay",
+                    async () => {
+                        const data = await captureFrame(video);
+                        video.pause();
+                        video.src = "";
+                        hls.destroy();
+                        resolve(data);
+                    },
+                    { once: true },
+                );
+                setTimeout(() => {
+                    hls.destroy();
+                    resolve(null);
+                }, 15000);
+            });
+        };
+
+        const bindLink = (link: HTMLAnchorElement) => {
+            if (link.dataset.adultThumbBound === "true") return;
+            const img = link.querySelector<HTMLImageElement>("img");
+            if (!img) return;
+            link.dataset.adultThumbBound = "true";
+            let intervalId: ReturnType<typeof setInterval> | null = null;
+
+            const load = async () => {
+                if (link.dataset.loading === "true") return;
+                const m = (link.getAttribute("href") ?? "").match(/play\.sooplive\.com\/([^/]+)\/(\d+)/);
+                if (!m) return;
+                const [, id, broadNo] = m;
+                link.dataset.loading = "true";
+                if (!link.dataset.imageLoaded) {
+                    img.style.filter = "grayscale(100%)";
+                    img.style.transition = "filter 0.5s ease";
+                }
+                const frame = await loadFrame(id, broadNo);
+                if (frame) {
+                    img.src = frame;
+                    img.style.objectFit = "cover";
+                    img.style.filter = "none";
+                    link.dataset.imageLoaded = "true";
+                    link.dataset.lastLoadedTime = Date.now().toString();
+                } else {
+                    img.style.filter = "none";
+                }
+                link.dataset.loading = "false";
+            };
+
+            link.addEventListener("mouseenter", () => {
+                const expired = Date.now() - parseInt(link.dataset.lastLoadedTime ?? "0", 10) > 30000;
+                if (!link.dataset.imageLoaded || expired) load();
+                intervalId = setInterval(load, 30000);
+            });
+            link.addEventListener("mouseleave", () => {
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                }
+            });
+        };
+
+        const scanAndBind = () => {
+            document.querySelectorAll<HTMLElement>("[data-type=cBox] .thumbs-box .status.adult").forEach((el) => {
+                const link = el.closest<HTMLAnchorElement>(".thumbs-box a[href]");
+                if (link && !link.href.startsWith("https://vod.sooplive.com")) bindLink(link);
+            });
+        };
+
+        scanAndBind();
+        const obs = new MutationObserver(scanAndBind);
+        obs.observe(document.body, { childList: true, subtree: true });
+        return () => obs.disconnect();
+    }, [settings.isReplaceEmptyThumbnailEnabled]);
     const [sidebarContainer, setSidebarContainer] = React.useState<HTMLElement | null>(null);
 
     useEffect(() => {

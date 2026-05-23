@@ -47,8 +47,6 @@ const EXPORT_KEYS = [
     "isBroadTitleTextEllipsisEnabled",
     "isNoAutoVODEnabled",
     "isAutoReloadAfterBroadcastEndEnabled",
-    "isRedirectLiveEnabled",
-    "redirectLiveSortOption",
     "isHideEsportsInfoEnabled",
     "isShowPauseButtonEnabled",
     "isCaptureButtonEnabled",
@@ -70,7 +68,6 @@ const EXPORT_KEYS = [
     "isAutoScreenModeEnabled",
     "isClickToMuteEnabled",
     "isSelectBestQualityEnabled",
-    "isRemoveShadowsFromCatchEnabled",
     "isVODHighlightEnabled",
     "isHideSupporterBadgeEnabled",
     "isHideFanBadgeEnabled",
@@ -499,14 +496,14 @@ const SettingModal: React.FC = observer(() => {
                             <Opt
                                 id="switchReplaceEmptyThumbnail"
                                 badge="list"
-                                label="마우스 오버시 연령 제한 썸네일 보기"
+                                label="마우스 오버 시 연령 제한 썸네일 보기"
                                 checked={s.isReplaceEmptyThumbnailEnabled}
                                 onChange={(v) => s.setSetting("isReplaceEmptyThumbnailEnabled", v)}
                             />
                             <Opt
                                 id="switchThumbnailTooltip"
                                 badge="list"
-                                label="마우스 오버시 썸네일 미리보기 툴팁"
+                                label="마우스 오버 시 썸네일 미리보기 툴팁"
                                 checked={s.isThumbnailTooltipEnabled}
                                 onChange={(v) => s.setSetting("isThumbnailTooltipEnabled", v)}
                             />
@@ -536,7 +533,7 @@ const SettingModal: React.FC = observer(() => {
                             <Opt
                                 id="switchCustomSidebar"
                                 badge="sidebar"
-                                label="사이드바 사용 (해제시 기본 사이드바)"
+                                label="사이드바 사용 (해제 시 기본 사이드바)"
                                 checked={s.isCustomSidebarEnabled}
                                 onChange={(v) => s.setSetting("isCustomSidebarEnabled", v)}
                             />
@@ -674,7 +671,7 @@ const SettingModal: React.FC = observer(() => {
                             <Opt
                                 id="switchRandomSort"
                                 badge="sidebar"
-                                label="랜덤 정렬 (해제시 시청자 많은 순)"
+                                label="랜덤 정렬 (해제 시 시청자 많은 순)"
                                 checked={s.isRandomSortEnabled}
                                 onChange={(v) => s.setSetting("isRandomSortEnabled", v)}
                             />
@@ -716,7 +713,7 @@ const SettingModal: React.FC = observer(() => {
                             <Opt
                                 id="mpSortByViewers"
                                 badge="sidebar"
-                                label="정렬을 추천순으로 변경 (해제시 시청자순)"
+                                label="정렬을 추천순으로 변경 (해제 시 시청자순)"
                                 checked={Boolean(s.myplusOrder)}
                                 onChange={(v) => s.setSetting("myplusOrder", v ? 1 : 0)}
                             />
@@ -771,30 +768,7 @@ const SettingModal: React.FC = observer(() => {
                                 checked={s.isAutoReloadAfterBroadcastEndEnabled}
                                 onChange={(v) => s.setSetting("isAutoReloadAfterBroadcastEndEnabled", v)}
                             />
-                            {/* redirectLive — label 내부에 select 포함 (sample.js 동일) */}
-                            <div className="option_v8xK4z" id="redirectLiveOptionContainer">
-                                <label htmlFor="switchRedirectLive">
-                                    <B k="live" />
-                                    방송 종료 후 자동 LIVE 이동<sup>3)</sup>
-                                    <div className="mapper-setting_v8xK4z">
-                                        <select
-                                            id="redirectLiveSortOption"
-                                            value={s.redirectLiveSortOption}
-                                            onChange={(e) => s.setSetting("redirectLiveSortOption", e.target.value)}
-                                        >
-                                            <option value="custom">커스텀</option>
-                                            <option value="mostViewers">시청자 많은 순</option>
-                                            <option value="leastViewers">시청자 적은 순</option>
-                                            <option value="random">랜덤</option>
-                                        </select>
-                                    </div>
-                                </label>
-                                <Toggle
-                                    checked={s.isRedirectLiveEnabled}
-                                    onChange={(v) => s.setSetting("isRedirectLiveEnabled", v)}
-                                    id="switchRedirectLive"
-                                />
-                            </div>
+                            {/* redirectLive 제거 */}
                             <Opt
                                 id="switchHideEsportsInfo"
                                 badge="live"
@@ -826,7 +800,7 @@ const SettingModal: React.FC = observer(() => {
                             <div className="option_v8xK4z">
                                 <label htmlFor="selectPreferredQuality">
                                     <B k="player" />
-                                    방송 진입시 화질 고정
+                                    방송 진입 시 화질 고정
                                 </label>
                                 <div className="mapper-setting_v8xK4z">
                                     <select
@@ -851,7 +825,7 @@ const SettingModal: React.FC = observer(() => {
                                     클릭/우클릭 기능 매핑
                                 </label>
                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                    <div className="mapper-setting_v8xK4z" style={{ marginLeft: 0 }}>
+                                    <div className="mapper-setting_v8xK4z" style={{ marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }}>
                                         <label htmlFor="selectLeftClick">좌</label>
                                         <select
                                             id="selectLeftClick"
@@ -866,7 +840,7 @@ const SettingModal: React.FC = observer(() => {
                                             <option value="toggleFullscreen">전체화면</option>
                                         </select>
                                     </div>
-                                    <div className="mapper-setting_v8xK4z" style={{ marginLeft: 0 }}>
+                                    <div className="mapper-setting_v8xK4z" style={{ marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }}>
                                         <label htmlFor="selectRightClick">우</label>
                                         <select
                                             id="selectRightClick"
@@ -919,14 +893,14 @@ const SettingModal: React.FC = observer(() => {
                             <Opt
                                 id="mutedInactiveTabs"
                                 badge="tab"
-                                label="전환시 음소거"
+                                label="전환 시 음소거"
                                 checked={s.isMutedInactiveTabsEnabled}
                                 onChange={(v) => s.setSetting("isMutedInactiveTabsEnabled", v)}
                             />
                             <Opt
                                 id="switchAutoChangeQuality"
                                 badge="tab"
-                                label="전환시 화질 낮추기"
+                                label="전환 시 화질 낮추기"
                                 checked={s.isAutoChangeQualityEnabled}
                                 onChange={(v) => s.setSetting("isAutoChangeQualityEnabled", v)}
                             />
@@ -954,7 +928,7 @@ const SettingModal: React.FC = observer(() => {
                             <Opt
                                 id="mouseOverSideBar"
                                 badge="screen"
-                                label="좌상단 마우스 오버시 사이드바 보기"
+                                label="좌상단 마우스 오버 시 사이드바 보기"
                                 checked={s.isMouseOverSideBarEnabled}
                                 onChange={(v) => s.setSetting("isMouseOverSideBarEnabled", v)}
                             />
@@ -990,13 +964,6 @@ const SettingModal: React.FC = observer(() => {
                                 onChange={(v) => s.setSetting("isSelectBestQualityEnabled", v)}
                             />
                             <Opt
-                                id="switchRemoveShadowsFromCatch"
-                                badge="vod"
-                                label="CATCH 플레이어 하단의 그림자 효과 숨기기"
-                                checked={s.isRemoveShadowsFromCatchEnabled}
-                                onChange={(v) => s.setSetting("isRemoveShadowsFromCatchEnabled", v)}
-                            />
-                            <Opt
                                 id="switchVODHighlight"
                                 badge="vod"
                                 label="VOD 하이라이트(별별랭킹) 타임라인 활성화"
@@ -1015,7 +982,7 @@ const SettingModal: React.FC = observer(() => {
                             <div className="option_v8xK4z range-option_v8xK4z">
                                 <label htmlFor="nicknameWidthDisplay">
                                     <B k="nickname" />
-                                    가로 크기 (채팅 메시지 정렬시)
+                                    가로 크기 (채팅 메시지 정렬 시)
                                 </label>
                                 <div className="range-container_v8xK4z">
                                     <input
@@ -1034,7 +1001,7 @@ const SettingModal: React.FC = observer(() => {
                             <Opt
                                 id="switchAlignNicknameRight"
                                 badge="nickname"
-                                label="오른쪽으로 붙이기 (채팅 메시지 정렬시)"
+                                label="오른쪽으로 붙이기 (채팅 메시지 정렬 시)"
                                 checked={s.isAlignNicknameRightEnabled}
                                 onChange={(v) => s.setSetting("isAlignNicknameRightEnabled", v)}
                             />

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260523120925
+// @version      20260523122117
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -11479,8 +11479,6 @@
       // LIVE 플레이어
       __publicField(this, "isNoAutoVODEnabled");
       __publicField(this, "isAutoReloadAfterBroadcastEndEnabled");
-      __publicField(this, "isRedirectLiveEnabled");
-      __publicField(this, "redirectLiveSortOption");
       __publicField(this, "isHideEsportsInfoEnabled");
       __publicField(this, "isShowPauseButtonEnabled");
       __publicField(this, "isCaptureButtonEnabled");
@@ -11503,7 +11501,6 @@
       __publicField(this, "isClickToMuteEnabled");
       // VOD 플레이어
       __publicField(this, "isSelectBestQualityEnabled");
-      __publicField(this, "isRemoveShadowsFromCatchEnabled");
       __publicField(this, "isVODHighlightEnabled");
       // 채팅창
       __publicField(this, "isHideSupporterBadgeEnabled");
@@ -11559,8 +11556,6 @@
       this.isBroadTitleTextEllipsisEnabled = _GM_getValue("isBroadTitleTextEllipsisEnabled", false);
       this.isNoAutoVODEnabled = _GM_getValue("isNoAutoVODEnabled", true);
       this.isAutoReloadAfterBroadcastEndEnabled = _GM_getValue("isAutoReloadAfterBroadcastEndEnabled", true);
-      this.isRedirectLiveEnabled = _GM_getValue("isRedirectLiveEnabled", false);
-      this.redirectLiveSortOption = _GM_getValue("redirectLiveSortOption", "custom");
       this.isHideEsportsInfoEnabled = _GM_getValue("isHideEsportsInfoEnabled", false);
       this.isShowPauseButtonEnabled = _GM_getValue("isMakePauseButtonEnabled", true);
       this.isCaptureButtonEnabled = _GM_getValue("isCaptureButtonEnabled", false);
@@ -11582,7 +11577,6 @@
       this.isAutoScreenModeEnabled = _GM_getValue("isAutoScreenModeEnabled", false);
       this.isClickToMuteEnabled = _GM_getValue("isClickToMuteEnabled", false);
       this.isSelectBestQualityEnabled = _GM_getValue("isSelectBestQualityEnabled", false);
-      this.isRemoveShadowsFromCatchEnabled = _GM_getValue("isRemoveShadowsFromCatchEnabled", false);
       this.isVODHighlightEnabled = _GM_getValue("isVODHighlightEnabled", true);
       this.isHideSupporterBadgeEnabled = _GM_getValue("isHideSupporterBadgeEnabled", false);
       this.isHideFanBadgeEnabled = _GM_getValue("isHideFanBadgeEnabled", false);
@@ -11635,8 +11629,6 @@
         isBroadTitleTextEllipsisEnabled: observable,
         isNoAutoVODEnabled: observable,
         isAutoReloadAfterBroadcastEndEnabled: observable,
-        isRedirectLiveEnabled: observable,
-        redirectLiveSortOption: observable,
         isHideEsportsInfoEnabled: observable,
         isShowPauseButtonEnabled: observable,
         isCaptureButtonEnabled: observable,
@@ -11658,7 +11650,6 @@
         isAutoScreenModeEnabled: observable,
         isClickToMuteEnabled: observable,
         isSelectBestQualityEnabled: observable,
-        isRemoveShadowsFromCatchEnabled: observable,
         isVODHighlightEnabled: observable,
         isHideSupporterBadgeEnabled: observable,
         isHideFanBadgeEnabled: observable,
@@ -13332,8 +13323,6 @@
     "isBroadTitleTextEllipsisEnabled",
     "isNoAutoVODEnabled",
     "isAutoReloadAfterBroadcastEndEnabled",
-    "isRedirectLiveEnabled",
-    "redirectLiveSortOption",
     "isHideEsportsInfoEnabled",
     "isShowPauseButtonEnabled",
     "isCaptureButtonEnabled",
@@ -13355,7 +13344,6 @@
     "isAutoScreenModeEnabled",
     "isClickToMuteEnabled",
     "isSelectBestQualityEnabled",
-    "isRemoveShadowsFromCatchEnabled",
     "isVODHighlightEnabled",
     "isHideSupporterBadgeEnabled",
     "isHideFanBadgeEnabled",
@@ -13545,7 +13533,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260523120925";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260523122117";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -13722,7 +13710,7 @@
                   {
                     id: "switchReplaceEmptyThumbnail",
                     badge: "list",
-                    label: "마우스 오버시 연령 제한 썸네일 보기",
+                    label: "마우스 오버 시 연령 제한 썸네일 보기",
                     checked: s.isReplaceEmptyThumbnailEnabled,
                     onChange: (v2) => s.setSetting("isReplaceEmptyThumbnailEnabled", v2)
                   }
@@ -13732,7 +13720,7 @@
                   {
                     id: "switchThumbnailTooltip",
                     badge: "list",
-                    label: "마우스 오버시 썸네일 미리보기 툴팁",
+                    label: "마우스 오버 시 썸네일 미리보기 툴팁",
                     checked: s.isThumbnailTooltipEnabled,
                     onChange: (v2) => s.setSetting("isThumbnailTooltipEnabled", v2)
                   }
@@ -13766,7 +13754,7 @@
                   {
                     id: "switchCustomSidebar",
                     badge: "sidebar",
-                    label: "사이드바 사용 (해제시 기본 사이드바)",
+                    label: "사이드바 사용 (해제 시 기본 사이드바)",
                     checked: s.isCustomSidebarEnabled,
                     onChange: (v2) => s.setSetting("isCustomSidebarEnabled", v2)
                   }
@@ -13925,7 +13913,7 @@
                   {
                     id: "switchRandomSort",
                     badge: "sidebar",
-                    label: "랜덤 정렬 (해제시 시청자 많은 순)",
+                    label: "랜덤 정렬 (해제 시 시청자 많은 순)",
                     checked: s.isRandomSortEnabled,
                     onChange: (v2) => s.setSetting("isRandomSortEnabled", v2)
                   }
@@ -13985,7 +13973,7 @@
                   {
                     id: "mpSortByViewers",
                     badge: "sidebar",
-                    label: "정렬을 추천순으로 변경 (해제시 시청자순)",
+                    label: "정렬을 추천순으로 변경 (해제 시 시청자순)",
                     checked: Boolean(s.myplusOrder),
                     onChange: (v2) => s.setSetting("myplusOrder", v2 ? 1 : 0)
                   }
@@ -14054,35 +14042,6 @@
                     onChange: (v2) => s.setSetting("isAutoReloadAfterBroadcastEndEnabled", v2)
                   }
                 ),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z", id: "redirectLiveOptionContainer", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "switchRedirectLive", children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "live" }),
-                    "방송 종료 후 자동 LIVE 이동",
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("sup", { children: "3)" }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mapper-setting_v8xK4z", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                      "select",
-                      {
-                        id: "redirectLiveSortOption",
-                        value: s.redirectLiveSortOption,
-                        onChange: (e) => s.setSetting("redirectLiveSortOption", e.target.value),
-                        children: [
-                          /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "custom", children: "커스텀" }),
-                          /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "mostViewers", children: "시청자 많은 순" }),
-                          /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "leastViewers", children: "시청자 적은 순" }),
-                          /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "random", children: "랜덤" })
-                        ]
-                      }
-                    ) })
-                  ] }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(
-                    Toggle,
-                    {
-                      checked: s.isRedirectLiveEnabled,
-                      onChange: (v2) => s.setSetting("isRedirectLiveEnabled", v2),
-                      id: "switchRedirectLive"
-                    }
-                  )
-                ] }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
                   Opt,
                   {
@@ -14126,7 +14085,7 @@
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z", children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "selectPreferredQuality", children: [
                     /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "player" }),
-                    "방송 진입시 화질 고정"
+                    "방송 진입 시 화질 고정"
                   ] }),
                   /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mapper-setting_v8xK4z", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
                     "select",
@@ -14152,7 +14111,7 @@
                     "클릭/우클릭 기능 매핑"
                   ] }),
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 8 }, children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mapper-setting_v8xK4z", style: { marginLeft: 0 }, children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mapper-setting_v8xK4z", style: { marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }, children: [
                       /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "selectLeftClick", children: "좌" }),
                       /* @__PURE__ */ jsxRuntimeExports.jsxs(
                         "select",
@@ -14171,7 +14130,7 @@
                         }
                       )
                     ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mapper-setting_v8xK4z", style: { marginLeft: 0 }, children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mapper-setting_v8xK4z", style: { marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }, children: [
                       /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "selectRightClick", children: "우" }),
                       /* @__PURE__ */ jsxRuntimeExports.jsxs(
                         "select",
@@ -14245,7 +14204,7 @@
                   {
                     id: "mutedInactiveTabs",
                     badge: "tab",
-                    label: "전환시 음소거",
+                    label: "전환 시 음소거",
                     checked: s.isMutedInactiveTabsEnabled,
                     onChange: (v2) => s.setSetting("isMutedInactiveTabsEnabled", v2)
                   }
@@ -14255,7 +14214,7 @@
                   {
                     id: "switchAutoChangeQuality",
                     badge: "tab",
-                    label: "전환시 화질 낮추기",
+                    label: "전환 시 화질 낮추기",
                     checked: s.isAutoChangeQualityEnabled,
                     onChange: (v2) => s.setSetting("isAutoChangeQualityEnabled", v2)
                   }
@@ -14295,7 +14254,7 @@
                   {
                     id: "mouseOverSideBar",
                     badge: "screen",
-                    label: "좌상단 마우스 오버시 사이드바 보기",
+                    label: "좌상단 마우스 오버 시 사이드바 보기",
                     checked: s.isMouseOverSideBarEnabled,
                     onChange: (v2) => s.setSetting("isMouseOverSideBarEnabled", v2)
                   }
@@ -14337,16 +14296,6 @@
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
                   Opt,
                   {
-                    id: "switchRemoveShadowsFromCatch",
-                    badge: "vod",
-                    label: "CATCH 플레이어 하단의 그림자 효과 숨기기",
-                    checked: s.isRemoveShadowsFromCatchEnabled,
-                    onChange: (v2) => s.setSetting("isRemoveShadowsFromCatchEnabled", v2)
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  Opt,
-                  {
                     id: "switchVODHighlight",
                     badge: "vod",
                     label: "VOD 하이라이트(별별랭킹) 타임라인 활성화",
@@ -14361,7 +14310,7 @@
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z range-option_v8xK4z", children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "nicknameWidthDisplay", children: [
                     /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "nickname" }),
-                    "가로 크기 (채팅 메시지 정렬시)"
+                    "가로 크기 (채팅 메시지 정렬 시)"
                   ] }),
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "range-container_v8xK4z", children: [
                     /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -14383,7 +14332,7 @@
                   {
                     id: "switchAlignNicknameRight",
                     badge: "nickname",
-                    label: "오른쪽으로 붙이기 (채팅 메시지 정렬시)",
+                    label: "오른쪽으로 붙이기 (채팅 메시지 정렬 시)",
                     checked: s.isAlignNicknameRightEnabled,
                     onChange: (v2) => s.setSetting("isAlignNicknameRightEnabled", v2)
                   }
@@ -14682,6 +14631,164 @@
       document.addEventListener("click", handleClick, true);
       return () => document.removeEventListener("click", handleClick, true);
     }, [settings.isSendLoadBroadEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isReplaceEmptyThumbnailEnabled) return;
+      const _uw2 = (() => {
+        try {
+          return unsafeWindow;
+        } catch {
+          return window;
+        }
+      })();
+      if (!document.querySelector("script[data-hls-loader]")) {
+        const hlsScript = document.createElement("script");
+        hlsScript.src = "https://cdn.jsdelivr.net/npm/hls.js@latest";
+        hlsScript.dataset.hlsLoader = "1";
+        document.head.appendChild(hlsScript);
+      }
+      const getBroadM3u8Domain = async (broadNumber) => {
+        const params = new URLSearchParams({
+          return_type: "gs_cdn_pc_web",
+          use_cors: "true",
+          cors_origin_url: "play.sooplive.com",
+          broad_key: `${broadNumber}-common-master-hls`,
+          player_mode: "landing",
+          time: "0"
+        });
+        try {
+          const res = await fetch(
+            `https://livestream-manager.sooplive.com/broad_stream_assign.html?${params}`,
+            { credentials: "include", cache: "no-store" }
+          );
+          if (!res.ok) return null;
+          const data = await res.json();
+          return data.result === "1" && data.view_url ? data.view_url : null;
+        } catch {
+          return null;
+        }
+      };
+      const getBroadAid = async (id2, broadNumber) => {
+        var _a2;
+        const payload = new URLSearchParams({
+          bid: id2,
+          bno: broadNumber,
+          from_api: "0",
+          mode: "landing",
+          player_type: "html5",
+          stream_type: "common",
+          quality: "sd",
+          type: "aid",
+          pwd: ""
+        });
+        try {
+          const res = await fetch("https://live.sooplive.com/afreeca/player_live_api.php", {
+            method: "POST",
+            body: payload,
+            credentials: "include",
+            cache: "no-store"
+          });
+          const data = await res.json();
+          return ((_a2 = data == null ? void 0 : data.CHANNEL) == null ? void 0 : _a2.AID) ?? null;
+        } catch {
+          return null;
+        }
+      };
+      const captureFrame = (video) => new Promise((resolve) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 480;
+        canvas.height = 270;
+        const ctx = canvas.getContext("2d");
+        const vr = video.videoWidth / video.videoHeight;
+        const cr = 480 / 270;
+        let dw = 480, dh2 = 270, ox = 0, oy = 0;
+        if (vr > cr) {
+          dh2 = 480 / vr;
+          oy = (270 - dh2) / 2;
+        } else {
+          dw = 270 * vr;
+          ox = (480 - dw) / 2;
+        }
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, 480, 270);
+        ctx.drawImage(video, ox, oy, dw, dh2);
+        resolve(canvas.toDataURL("image/webp"));
+      });
+      const loadFrame = async (id2, broadNumber) => {
+        const Hls = _uw2.Hls;
+        if (!(Hls == null ? void 0 : Hls.isSupported())) return null;
+        const [aid, baseUrl] = await Promise.all([getBroadAid(id2, broadNumber), getBroadM3u8Domain(broadNumber)]);
+        if (!aid || !baseUrl) return null;
+        const m3u8 = `${baseUrl}?aid=${aid}`;
+        const video = document.createElement("video");
+        video.playbackRate = 16;
+        const hls = new Hls();
+        hls.loadSource(m3u8);
+        hls.attachMedia(video);
+        return new Promise((resolve) => {
+          video.addEventListener("canplay", async () => {
+            const data = await captureFrame(video);
+            video.pause();
+            video.src = "";
+            hls.destroy();
+            resolve(data);
+          }, { once: true });
+          setTimeout(() => {
+            hls.destroy();
+            resolve(null);
+          }, 15e3);
+        });
+      };
+      const bindLink = (link) => {
+        if (link.dataset.adultThumbBound === "true") return;
+        const img = link.querySelector("img");
+        if (!img) return;
+        link.dataset.adultThumbBound = "true";
+        let intervalId = null;
+        const load = async () => {
+          if (link.dataset.loading === "true") return;
+          const m2 = (link.getAttribute("href") ?? "").match(/play\.sooplive\.com\/([^/]+)\/(\d+)/);
+          if (!m2) return;
+          const [, id2, broadNo] = m2;
+          link.dataset.loading = "true";
+          if (!link.dataset.imageLoaded) {
+            img.style.filter = "grayscale(100%)";
+            img.style.transition = "filter 0.5s ease";
+          }
+          const frame = await loadFrame(id2, broadNo);
+          if (frame) {
+            img.src = frame;
+            img.style.objectFit = "cover";
+            img.style.filter = "none";
+            link.dataset.imageLoaded = "true";
+            link.dataset.lastLoadedTime = Date.now().toString();
+          } else {
+            img.style.filter = "none";
+          }
+          link.dataset.loading = "false";
+        };
+        link.addEventListener("mouseenter", () => {
+          const expired = Date.now() - parseInt(link.dataset.lastLoadedTime ?? "0", 10) > 3e4;
+          if (!link.dataset.imageLoaded || expired) load();
+          intervalId = setInterval(load, 3e4);
+        });
+        link.addEventListener("mouseleave", () => {
+          if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+          }
+        });
+      };
+      const scanAndBind = () => {
+        document.querySelectorAll("[data-type=cBox] .thumbs-box .status.adult").forEach((el2) => {
+          const link = el2.closest(".thumbs-box a[href]");
+          if (link && !link.href.startsWith("https://vod.sooplive.com")) bindLink(link);
+        });
+      };
+      scanAndBind();
+      const obs = new MutationObserver(scanAndBind);
+      obs.observe(document.body, { childList: true, subtree: true });
+      return () => obs.disconnect();
+    }, [settings.isReplaceEmptyThumbnailEnabled]);
     const [sidebarContainer, setSidebarContainer] = React$1.useState(null);
     reactExports.useEffect(() => {
       const container = document.createElement("div");
@@ -14817,24 +14924,6 @@
       style.textContent = css;
       document.head.appendChild(style);
     }
-  }
-  function getPrioritizedLiveBroadcasts(favoriteData) {
-    var _a2;
-    if (!((_a2 = favoriteData == null ? void 0 : favoriteData.data) == null ? void 0 : _a2.length)) return [];
-    const pinned = [];
-    const notified = [];
-    const normal = [];
-    favoriteData.data.forEach((item) => {
-      var _a3;
-      if (item.is_live !== true) return;
-      const broadInfo = (_a3 = item.broad_info) == null ? void 0 : _a3[0];
-      if (!broadInfo) return;
-      if (item.is_pin === true) pinned.push(broadInfo);
-      else if (item.is_mobile_push === "Y") notified.push(broadInfo);
-      else normal.push(broadInfo);
-    });
-    const cmp = (a, b) => (b.total_view_cnt ?? 0) - (a.total_view_cnt ?? 0);
-    return [...pinned.sort(cmp), ...notified.sort(cmp), ...normal.sort(cmp)];
   }
   const PlayerPage = observer(() => {
     const settings = useSettingsStore();
@@ -15486,55 +15575,6 @@
     }, [settings.isAutoReloadAfterBroadcastEndEnabled]);
     reactExports.useEffect(() => {
       if (!settings.isNoAutoVODEnabled) return;
-      let retryTimer = null;
-      const redirectLiveWithTabCheck = async (retryCount = 0) => {
-        var _a2;
-        const MAX_RETRIES = 100;
-        const RETRY_DELAY_MS = 1e4;
-        const LOCK_KEY = "auto_redirect_lock";
-        const LOCK_TIMEOUT_MS = 1e4;
-        if (retryCount >= MAX_RETRIES) return;
-        try {
-          const now = Date.now();
-          const lockTs = localStorage.getItem(LOCK_KEY);
-          if (lockTs && now - parseInt(lockTs, 10) < LOCK_TIMEOUT_MS) {
-            retryTimer = setTimeout(() => redirectLiveWithTabCheck(retryCount + 1), RETRY_DELAY_MS);
-            return;
-          }
-          localStorage.setItem(LOCK_KEY, now.toString());
-          const favoriteData = await fetchBroadList("https://myapi.sooplive.com/api/favorite", 50);
-          const targets = getPrioritizedLiveBroadcasts(favoriteData);
-          if (!targets.length) {
-            localStorage.removeItem(LOCK_KEY);
-            return;
-          }
-          switch (settings.redirectLiveSortOption) {
-            case "mostViewers":
-              targets.sort((a, b) => (b.total_view_cnt ?? 0) - (a.total_view_cnt ?? 0));
-              break;
-            case "leastViewers":
-              targets.sort((a, b) => (a.total_view_cnt ?? 0) - (b.total_view_cnt ?? 0));
-              break;
-            case "random":
-              for (let i = targets.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [targets[i], targets[j]] = [targets[j], targets[i]];
-              }
-              break;
-          }
-          for (const target of targets) {
-            const { user_id, broad_no } = target;
-            if (!user_id || !broad_no) continue;
-            const lv = _uw.liveView ?? window.liveView;
-            (_a2 = lv == null ? void 0 : lv.playerController) == null ? void 0 : _a2.sendLoadBroad(user_id, broad_no);
-            return;
-          }
-          localStorage.removeItem(LOCK_KEY);
-        } catch (err) {
-          customLog.error("자동 전환 실패:", err);
-          localStorage.removeItem(LOCK_KEY);
-        }
-      };
       const disableAutoVOD = () => {
         var _a2;
         const lv = _uw.liveView ?? window.liveView;
@@ -15543,19 +15583,11 @@
           setTimeout(disableAutoVOD, 3e3);
           return;
         }
-        if (settings.isRedirectLiveEnabled) {
-          container.autoPlayVodBanner.show = () => redirectLiveWithTabCheck();
-          customLog.log("[VOD 방지] 자동 LIVE 전환 활성화");
-        } else {
-          container.autoPlayVodBanner.show = () => {
-          };
-        }
+        container.autoPlayVodBanner.show = () => {
+        };
       };
       disableAutoVOD();
-      return () => {
-        if (retryTimer) clearTimeout(retryTimer);
-      };
-    }, [settings.isNoAutoVODEnabled, settings.isRedirectLiveEnabled, settings.redirectLiveSortOption]);
+    }, [settings.isNoAutoVODEnabled]);
     reactExports.useEffect(() => {
       if (!settings.isSendLoadBroadEnabled) return;
       const handleClick = (e) => {
@@ -15832,13 +15864,6 @@
         clearTimeout(timeout);
       };
     }, [settings.isSelectBestQualityEnabled]);
-    reactExports.useEffect(() => {
-      if (!settings.isRemoveShadowsFromCatchEnabled) return;
-      const style = document.createElement("style");
-      style.textContent = `[class*="shadow"], [class*="vignette"] { display: none !important; }`;
-      document.head.appendChild(style);
-      return () => style.remove();
-    }, [settings.isRemoveShadowsFromCatchEnabled]);
     reactExports.useEffect(() => {
       if (!settings.isVODHighlightEnabled) return;
       if (highlightItems.length === 0) return;
