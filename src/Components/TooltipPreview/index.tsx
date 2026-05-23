@@ -177,8 +177,9 @@ const TooltipPreview: React.FC = observer(() => {
     const [capturedFrame, setCapturedFrame] = useState<string | null>(null);
     const ref = useRef<HTMLDivElement>(null);
 
-    // 19금 HLS 캡처 fallback: 썸네일 이미지 로드 실패 시 호출
+    // 19금 HLS 캡처 fallback: 썸네일 이미지 로드 실패 시 호출 (isReplaceEmptyThumbnailEnabled 설정 필요)
     const handleThumbnailError = async (e: React.SyntheticEvent<HTMLImageElement>) => {
+        if (!settings.isReplaceEmptyThumbnailEnabled) return;
         if (!data?.userId || !data?.broadNo) return;
         const broadNoStr = String(data.broadNo);
         const cached = adultFrameCache.get(broadNoStr);
