@@ -63,7 +63,7 @@ const ChannelItemChzzk: React.FC<ChannelItemChzzkProps> = observer(({ data }) =>
         >
             {profileUrl && <img className="profile-picture" src={profileUrl} alt={channelName} loading="lazy" />}
             <span className="username">
-                {isPinned && "🖈"}
+                {isPinned && <i className="fa fa-thumb-tack" style={{ marginRight: 3 }} />}
                 {channelName}
             </span>
             <span className="description">{category}</span>
@@ -76,7 +76,7 @@ const ChannelItemChzzk: React.FC<ChannelItemChzzkProps> = observer(({ data }) =>
                 onClick={handlePinClick}
                 title={isPinned ? "고정 해제" : "상단 고정"}
             >
-                🖈
+                <i className="fa fa-thumb-tack" />
             </button>
         </a>
     );

@@ -109,23 +109,30 @@ const ChannelItem: React.FC<ChannelItemProps> = observer(({ data }) => {
             data-broad-start={channel.broad_start}
             data-total-view-cnt={channel.total_view_cnt}
         >
-            <img
-                className="profile-picture"
-                src={profileUrl}
-                alt={channel.user_nick}
-                loading="lazy"
-                onClick={isOnPlayerPage ? handleProfileClick : undefined}
-                onError={(e) => {
-                    const img = e.target as HTMLImageElement;
-                    const uid = channel.user_id;
-                    img.src = `https://profile.img.sooplive.com/LOGO/${uid.slice(0, 2)}/${uid}/m/${uid}.jpg`;
-                    img.onerror = () => {
-                        img.src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
-                    };
-                }}
-            />
+            <div className="profile-picture-container">
+                <img
+                    className="profile-picture"
+                    src={profileUrl}
+                    alt={channel.user_nick}
+                    loading="lazy"
+                    onClick={isOnPlayerPage ? handleProfileClick : undefined}
+                    onError={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        const uid = channel.user_id;
+                        img.src = `https://profile.img.sooplive.com/LOGO/${uid.slice(0, 2)}/${uid}/m/${uid}.jpg`;
+                        img.onerror = () => {
+                            img.src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
+                        };
+                    }}
+                />
+                {isPinned && (
+                    <span className="pin-badge">
+                        <i className="fa fa-thumb-tack" />
+                    </span>
+                )}
+            </div>
             <span className="username">
-                {(isPinned || isNotified) && "🖈"}
+                {isNotified && !isPinned && <i className="fa fa-bell" style={{ marginRight: 3 }} />}
                 {channel.user_nick}
             </span>
             <span className="description">{channel.category_name || getCategoryName(channel.broad_cate_no) || ""}</span>
