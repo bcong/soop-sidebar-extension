@@ -120,6 +120,19 @@ const MainPage: React.FC = observer(() => {
             document.head.appendChild(hlsScript);
         }
 
+        // HLS.js 로드 완료까지 대기 (sample.js는 @require로 미리 로드, 우리는 직접 대기 필요)
+        const ensureHls = (): Promise<void> => {
+            if (_uw.Hls) return Promise.resolve();
+            return new Promise((resolve) => {
+                const check = setInterval(() => {
+                    if (_uw.Hls) {
+                        clearInterval(check);
+                        resolve();
+                    }
+                }, 100);
+            });
+        };
+
         const getBroadM3u8Domain = async (broadNumber: string): Promise<string | null> => {
             const params = new URLSearchParams({
                 return_type: "gs_cdn_pc_web",
@@ -194,6 +207,7 @@ const MainPage: React.FC = observer(() => {
             });
 
         const loadFrame = async (id: string, broadNumber: string): Promise<string | null> => {
+            await ensureHls();
             const Hls = _uw.Hls;
             if (!Hls?.isSupported()) return null;
             const [aid, baseUrl] = await Promise.all([getBroadAid(id, broadNumber), getBroadM3u8Domain(broadNumber)]);
@@ -268,7 +282,7 @@ const MainPage: React.FC = observer(() => {
 
         const scanAndBind = () => {
             document.querySelectorAll<HTMLElement>("[data-type=cBox] .thumbs-box .status.adult").forEach((el) => {
-                const link = el.closest<HTMLAnchorElement>(".thumbs-box a[href]");
+                const link = el.closest<HTMLElement>(".thumbs-box")?.querySelector<HTMLAnchorElement>("a[href]");
                 if (link && !link.href.startsWith("https://vod.sooplive.com")) bindLink(link);
             });
         };
