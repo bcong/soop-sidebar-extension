@@ -142,6 +142,8 @@ async function loadAdultFrame(userId: string, broadNo: string): Promise<string |
 
 // broadNo → base64 캡처 캐시 (탭 수명 동안 유지)
 const adultFrameCache = new Map<string, string>();
+// broadNo → 마지막 HLS 시도 타임스탬프 (30s 쿨다운, sample.js 동일 방식)
+const adultFrameTimestamps = new Map<string, number>();
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface TooltipData {
@@ -177,22 +179,39 @@ const TooltipPreview: React.FC = observer(() => {
     const [capturedFrame, setCapturedFrame] = useState<string | null>(null);
     const ref = useRef<HTMLDivElement>(null);
 
-    // 19금 HLS 캡처 fallback: 썸네일 이미지 로드 실패 시 호출 (isReplaceEmptyThumbnailEnabled 설정 필요)
-    const handleThumbnailError = async (e: React.SyntheticEvent<HTMLImageElement>) => {
+    // SOOP 라이브 스트림: 툴팁 표시 시 즉시 HLS 캡처 (sample.js replaceThumbnails 방식)
+    // onError 대신 적극적(proactive) 방식 — SOOP은 19금 썸네일에 HTTP 200 placeholder를 반환하므로 onError 불가
+    useEffect(() => {
         if (!settings.isReplaceEmptyThumbnailEnabled) return;
-        if (!data?.userId || !data?.broadNo) return;
+        if (!data?.userId || !data?.broadNo || data.type !== "live" || data.platform === "chzzk") return;
+
         const broadNoStr = String(data.broadNo);
+        const userId = data.userId;
+        let cancelled = false;
+
+        // 캐시 확인
         const cached = adultFrameCache.get(broadNoStr);
         if (cached) {
             setCapturedFrame(cached);
             return;
         }
-        const frame = await loadAdultFrame(data.userId, broadNoStr);
-        if (frame) {
+
+        // 30초 이내 로드 시도 여부 확인 (sample.js와 동일한 30s 만료 로직)
+        const lastTime = adultFrameTimestamps.get(broadNoStr) ?? 0;
+        if (Date.now() - lastTime < 30000) return;
+        adultFrameTimestamps.set(broadNoStr, Date.now());
+
+        (async () => {
+            const frame = await loadAdultFrame(userId, broadNoStr);
+            if (cancelled || !frame) return;
             adultFrameCache.set(broadNoStr, frame);
             setCapturedFrame(frame);
-        }
-    };
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [data, settings.isReplaceEmptyThumbnailEnabled]);
 
     // Chzzk 썸네일 fallback: liveImageUrl이 없으면 채널 데이터 API에서 가져옴
     useEffect(() => {
@@ -274,7 +293,7 @@ const TooltipPreview: React.FC = observer(() => {
         <div ref={ref} className={`tooltip-container${visible ? " visible" : ""}`} style={{ position: "fixed" }}>
             {thumbnailSrc && (
                 <div className="thumbs-box">
-                    <img src={thumbnailSrc} alt={data.broadTitle} onError={handleThumbnailError} />
+                    <img src={thumbnailSrc} alt={data.broadTitle} />
                     {data.totalViewCnt !== undefined && (
                         <div className="thumb-overlay-bottom">
                             <div className="views">{addNumberSeparator(data.totalViewCnt)}명</div>
