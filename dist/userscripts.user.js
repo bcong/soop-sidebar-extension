@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260524000012
+// @version      20260524001131
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -13009,6 +13009,132 @@
       )
     ] });
   });
+  const _uwTooltip = (() => {
+    try {
+      return unsafeWindow;
+    } catch {
+      return window;
+    }
+  })();
+  function ensureHlsJs() {
+    if (_uwTooltip.Hls) return Promise.resolve();
+    return new Promise((resolve) => {
+      if (document.querySelector("script[data-hls-loader]")) {
+        const check = setInterval(() => {
+          if (_uwTooltip.Hls) {
+            clearInterval(check);
+            resolve();
+          }
+        }, 100);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/hls.js@latest";
+      script.dataset.hlsLoader = "1";
+      script.onload = () => resolve();
+      document.head.appendChild(script);
+    });
+  }
+  async function getBroadM3u8Domain(broadNo) {
+    const params = new URLSearchParams({
+      return_type: "gs_cdn_pc_web",
+      use_cors: "true",
+      cors_origin_url: "play.sooplive.com",
+      broad_key: `${broadNo}-common-master-hls`,
+      player_mode: "landing",
+      time: "0"
+    });
+    try {
+      const res = await fetch(`https://livestream-manager.sooplive.com/broad_stream_assign.html?${params}`, {
+        credentials: "include",
+        cache: "no-store"
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.result === "1" && data.view_url ? data.view_url : null;
+    } catch {
+      return null;
+    }
+  }
+  async function getBroadAid(userId, broadNo) {
+    var _a2;
+    const payload = new URLSearchParams({
+      bid: userId,
+      bno: broadNo,
+      from_api: "0",
+      mode: "landing",
+      player_type: "html5",
+      stream_type: "common",
+      quality: "sd",
+      type: "aid",
+      pwd: ""
+    });
+    try {
+      const res = await fetch("https://live.sooplive.com/afreeca/player_live_api.php", {
+        method: "POST",
+        body: payload,
+        credentials: "include",
+        cache: "no-store"
+      });
+      const data = await res.json();
+      return ((_a2 = data == null ? void 0 : data.CHANNEL) == null ? void 0 : _a2.AID) ?? null;
+    } catch {
+      return null;
+    }
+  }
+  function captureVideoFrame(video) {
+    return new Promise((resolve) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 480;
+      canvas.height = 270;
+      const ctx = canvas.getContext("2d");
+      const vr = video.videoWidth / video.videoHeight;
+      const cr = 480 / 270;
+      let dw = 480, dh2 = 270, ox = 0, oy = 0;
+      if (vr > cr) {
+        dh2 = 480 / vr;
+        oy = (270 - dh2) / 2;
+      } else {
+        dw = 270 * vr;
+        ox = (480 - dw) / 2;
+      }
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, 480, 270);
+      ctx.drawImage(video, ox, oy, dw, dh2);
+      resolve(canvas.toDataURL("image/webp"));
+    });
+  }
+  async function loadAdultFrame(userId, broadNo) {
+    await ensureHlsJs();
+    const Hls = _uwTooltip.Hls;
+    if (!(Hls == null ? void 0 : Hls.isSupported())) return null;
+    const [aid, baseUrl] = await Promise.all([getBroadAid(userId, broadNo), getBroadM3u8Domain(broadNo)]);
+    if (!aid || !baseUrl) return null;
+    const m3u8 = `${baseUrl}?aid=${aid}`;
+    const video = document.createElement("video");
+    video.playbackRate = 16;
+    const hls = new Hls();
+    hls.loadSource(m3u8);
+    hls.attachMedia(video);
+    return new Promise((resolve) => {
+      video.addEventListener(
+        "canplay",
+        async () => {
+          const frame = await captureVideoFrame(video);
+          video.pause();
+          video.src = "";
+          hls.destroy();
+          resolve(frame);
+        },
+        { once: true }
+      );
+      setTimeout(() => {
+        hls.destroy();
+        resolve(null);
+      }, 15e3);
+    });
+  }
+  const adultFrameCache = /* @__PURE__ */ new Map();
   let globalShowFn = null;
   let globalHideFn = null;
   const showTooltip = (data, x2, y2) => {
@@ -13023,8 +13149,24 @@
     const [pos, setPos] = reactExports.useState({ x: 0, y: 0 });
     const [data, setData] = reactExports.useState(null);
     const [resolvedThumbnail, setResolvedThumbnail] = reactExports.useState(null);
+    const [capturedFrame, setCapturedFrame] = reactExports.useState(null);
     const ref = reactExports.useRef(null);
+    const handleThumbnailError = async (e) => {
+      if (!(data == null ? void 0 : data.userId) || !(data == null ? void 0 : data.broadNo)) return;
+      const broadNoStr = String(data.broadNo);
+      const cached = adultFrameCache.get(broadNoStr);
+      if (cached) {
+        setCapturedFrame(cached);
+        return;
+      }
+      const frame = await loadAdultFrame(data.userId, broadNoStr);
+      if (frame) {
+        adultFrameCache.set(broadNoStr, frame);
+        setCapturedFrame(frame);
+      }
+    };
     reactExports.useEffect(() => {
+      setCapturedFrame(null);
       if (!data) {
         setResolvedThumbnail(null);
         return;
@@ -13079,11 +13221,11 @@
     }, [visible, pos]);
     if (!settings.isThumbnailTooltipEnabled || !visible || !data) return null;
     const cacheBuster = `?${Math.floor(Date.now() / 1e4)}`;
-    const thumbnailSrc = resolvedThumbnail ? resolvedThumbnail + (resolvedThumbnail.startsWith("http") && !resolvedThumbnail.startsWith("https://stimg.") ? cacheBuster : "") : null;
+    const thumbnailSrc = capturedFrame ? capturedFrame : resolvedThumbnail ? resolvedThumbnail + (resolvedThumbnail.startsWith("http") && !resolvedThumbnail.startsWith("https://stimg.") ? cacheBuster : "") : null;
     const elapsed = data.broadStart && data.type === "live" ? getElapsedTime(data.broadStart) : null;
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { ref, className: `tooltip-container${visible ? " visible" : ""}`, style: { position: "fixed" }, children: [
       thumbnailSrc && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "thumbs-box", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: thumbnailSrc, alt: data.broadTitle }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: thumbnailSrc, alt: data.broadTitle, onError: handleThumbnailError }),
         data.totalViewCnt !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "thumb-overlay-bottom", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "views", children: [
             addNumberSeparator(data.totalViewCnt),
@@ -13548,7 +13690,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260524000012";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260524001131";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -14685,7 +14827,7 @@
         hlsScript.dataset.hlsLoader = "1";
         document.head.appendChild(hlsScript);
       }
-      const getBroadM3u8Domain = async (broadNumber) => {
+      const getBroadM3u8Domain2 = async (broadNumber) => {
         const params = new URLSearchParams({
           return_type: "gs_cdn_pc_web",
           use_cors: "true",
@@ -14706,7 +14848,7 @@
           return null;
         }
       };
-      const getBroadAid = async (id2, broadNumber) => {
+      const getBroadAid2 = async (id2, broadNumber) => {
         var _a2;
         const payload = new URLSearchParams({
           bid: id2,
@@ -14755,7 +14897,7 @@
       const loadFrame = async (id2, broadNumber) => {
         const Hls = _uw2.Hls;
         if (!(Hls == null ? void 0 : Hls.isSupported())) return null;
-        const [aid, baseUrl] = await Promise.all([getBroadAid(id2, broadNumber), getBroadM3u8Domain(broadNumber)]);
+        const [aid, baseUrl] = await Promise.all([getBroadAid2(id2, broadNumber), getBroadM3u8Domain2(broadNumber)]);
         if (!aid || !baseUrl) return null;
         const m3u8 = `${baseUrl}?aid=${aid}`;
         const video = document.createElement("video");

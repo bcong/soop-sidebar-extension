@@ -6,6 +6,144 @@ import { getElapsedTime } from "@Utils/format";
 import { fetchBroadList } from "@Utils/api";
 import "./style.less";
 
+// ── HLS 프레임 캡처 유틸리티 (19금 썸네일 fallback) ──────────────────────────
+const _uwTooltip: any = (() => {
+    try {
+        return unsafeWindow;
+    } catch {
+        return window;
+    }
+})();
+
+function ensureHlsJs(): Promise<void> {
+    if (_uwTooltip.Hls) return Promise.resolve();
+    return new Promise((resolve) => {
+        if (document.querySelector("script[data-hls-loader]")) {
+            const check = setInterval(() => {
+                if (_uwTooltip.Hls) {
+                    clearInterval(check);
+                    resolve();
+                }
+            }, 100);
+            return;
+        }
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/hls.js@latest";
+        script.dataset.hlsLoader = "1";
+        script.onload = () => resolve();
+        document.head.appendChild(script);
+    });
+}
+
+async function getBroadM3u8Domain(broadNo: string): Promise<string | null> {
+    const params = new URLSearchParams({
+        return_type: "gs_cdn_pc_web",
+        use_cors: "true",
+        cors_origin_url: "play.sooplive.com",
+        broad_key: `${broadNo}-common-master-hls`,
+        player_mode: "landing",
+        time: "0",
+    });
+    try {
+        const res = await fetch(`https://livestream-manager.sooplive.com/broad_stream_assign.html?${params}`, {
+            credentials: "include",
+            cache: "no-store",
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data.result === "1" && data.view_url ? data.view_url : null;
+    } catch {
+        return null;
+    }
+}
+
+async function getBroadAid(userId: string, broadNo: string): Promise<string | null> {
+    const payload = new URLSearchParams({
+        bid: userId,
+        bno: broadNo,
+        from_api: "0",
+        mode: "landing",
+        player_type: "html5",
+        stream_type: "common",
+        quality: "sd",
+        type: "aid",
+        pwd: "",
+    });
+    try {
+        const res = await fetch("https://live.sooplive.com/afreeca/player_live_api.php", {
+            method: "POST",
+            body: payload,
+            credentials: "include",
+            cache: "no-store",
+        });
+        const data = await res.json();
+        return data?.CHANNEL?.AID ?? null;
+    } catch {
+        return null;
+    }
+}
+
+function captureVideoFrame(video: HTMLVideoElement): Promise<string> {
+    return new Promise((resolve) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 480;
+        canvas.height = 270;
+        const ctx = canvas.getContext("2d")!;
+        const vr = video.videoWidth / video.videoHeight;
+        const cr = 480 / 270;
+        let dw = 480,
+            dh = 270,
+            ox = 0,
+            oy = 0;
+        if (vr > cr) {
+            dh = 480 / vr;
+            oy = (270 - dh) / 2;
+        } else {
+            dw = 270 * vr;
+            ox = (480 - dw) / 2;
+        }
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, 480, 270);
+        ctx.drawImage(video, ox, oy, dw, dh);
+        resolve(canvas.toDataURL("image/webp"));
+    });
+}
+
+async function loadAdultFrame(userId: string, broadNo: string): Promise<string | null> {
+    await ensureHlsJs();
+    const Hls = _uwTooltip.Hls;
+    if (!Hls?.isSupported()) return null;
+    const [aid, baseUrl] = await Promise.all([getBroadAid(userId, broadNo), getBroadM3u8Domain(broadNo)]);
+    if (!aid || !baseUrl) return null;
+    const m3u8 = `${baseUrl}?aid=${aid}`;
+    const video = document.createElement("video");
+    video.playbackRate = 16;
+    const hls = new Hls();
+    hls.loadSource(m3u8);
+    hls.attachMedia(video);
+    return new Promise((resolve) => {
+        video.addEventListener(
+            "canplay",
+            async () => {
+                const frame = await captureVideoFrame(video);
+                video.pause();
+                video.src = "";
+                hls.destroy();
+                resolve(frame);
+            },
+            { once: true },
+        );
+        setTimeout(() => {
+            hls.destroy();
+            resolve(null);
+        }, 15000);
+    });
+}
+
+// broadNo → base64 캡처 캐시 (탭 수명 동안 유지)
+const adultFrameCache = new Map<string, string>();
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface TooltipData {
     userId: string;
     userNick: string;
@@ -36,10 +174,28 @@ const TooltipPreview: React.FC = observer(() => {
     const [pos, setPos] = useState({ x: 0, y: 0 });
     const [data, setData] = useState<TooltipData | null>(null);
     const [resolvedThumbnail, setResolvedThumbnail] = useState<string | null>(null);
+    const [capturedFrame, setCapturedFrame] = useState<string | null>(null);
     const ref = useRef<HTMLDivElement>(null);
+
+    // 19금 HLS 캡처 fallback: 썸네일 이미지 로드 실패 시 호출
+    const handleThumbnailError = async (e: React.SyntheticEvent<HTMLImageElement>) => {
+        if (!data?.userId || !data?.broadNo) return;
+        const broadNoStr = String(data.broadNo);
+        const cached = adultFrameCache.get(broadNoStr);
+        if (cached) {
+            setCapturedFrame(cached);
+            return;
+        }
+        const frame = await loadAdultFrame(data.userId, broadNoStr);
+        if (frame) {
+            adultFrameCache.set(broadNoStr, frame);
+            setCapturedFrame(frame);
+        }
+    };
 
     // Chzzk 썸네일 fallback: liveImageUrl이 없으면 채널 데이터 API에서 가져옴
     useEffect(() => {
+        setCapturedFrame(null);
         if (!data) {
             setResolvedThumbnail(null);
             return;
@@ -104,10 +260,12 @@ const TooltipPreview: React.FC = observer(() => {
     if (!settings.isThumbnailTooltipEnabled || !visible || !data) return null;
 
     const cacheBuster = `?${Math.floor(Date.now() / 10000)}`;
-    const thumbnailSrc = resolvedThumbnail
-        ? resolvedThumbnail +
-          (resolvedThumbnail.startsWith("http") && !resolvedThumbnail.startsWith("https://stimg.") ? cacheBuster : "")
-        : null;
+    const thumbnailSrc = capturedFrame
+        ? capturedFrame
+        : resolvedThumbnail
+          ? resolvedThumbnail +
+            (resolvedThumbnail.startsWith("http") && !resolvedThumbnail.startsWith("https://stimg.") ? cacheBuster : "")
+          : null;
 
     const elapsed = data.broadStart && data.type === "live" ? getElapsedTime(data.broadStart, "HH:MM") : null;
 
@@ -115,7 +273,7 @@ const TooltipPreview: React.FC = observer(() => {
         <div ref={ref} className={`tooltip-container${visible ? " visible" : ""}`} style={{ position: "fixed" }}>
             {thumbnailSrc && (
                 <div className="thumbs-box">
-                    <img src={thumbnailSrc} alt={data.broadTitle} />
+                    <img src={thumbnailSrc} alt={data.broadTitle} onError={handleThumbnailError} />
                     {data.totalViewCnt !== undefined && (
                         <div className="thumb-overlay-bottom">
                             <div className="views">{addNumberSeparator(data.totalViewCnt)}명</div>
