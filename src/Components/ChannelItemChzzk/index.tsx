@@ -51,7 +51,7 @@ const ChannelItemChzzk: React.FC<ChannelItemChzzkProps> = observer(({ data }) =>
         <a
             className={`user${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}`}
             href={liveUrl}
-            target="_blank"
+            target={settings.isSendLoadBroadEnabled ? "_self" : "_blank"}
             rel="noreferrer"
             onContextMenu={handleContextMenu}
             data-chzzk-channel-id={channelId}
