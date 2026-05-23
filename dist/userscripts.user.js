@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260524010528
+// @version      20260524013030
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -13135,7 +13135,7 @@
     });
   }
   const adultFrameCache = /* @__PURE__ */ new Map();
-  const adultFrameTimestamps = /* @__PURE__ */ new Map();
+  const adultFrameInProgress = /* @__PURE__ */ new Set();
   let globalShowFn = null;
   let globalHideFn = null;
   const showTooltip = (data, x2, y2) => {
@@ -13163,25 +13163,30 @@
         setCapturedFrame(cached);
         return;
       }
-      const lastTime = adultFrameTimestamps.get(broadNoStr) ?? 0;
-      if (Date.now() - lastTime < 3e4) return;
-      adultFrameTimestamps.set(broadNoStr, Date.now());
+      if (adultFrameInProgress.has(broadNoStr)) return;
+      adultFrameInProgress.add(broadNoStr);
       (async () => {
         const frame = await loadAdultFrame(userId, broadNoStr);
-        if (cancelled) {
-          if (!adultFrameCache.has(broadNoStr)) adultFrameTimestamps.delete(broadNoStr);
-          return;
-        }
+        adultFrameInProgress.delete(broadNoStr);
         if (!frame) return;
         adultFrameCache.set(broadNoStr, frame);
-        setCapturedFrame(frame);
+        if (!cancelled) setCapturedFrame(frame);
       })();
       return () => {
         cancelled = true;
       };
-    }, [data, settings.isReplaceEmptyThumbnailEnabled]);
+    }, [data == null ? void 0 : data.broadNo, data == null ? void 0 : data.userId, data == null ? void 0 : data.type, data == null ? void 0 : data.platform, settings.isReplaceEmptyThumbnailEnabled]);
     reactExports.useEffect(() => {
-      setCapturedFrame(null);
+      if ((data == null ? void 0 : data.broadNo) && data.type === "live" && data.platform !== "chzzk") {
+        const cached = adultFrameCache.get(String(data.broadNo));
+        if (cached) {
+          setCapturedFrame(cached);
+        } else {
+          setCapturedFrame(null);
+        }
+      } else {
+        setCapturedFrame(null);
+      }
       if (!data) {
         setResolvedThumbnail(null);
         return;
@@ -13705,7 +13710,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260524010528";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260524013030";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {

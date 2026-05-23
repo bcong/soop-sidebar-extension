@@ -142,8 +142,8 @@ async function loadAdultFrame(userId: string, broadNo: string): Promise<string |
 
 // broadNo → base64 캡처 캐시 (탭 수명 동안 유지)
 const adultFrameCache = new Map<string, string>();
-// broadNo → 마지막 HLS 시도 타임스탬프 (30s 쿨다운, sample.js 동일 방식)
-const adultFrameTimestamps = new Map<string, number>();
+// 현재 로드 중인 broadNo Set (중복 로드 방지)
+const adultFrameInProgress = new Set<string>();
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface TooltipData {
@@ -181,6 +181,7 @@ const TooltipPreview: React.FC = observer(() => {
 
     // SOOP 라이브 스트림: 툴팁 표시 시 즉시 HLS 캡처 (sample.js replaceThumbnails 방식)
     // onError 대신 적극적(proactive) 방식 — SOOP은 19금 썸네일에 HTTP 200 placeholder를 반환하므로 onError 불가
+    // deps를 primitive로 사용 → 같은 채널 위에서 마우스 움직임이 발생해도 재실행/취소되지 않음
     useEffect(() => {
         if (!settings.isReplaceEmptyThumbnailEnabled) return;
         if (!data?.userId || !data?.broadNo || data.type !== "live" || data.platform === "chzzk") return;
@@ -196,31 +197,39 @@ const TooltipPreview: React.FC = observer(() => {
             return;
         }
 
-        // 30초 이내 로드 시도 여부 확인 (sample.js와 동일한 30s 만료 로직)
-        const lastTime = adultFrameTimestamps.get(broadNoStr) ?? 0;
-        if (Date.now() - lastTime < 30000) return;
-        adultFrameTimestamps.set(broadNoStr, Date.now());
+        // 이미 로드 중이면 중복 시작 방지 (완료 후 캐시 → 다음 hover에서 즉시 표시)
+        if (adultFrameInProgress.has(broadNoStr)) return;
+        adultFrameInProgress.add(broadNoStr);
 
         (async () => {
             const frame = await loadAdultFrame(userId, broadNoStr);
-            if (cancelled) {
-                // hover 이탈로 취소된 경우 쿨다운 제거 → 다음 hover 시 즉시 재시도
-                if (!adultFrameCache.has(broadNoStr)) adultFrameTimestamps.delete(broadNoStr);
-                return;
-            }
+            adultFrameInProgress.delete(broadNoStr);
             if (!frame) return;
+            // 취소 여부와 무관하게 캐시에 저장 → 다음 hover 시 즉시 표시
             adultFrameCache.set(broadNoStr, frame);
-            setCapturedFrame(frame);
+            if (!cancelled) setCapturedFrame(frame);
         })();
 
         return () => {
             cancelled = true;
         };
-    }, [data, settings.isReplaceEmptyThumbnailEnabled]);
+        // data 객체 참조 대신 primitive 값으로 비교 → 같은 채널 내 mousemove 시 재실행 방지
+    }, [data?.broadNo, data?.userId, data?.type, data?.platform, settings.isReplaceEmptyThumbnailEnabled]);
 
-    // Chzzk 썸네일 fallback: liveImageUrl이 없으면 채널 데이터 API에서 가져옴
+    // 썸네일 해상도 + capturedFrame 초기화 (data 변경 시 실행)
     useEffect(() => {
-        setCapturedFrame(null);
+        // 같은 채널이라도 data 객체가 바뀌므로 캐시 먼저 복원
+        if (data?.broadNo && data.type === "live" && data.platform !== "chzzk") {
+            const cached = adultFrameCache.get(String(data.broadNo));
+            if (cached) {
+                setCapturedFrame(cached);
+            } else {
+                setCapturedFrame(null);
+            }
+        } else {
+            setCapturedFrame(null);
+        }
+
         if (!data) {
             setResolvedThumbnail(null);
             return;
