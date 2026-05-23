@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import "./style.module.less";
+import "./style.less";
 
 interface PreviewModalProps {
     broadNo: string | number;

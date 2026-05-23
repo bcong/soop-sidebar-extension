@@ -1,6 +1,6 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
-import "./style.module.less";
+import "./style.less";
 import { useSidebarStore, useSettingsStore } from "@Stores/index";
 import type { I_ChannelData } from "@Types/index.d";
 import { addNumberSeparator } from "@Utils/format";

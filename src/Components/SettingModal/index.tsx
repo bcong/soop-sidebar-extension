@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import { observer } from "mobx-react-lite";
 import { useSettingsStore } from "@Stores/index";
-import "./style.module.less";
+import "./style.less";
 
 // ============================================================
 // 설정 모달 — 전체 7개 섹션

@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useSidebarStore, useSettingsStore } from "@Stores/index";
 import type { I_FavoriteGroup, I_PinnedCategory } from "@Types/index.d";
-import "./style.module.less";
+import "./style.less";
 
 // ============================================================
 // 즐겨찾기 그룹 탭

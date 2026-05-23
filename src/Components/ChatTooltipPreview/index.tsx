@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useSettingsStore } from "@Stores/index";
-import "./style.module.less";
+import "./style.less";
 
 interface ChatData {
     userId: string;

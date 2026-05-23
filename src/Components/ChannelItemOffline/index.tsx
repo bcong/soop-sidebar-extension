@@ -1,6 +1,6 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
-import "../ChannelItem/style.module.less";
+import "../ChannelItem/style.less";
 import { useSettingsStore } from "@Stores/index";
 import type { I_ChannelData } from "@Types/index.d";
 import { timeSince } from "@Utils/format";

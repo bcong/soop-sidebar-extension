@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { observer } from "mobx-react-lite";
 import { useSettingsStore } from "@Stores/index";
 import { waitForElementAsync } from "@Utils/index";
-import "./style.module.less";
+import "./style.less";
 
 // sample.js BUTTON_DATA와 동일한 구조
 const BUTTON_DATA = [

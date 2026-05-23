@@ -4,7 +4,7 @@ import { useSettingsStore } from "@Stores/index";
 import { addNumberSeparator } from "@Utils/format";
 import { getElapsedTime } from "@Utils/format";
 import { fetchBroadList } from "@Utils/api";
-import "./style.module.less";
+import "./style.less";
 
 interface TooltipData {
     userId: string;

@@ -5,7 +5,7 @@ import ChannelItem from "@Components/ChannelItem";
 import ChannelItemChzzk from "@Components/ChannelItemChzzk";
 import ChannelItemOffline from "@Components/ChannelItemOffline";
 import { useSettingsStore } from "@Stores/index";
-import "./style.module.less";
+import "./style.less";
 
 const DEFAULT_SHOW_COUNT = 30;
 

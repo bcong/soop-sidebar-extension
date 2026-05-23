@@ -1,0 +1,98 @@
+// PreviewModal 스타일 — _v8xK4z 클래스 이름 기준
+
+.preview-modal-overlay_v8xK4z {
+    display: flex;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.85);
+    align-items: center;
+    justify-content: center;
+
+    .preview-modal-content_v8xK4z {
+        position: relative;
+        width: 80%;
+        max-width: 800px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        overflow: hidden;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
+        background-color: #1a1a1b;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .preview-modal-close_v8xK4z {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        color: #fff;
+        font-size: 30px;
+        font-weight: bold;
+        cursor: pointer;
+        background: none;
+        border: none;
+        line-height: 1;
+        z-index: 10;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+
+    .preview-modal-thumbnail_v8xK4z {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background-color: #000;
+        overflow: hidden;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    .preview-modal-info_v8xK4z {
+        padding: 20px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .preview-modal-nick_v8xK4z {
+        font-size: 18px;
+        font-weight: 700;
+        color: #f2f3f5;
+    }
+
+    .preview-modal-title_v8xK4z {
+        font-size: 15px;
+        color: #a9adb6;
+        line-height: 1.4;
+    }
+
+    .preview-modal-link_v8xK4z {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 8px 18px;
+        background-color: #4f8fb8;
+        color: #fff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        align-self: flex-start;
+        transition: background-color 0.2s;
+
+        &:hover {
+            background-color: #3a7ca5;
+        }
+    }
+}
