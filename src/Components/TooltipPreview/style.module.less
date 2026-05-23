@@ -1,0 +1,270 @@
+// TooltipPreview 스타일 — 툴팁 컨테이너 전체
+
+:global {
+    .tooltip-container {
+        z-index: 9999;
+        width: 460px;
+        height: auto;
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-radius: 10px;
+        box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        overflow: hidden;
+        pointer-events: none;
+        background-color: #1a1a1b;
+
+        &.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .thumbs-box {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .views {
+            display: flex;
+            align-items: center;
+            background: rgba(23, 25, 28, 0.85);
+            height: 24px;
+            padding: 0 10px;
+            border-radius: 30px;
+            color: #fff !important;
+            font-size: 13px;
+            line-height: 24px;
+            z-index: 5;
+            position: relative;
+
+            &:before {
+                content: "";
+                display: block;
+                background: #ff2424;
+                width: 6px;
+                height: 6px;
+                margin-right: 4px;
+                border-radius: 50%;
+            }
+        }
+
+        &.feed-mode {
+            width: 400px;
+
+            img {
+                height: 100%;
+                object-fit: contain;
+                background-color: #000;
+            }
+        }
+    }
+
+    .tooltiptext {
+        padding: 14px 20px;
+        font-size: 18px;
+        text-align: left;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        line-height: 22px;
+        width: 100%;
+        box-sizing: border-box;
+
+        .dot {
+            font-size: 11px;
+            margin-right: 2px;
+            vertical-align: middle;
+            line-height: 22px;
+            display: inline-block;
+        }
+    }
+
+    .tooltiptext,
+    .tooltiptext * {
+        font-family: inherit;
+    }
+
+    .thumb-overlay-bottom {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        display: flex;
+        gap: 6px;
+        z-index: 10;
+    }
+
+    .duration-overlay {
+        display: flex;
+        align-items: center;
+        background: rgba(23, 25, 28, 0.85);
+        height: 24px;
+        padding: 0 10px;
+        border-radius: 30px;
+        color: #fff !important;
+        font-size: 13px;
+        line-height: 24px;
+        z-index: 5;
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+    }
+
+    .feed-stats-tooltip {
+        display: flex;
+        justify-content: flex-start;
+        gap: 15px;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(128, 128, 128, 0.2);
+        font-size: 14px;
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            opacity: 0.85;
+        }
+    }
+
+    .icon-feed-like,
+    .icon-feed-view {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .icon-feed-comment {
+        display: inline-block;
+        margin-top: 2px;
+        width: 18px;
+        height: 18px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .icon-feed-like {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23757B8A' stroke-width='1.4' d='M7.032 14.847v-6.93l1.95-4.614a1.667 1.667 0 0 1 1.714-1.009l.036.004a1.667 1.667 0 0 1 1.488 1.657v2.221c0 .23.187.417.417.417h3.293a1.5 1.5 0 0 1 1.47 1.798l-1.161 5.737a2.5 2.5 0 0 1-2.45 2.003H9.633c-.148 0-.295-.02-.438-.058l-1.549-.423a.833.833 0 0 1-.614-.803ZM3.563 9.582c0-.92.747-1.666 1.667-1.666h.966c.46 0 .834.373.834.833v5.8c0 .46-.373.833-.834.833H5.23c-.92 0-1.667-.746-1.667-1.666V9.582Z'/%3e%3c/svg%3e");
+    }
+
+    html[dark="true"] .icon-feed-like {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23999' stroke-width='1.4' d='M7.032 14.847v-6.93l1.95-4.614a1.667 1.667 0 0 1 1.714-1.009l.036.004a1.667 1.667 0 0 1 1.488 1.657v2.221c0 .23.187.417.417.417h3.293a1.5 1.5 0 0 1 1.47 1.798l-1.161 5.737a2.5 2.5 0 0 1-2.45 2.003H9.633c-.148 0-.295-.02-.438-.058l-1.549-.423a.833.833 0 0 1-.614-.803ZM3.563 9.582c0-.92.747-1.666 1.667-1.666h.966c0 .46.373.833.834.833v5.8c0 .46-.373.833-.834.833H5.23c-.92 0-1.667-.746-1.667-1.666V9.582Z'/%3e%3c/svg%3e");
+    }
+
+    .tooltip-feed-content {
+        margin-top: 12px;
+        padding: 10px;
+        font-size: 15px;
+        line-height: 1.6;
+        text-align: left;
+        border-radius: 6px;
+        opacity: 0.9;
+        word-break: break-all;
+        max-height: 350px;
+        overflow-y: auto;
+    }
+
+    .tooltip-header {
+        margin-bottom: 6px;
+        font-size: 17px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .tooltip-username {
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .tooltip-description {
+        font-size: 17px;
+        margin-left: 0;
+        margin-top: 2px;
+        display: block;
+        color: #fff !important;
+    }
+
+    .tooltip-title {
+        line-height: 1.4;
+        font-size: 22px;
+        color: #fff !important;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .tooltip-time {
+        font-size: 14px;
+        opacity: 0.55;
+        font-weight: 300;
+        flex-shrink: 0;
+    }
+
+    // ── dark ─────────────────────────────────────────────────
+    html[dark="true"] {
+        .tooltip-container {
+            background-color: #26262c;
+        }
+        .tooltiptext {
+            color: #fff;
+            background-color: #26262c;
+        }
+        .tooltip-username {
+            color: #fff;
+        }
+        .tooltip-description {
+            color: #fff !important;
+        }
+        .feed-stats-tooltip {
+            border-top-color: rgba(255, 255, 255, 0.1);
+        }
+        .tooltip-feed-content {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #ddd;
+        }
+    }
+
+    // ── light ────────────────────────────────────────────────
+    html:not([dark="true"]) {
+        .tooltip-container {
+            background-color: #f0f0f5;
+            border: 1px solid #dcdce6;
+        }
+        .tooltiptext {
+            color: #1a1a1b;
+            background-color: #f0f0f5;
+        }
+        .tooltip-username {
+            color: #1a1a1b;
+        }
+        .tooltip-description {
+            color: #fff !important;
+        }
+        .feed-stats-tooltip {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+        .tooltip-feed-content {
+            background-color: rgba(0, 0, 0, 0.03);
+            color: #444;
+        }
+    }
+}

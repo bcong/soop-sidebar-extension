@@ -3,31 +3,24 @@ import { SettingsStore } from "./SettingsStore";
 import { SidebarStore } from "./SidebarStore";
 
 export class RootStore {
-  settingsStore: SettingsStore;
-  sidebarStore: SidebarStore;
+    settingsStore: SettingsStore;
+    sidebarStore: SidebarStore;
 
-  constructor() {
-    this.settingsStore = new SettingsStore();
-    this.sidebarStore = new SidebarStore(this.settingsStore);
-  }
+    constructor() {
+        this.settingsStore = new SettingsStore();
+        this.sidebarStore = new SidebarStore(this.settingsStore);
+    }
 }
 
-const rootStore = new RootStore();
-
-export const StoreContext = createContext<RootStore>(rootStore);
+export const StoreContext = createContext<RootStore>(null!);
 
 export const useRootStore = (): RootStore => useContext(StoreContext);
 
-export const useSettingsStore = (): SettingsStore =>
-  useContext(StoreContext).settingsStore;
+export const useSettingsStore = (): SettingsStore => useContext(StoreContext).settingsStore;
 
-export const useSidebarStore = (): SidebarStore =>
-  useContext(StoreContext).sidebarStore;
+export const useSidebarStore = (): SidebarStore => useContext(StoreContext).sidebarStore;
 
-export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  return (
-    <StoreContext.Provider value={rootStore}>{children}</StoreContext.Provider>
-  );
+export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [store] = React.useState(() => new RootStore());
+    return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 };

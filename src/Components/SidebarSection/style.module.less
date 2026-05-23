@@ -1,0 +1,292 @@
+// SidebarSection 스타일 — .users-section, .top-section, .user 및 자식
+
+:global {
+    // ── 섹션 헤더 ─────────────────────────────────────────────
+    .section-wrapper > .top-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        margin: 12px 0 6px 0;
+        line-height: 17px;
+        border-left: 3px solid transparent;
+        // padding-left: 8px;
+
+        &.follow {
+            border-left-color: #f9a825;
+        }
+        &.myplus {
+            border-left-color: #4db6ac;
+        }
+        &.top {
+            border-left-color: #ef5350;
+        }
+
+        > span {
+            text-transform: uppercase;
+            font-weight: 550;
+            font-size: 14px;
+            margin-top: 6px;
+            margin-bottom: 2px;
+        }
+
+        > button {
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 11px;
+            opacity: 0.6;
+            line-height: 1;
+            flex-shrink: 0;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+
+        .min {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .min a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+        }
+
+        .section-icon {
+            display: inline-block;
+            font-size: 18px;
+        }
+    }
+
+    // ── 섹션 아이콘 색상 ──────────────────────────────────────
+    .top-section.follow .section-icon {
+        color: #f9a825;
+    }
+    .top-section.myplus .section-icon {
+        color: #66bb6a;
+    }
+    .top-section.top .section-icon {
+        color: #ef5350;
+    }
+
+    .users-section {
+        .vl-spacer-bottom {
+            display: block;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .user.show-more {
+            display: block;
+            grid-template-areas: unset;
+            grid-template-columns: unset;
+            max-height: 36px;
+            opacity: 1;
+            padding: 6px 0;
+            pointer-events: auto;
+            text-align: center;
+            font-size: 13px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        // ── 채널 아이템 ───────────────────────────────────────
+        .user {
+            display: grid;
+            grid-template-areas: "profile-picture username watchers" "profile-picture description blank";
+            grid-template-columns: 40px auto auto;
+            padding: 5px 10px;
+            max-height: 50px;
+            opacity: 1;
+            overflow: hidden;
+            content-visibility: auto;
+            contain-intrinsic-size: 0 60px;
+            position: relative;
+
+            &:hover {
+                cursor: pointer;
+            }
+
+            .chzzk-pin-btn {
+                display: none;
+                position: absolute;
+                right: 6px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(30, 30, 35, 0.82);
+                border: 1px solid rgba(255, 255, 255, 0.22);
+                cursor: pointer;
+                font-size: 13px;
+                padding: 3px 6px;
+                border-radius: 5px;
+                line-height: 1;
+                color: #c8c8cc;
+                z-index: 2;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+                transition:
+                    background 0.12s,
+                    border-color 0.12s;
+
+                &:hover {
+                    background: rgba(50, 50, 60, 0.95);
+                    border-color: rgba(255, 255, 255, 0.45);
+                    color: #ffffff;
+                }
+
+                &.pinned {
+                    color: #ffd700;
+                    border-color: rgba(255, 215, 0, 0.5);
+                }
+            }
+
+            &:hover .chzzk-pin-btn {
+                display: block;
+            }
+
+            .profile-picture {
+                grid-area: profile-picture;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                line-height: 20px;
+            }
+
+            .username {
+                grid-area: username;
+                font-size: 14px;
+                font-weight: 600;
+                letter-spacing: 0.6px;
+                margin-left: 1px;
+                line-height: 17px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
+            .description {
+                grid-area: description;
+                font-size: 13px;
+                font-weight: 400;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-left: 1px;
+                line-height: 16px;
+            }
+
+            .watchers {
+                grid-area: watchers;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                font-weight: 400;
+                font-size: 14px;
+                margin-right: 2px;
+                line-height: 17px;
+
+                .dot {
+                    font-size: 10px;
+                    margin-right: 5px;
+                    color: #ff2424;
+
+                    &.greendot {
+                        color: #34c76b !important;
+                    }
+                }
+            }
+        }
+    }
+
+    // ── 접기/펼치기 버튼 ──────────────────────────────────────
+    #toggleButton,
+    #toggleButton2,
+    #toggleButton3,
+    #toggleButton4,
+    #toggleButton5 {
+        padding: 7px 0;
+        width: 100%;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    html[dark="true"] {
+        #toggleButton,
+        #toggleButton2,
+        #toggleButton3,
+        #toggleButton4,
+        #toggleButton5 {
+            color: #a1a1a1;
+        }
+    }
+
+    html:not([dark="true"]) {
+        #toggleButton,
+        #toggleButton2,
+        #toggleButton3,
+        #toggleButton4,
+        #toggleButton5 {
+            color: #53535f;
+        }
+    }
+
+    // ── dark ─────────────────────────────────────────────────
+    html[dark="true"] .section-wrapper > .top-section > button {
+        color: #a1a1a1;
+    }
+
+    html[dark="true"] .users-section {
+        .user {
+            &:hover {
+                background-color: #26262c;
+            }
+            .username {
+                color: #dedee3;
+            }
+            .description {
+                color: #a1a1a1;
+            }
+            .watchers {
+                color: #c0c0c0;
+            }
+
+            &.user-offline span {
+                filter: grayscale(1) brightness(0.8);
+            }
+        }
+    }
+
+    // ── light ────────────────────────────────────────────────
+    html:not([dark="true"]) .section-wrapper > .top-section > button {
+        color: #53535f;
+    }
+
+    html:not([dark="true"]) .users-section {
+        .user {
+            &:hover {
+                background-color: #e6e6ea;
+            }
+            .username {
+                color: #1f1f23;
+            }
+            .description {
+                color: #53535f;
+            }
+            .watchers {
+                color: black;
+            }
+
+            &.user-offline span {
+                opacity: 0.7;
+            }
+        }
+    }
+}

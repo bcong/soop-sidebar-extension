@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260522103009
+// @version      20260523110851
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
+// @license      MIT
+// @icon         https://res.sooplive.co.kr/afreeca.ico
 // @downloadURL  https://raw.githubusercontent.com/bcong/soop-sidebar-extension/master/dist/userscripts.user.js
 // @updateURL    https://raw.githubusercontent.com/bcong/soop-sidebar-extension/master/dist/userscripts.user.js
 // @match        https://www.sooplive.com/*
@@ -20,10 +22,10 @@
 // @grant        GM_unregisterMenuCommand
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
-// @run-at       document-start
+// @run-at       document-end
 // ==/UserScript==
 
-(o=>{if(typeof GM_addStyle=="function"){GM_addStyle(o);return}const e=document.createElement("style");e.textContent=o,document.head.append(e)})(` :root{--nickname-width: 60px;--wp-scroll-left: 240px}.customSidebar #serviceLnb{display:none!important}.left_navbar{display:flex;align-items:center;justify-content:flex-end;position:fixed;flex-direction:row-reverse;top:0;left:128px;z-index:9999;background-color:#fff}html[dark=true] .left_navbar{background-color:#0c0d0e}html[dark=true] .left_nav_button{color:#e5e5e5}html:not([dark=true]) .left_nav_button{color:#1f1f23}.left_navbar button.left_nav_button{position:relative;width:68px;height:64px;padding:0;border:0;cursor:pointer;z-index:3001;font-size:1.25em!important;font-weight:600}@media (max-width: 1280px){#serviceHeader .left_navbar{left:124px!important}#serviceHeader .left_nav_button{width:58px!important;font-size:1.2em!important}}@media (max-width: 1100px){#serviceHeader .left_navbar{left:120px!important}#serviceHeader .left_nav_button{width:46px!important;font-size:1.1em!important}}#sidebar{top:64px;display:flex!important;flex-direction:column!important}.starting-line .chatting-list-item .message-container .username{width:var(--nickname-width)!important}.duration-overlay{position:absolute;top:235px;right:4px;background-color:#000000b3;color:#fff;padding:2px 5px;font-size:15px;border-radius:3px;z-index:9999;line-height:17px}#studioPlayKorPlayer,#studioPlayKor,#studioPlay,.btn-broadcast{display:none}#myModal{--bg-color-v8xK4z: #17181c;--surface-color-v8xK4z: #202229;--primary-text-v8xK4z: #f2f3f5;--secondary-text-v8xK4z: #a9adb6;--accent-color-v8xK4z: #4f8fb8;--border-color-v8xK4z: rgba(255, 255, 255, .09);--shadow-v8xK4z: 0 14px 40px rgba(0, 0, 0, .42);--font-family-v8xK4z: sans-serif;display:none;position:fixed;z-index:9999;left:0;top:0;width:100%;height:100%;overflow:hidden;background-color:#000000b8;font-family:var(--font-family-v8xK4z);color:var(--primary-text-v8xK4z)}html:not([dark=true]) #myModal{--bg-color-v8xK4z: #eef0f3;--surface-color-v8xK4z: #ffffff;--primary-text-v8xK4z: #14171c;--secondary-text-v8xK4z: #575d68;--accent-color-v8xK4z: #2f78a5;--border-color-v8xK4z: #d8dde4;--shadow-v8xK4z: 0 14px 36px rgba(17, 23, 34, .16);background-color:#14181e47}#myModal .modal-content_v8xK4z{background-color:var(--surface-color-v8xK4z);margin:5vh auto;border:1px solid var(--border-color-v8xK4z);border-radius:10px;width:850px;max-width:calc(100vw - 48px);height:90vh;box-shadow:var(--shadow-v8xK4z);display:flex;flex-direction:row;overflow:hidden}#myModal .modal-index_v8xK4z{flex-shrink:0;width:196px;padding:12px 0 8px;border-right:1px solid var(--border-color-v8xK4z);background-color:var(--bg-color-v8xK4z);overflow-y:auto;display:flex;flex-direction:column}#myModal .modal-version_v8xK4z{margin-top:auto;padding:14px 18px 13px;font-size:11px;line-height:1.5;color:var(--secondary-text-v8xK4z);border-top:1px solid var(--border-color-v8xK4z);opacity:.95}#myModal .index-title_v8xK4z{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.11em;padding:8px 18px;margin:0 0 6px;color:var(--secondary-text-v8xK4z)}#myModal .index-button_v8xK4z{display:block;width:auto;padding:12px;background:none;color:var(--secondary-text-v8xK4z);text-align:left;font-size:13px;font-weight:500;cursor:pointer;transition:background-color .18s,color .18s,border-color .18s}#myModal .index-button_v8xK4z:hover{background-color:#ffffff0f;border-color:var(--border-color-v8xK4z);color:var(--primary-text-v8xK4z)}#myModal .index-button_v8xK4z.active{background-color:#4f8fb82e;border-color:#4f8fb870;color:var(--primary-text-v8xK4z);font-weight:600}html:not([dark=true]) #myModal .index-button_v8xK4z:hover{background-color:#0f141c0a}html:not([dark=true]) #myModal .index-button_v8xK4z.active{background-color:#2f78a521;border-color:#2f78a54d}#myModal .modal-main-content_v8xK4z{flex-grow:1;display:flex;flex-direction:column;overflow:hidden}#myModal .modal-header_v8xK4z{padding:14px 22px;border-bottom:1px solid var(--border-color-v8xK4z);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background-color:var(--surface-color-v8xK4z);gap:16px}#myModal .modal-breadcrumb_v8xK4z{display:flex;align-items:center;gap:8px;min-width:0;color:var(--primary-text-v8xK4z);font-size:20px;font-weight:600}#myModal .breadcrumb-root_v8xK4z{flex-shrink:0}#myModal .breadcrumb-sep_v8xK4z{color:var(--secondary-text-v8xK4z);opacity:.6;font-size:14px}#myModal .breadcrumb-current_v8xK4z{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#myModal .modal-search-container_v8xK4z{flex:1;max-width:360px}#myModal .search-input-wrapper_v8xK4z{position:relative;display:flex;align-items:center}#myModal .search-icon_v8xK4z{position:absolute;left:12px;color:var(--secondary-text-v8xK4z);font-size:14px;pointer-events:none}#myModal #modal-search-input_v8xK4z{width:100%;height:30px;padding:0 34px;border-radius:6px;border:1px solid var(--border-color-v8xK4z);background-color:var(--bg-color-v8xK4z);color:var(--primary-text-v8xK4z);outline:none}#myModal #modal-search-input_v8xK4z:focus{border-color:#4f8fb88c;box-shadow:0 0 0 2px #4f8fb82e}#myModal #modal-search-input_v8xK4z::placeholder{color:var(--secondary-text-v8xK4z)}html:not([dark=true]) #myModal #modal-search-input_v8xK4z:focus{border-color:#2f78a580;box-shadow:0 0 0 2px #2f78a524}#myModal #modal-search-clear_v8xK4z{position:absolute;right:8px;width:20px;height:20px;padding:0;border:none;background:none;color:var(--secondary-text-v8xK4z);cursor:pointer;border-radius:4px}#myModal #modal-search-clear_v8xK4z:hover{background-color:#ffffff14;color:var(--primary-text-v8xK4z)}html:not([dark=true]) #myModal #modal-search-clear_v8xK4z:hover{background-color:#0000000d}#myModal .close-button_v8xK4z{background:none;border:none;color:var(--secondary-text-v8xK4z);font-size:32px;font-weight:700;cursor:pointer;width:36px;height:36px;border-radius:6px;transition:color .2s,background-color .2s}#myModal .close-button_v8xK4z:hover,#myModal .close-button_v8xK4z:focus{color:var(--primary-text-v8xK4z)}html:not([dark=true]) #myModal .close-button_v8xK4z:hover,html:not([dark=true]) #myModal .close-button_v8xK4z:focus{background-color:#0000000d}#myModal .modal-body_v8xK4z{padding:24px;overflow-y:auto;flex-grow:1;padding-bottom:30vh}#myModal .modal-footer_v8xK4z{padding-top:24px;margin-top:24px;border-top:1px solid var(--border-color-v8xK4z)}#myModal .section-title_v8xK4z{font-size:17px;font-weight:600;color:var(--primary-text-v8xK4z);margin:32px 0 16px;padding:10px 14px;background-color:var(--bg-color-v8xK4z);border-left:3px solid var(--accent-color-v8xK4z);border-radius:4px;scroll-margin-top:24px;-webkit-user-select:none;user-select:none}#myModal section:first-child .section-title_v8xK4z{margin-top:0}#myModal .option_v8xK4z{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;border:1px solid transparent;transition:background-color .2s,border-color .2s}#myModal .option_v8xK4z label{font-size:14px;color:var(--secondary-text-v8xK4z)}#myModal .option_v8xK4z:not(.multi-option_v8xK4z):hover{background-color:#ffffff0d;border-color:var(--border-color-v8xK4z)}html:not([dark=true]) #myModal .option_v8xK4z:not(.multi-option_v8xK4z):hover{background-color:#00000008}#myModal .range-option_v8xK4z{grid-template-columns:auto 1fr;gap:20px}#myModal .range-container_v8xK4z{display:flex;align-items:center;gap:15px}#myModal input[type=range]{width:100%}#myModal .range-value_v8xK4z{font-size:15px;color:var(--primary-text-v8xK4z);min-width:30px;text-align:right}#myModal .switch_v8xK4z{position:relative;display:inline-block;width:50px;height:28px}#myModal .switch_v8xK4z input{opacity:0;width:0;height:0}#myModal .slider_v8xK4z{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#4d4d4d;transition:.4s;border-radius:28px}#myModal .slider_v8xK4z:before{position:absolute;content:"";height:20px;width:20px;left:4px;bottom:4px;background-color:#fff;transition:.4s;border-radius:50%}#myModal input:checked+.slider_v8xK4z{background-color:var(--accent-color-v8xK4z)}#myModal input:focus+.slider_v8xK4z{box-shadow:0 0 1px var(--accent-color-v8xK4z)}#myModal input:checked+.slider_v8xK4z:before{transform:translate(22px)}#myModal .divider_v8xK4z{border:none;height:1px;background-color:var(--border-color-v8xK4z);margin:24px 0}#myModal .option-details_v8xK4z{grid-column:1 / -1;display:flex;gap:15px}#myModal .mapper-setting_v8xK4z{display:inline;margin-left:16px}#myModal .mapper-setting_v8xK4z select{background-color:var(--surface-color-v8xK4z);color:var(--primary-text-v8xK4z);border:1px solid var(--border-color-v8xK4z);border-radius:6px;padding:5px 8px;outline:none}#myModal textarea{grid-column:1 / -1;width:100%;background-color:var(--bg-color-v8xK4z);border:1px solid var(--border-color-v8xK4z);border-radius:6px;color:var(--primary-text-v8xK4z);padding:10px;resize:vertical}#myModal .description_v8xK4z{font-size:13px;line-height:1.5;color:var(--secondary-text-v8xK4z);margin:0 0 10px}#myModal .no-results_v8xK4z{padding:40px;text-align:center;color:var(--secondary-text-v8xK4z);font-size:14px}#myModal .bug-report_v8xK4z a{color:var(--accent-color-v8xK4z);text-decoration:none}#myModal .bug-report_v8xK4z a:hover{text-decoration:underline}#myModal .modal-body_v8xK4z::-webkit-scrollbar,#myModal .modal-index_v8xK4z::-webkit-scrollbar{width:8px}#myModal .modal-body_v8xK4z::-webkit-scrollbar-track,#myModal .modal-index_v8xK4z::-webkit-scrollbar-track{background:var(--surface-color-v8xK4z)}#myModal .modal-body_v8xK4z::-webkit-scrollbar-thumb,#myModal .modal-index_v8xK4z::-webkit-scrollbar-thumb{background-color:var(--border-color-v8xK4z);border-radius:4px}#myModal .modal-body_v8xK4z::-webkit-scrollbar-thumb:hover,#myModal .modal-index_v8xK4z::-webkit-scrollbar-thumb:hover{background-color:#555}#myModal .multi-option_v8xK4z{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px;padding:0}#myModal .option-group_v8xK4z{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;border:1px solid transparent;transition:background-color .2s,border-color .2s}#myModal .option-group_v8xK4z:hover{background-color:#ffffff1a;border-color:var(--border-color-v8xK4z)}html:not([dark=true]) #myModal .option-group_v8xK4z:hover{background-color:#0000000d}#myModal .subsection-title_v8xK4z{margin-top:25px;margin-bottom:15px;font-size:15px;color:var(--primary-text-v8xK4z);font-weight:600;border-bottom:1px solid var(--border-color-v8xK4z);padding-bottom:8px}#myModal .order-list_v8xK4z{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px}#myModal .draggable-item_v8xK4z{background-color:var(--bg-color-v8xK4z);padding:8px 12px;border-radius:5px;border:1px solid var(--border-color-v8xK4z);cursor:grab;transition:background-color .2s,border-color .2s;font-size:14px;white-space:nowrap}#myModal .draggable-item_v8xK4z:hover{background-color:#ffffff14}#myModal .draggable-item_v8xK4z.dragging_v8xK4z{opacity:.5;background-color:#5dade2;cursor:grabbing}html:not([dark=true]) #myModal .draggable-item_v8xK4z:hover{background-color:#0000000a}#openModalBtn{box-sizing:border-box;font-size:12px;line-height:1.2!important;font-family:NG;list-style:none;position:relative;margin-left:12px;width:40px;height:40px}#topInnerHeader #openModalBtn{margin-right:12px}#openModalBtn>button.btn-settings-ui{background:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none'%3e%3cpath stroke='%23757B8A' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.4' d='M8.269 2.061c.44-1.815 3.022-1.815 3.462 0a1.782 1.782 0 0 0 2.658 1.101c1.595-.971 3.42.854 2.449 2.449a1.781 1.781 0 0 0 1.1 2.658c1.816.44 1.816 3.022 0 3.462a1.781 1.781 0 0 0-1.1 2.659c.971 1.595-.854 3.42-2.449 2.448a1.781 1.781 0 0 0-2.658 1.101c-.44 1.815-3.022 1.815-3.462 0a1.781 1.781 0 0 0-2.658-1.101c-1.595.972-3.42-.854-2.449-2.448a1.782 1.782 0 0 0-1.1-2.659c-1.816-.44-1.816-3.021 0-3.462a1.782 1.782 0 0 0 1.1-2.658c-.972-1.595.854-3.42 2.449-2.449a1.781 1.781 0 0 0 2.658-1.1Z'/%3e%3cpath stroke='%23757B8A' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.4' d='M13.1 10a3.1 3.1 0 1 1-6.2 0 3.1 3.1 0 0 1 6.2 0Z'/%3e%3c/svg%3e") 50% 50% no-repeat!important;background-size:18px!important}html[dark=true] #openModalBtn>button.btn-settings-ui{background:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none'%3e%3cpath stroke='%23ACB0B9' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.4' d='M8.269 2.061c.44-1.815 3.022-1.815 3.462 0a1.782 1.782 0 0 0 2.658 1.101c1.595-.971 3.42.854 2.449 2.449a1.781 1.781 0 0 0 1.1 2.658c1.816.44 1.816 3.022 0 3.462a1.781 1.781 0 0 0-1.1 2.659c.971 1.595-.854 3.42-2.449 2.448a1.781 1.781 0 0 0-2.658 1.101c-.44 1.815-3.022 1.815-3.462 0a1.781 1.781 0 0 0-2.658-1.101c-1.595.972-3.42-.854-2.449-2.448a1.782 1.782 0 0 0-1.1-2.659c-1.816-.44-1.816-3.021 0-3.462a1.782 1.782 0 0 0 1.1-2.658c-.972-1.595.854-3.42 2.449-2.449a1.781 1.781 0 0 0 2.658-1.1Z'/%3e%3cpath stroke='%23ACB0B9' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.4' d='M13.1 10a3.1 3.1 0 1 1-6.2 0 3.1 3.1 0 0 1 6.2 0Z'/%3e%3c/svg%3e") 50% 50% no-repeat!important;background-size:18px!important}@keyframes rotate{0%{transform:rotate(0)}to{transform:rotate(360deg)}}#openModalBtn:has(.red-dot) .btn-settings-ui{animation:rotate 4s linear 10}#sidebar.max{width:240px}#sidebar.min{width:52px}#sidebar.min .users-section a.user span{display:none}#sidebar.min .users-section button{font-size:12px;padding:4px}#sidebar.max .button-fold-sidebar{background-size:7px 11px;background-repeat:no-repeat;width:26px;height:26px;background-position:center;position:absolute;top:13px;left:200px}#sidebar.max .button-fold-sidebar .sidebar-refresh-countdown{position:absolute;right:30px;top:50%;transform:translateY(-50%);font-size:10px;color:#888;white-space:nowrap;pointer-events:none;-webkit-user-select:none;user-select:none}#sidebar.max .button-unfold-sidebar,#sidebar.min .button-fold-sidebar{display:none}#sidebar.min .button-unfold-sidebar{background-size:7px 11px;background-repeat:no-repeat;width:26px;height:26px;background-position:center;position:relative;top:8px;left:12px;padding-top:16px;padding-bottom:12px}#sidebar.min .top-section span.max,#sidebar.max .top-section span.min{display:none}#toggleButton,#toggleButton2,#toggleButton3,#toggleButton4,#toggleButton5{padding:7px 0;width:100%;text-align:center;font-size:14px}html[dark=true] #toggleButton,html[dark=true] #toggleButton2,html[dark=true] #toggleButton3,html[dark=true] #toggleButton4,html[dark=true] #toggleButton5{color:#a1a1a1}html:not([dark=true]) #toggleButton,html:not([dark=true]) #toggleButton2,html:not([dark=true]) #toggleButton3,html:not([dark=true]) #toggleButton4,html:not([dark=true]) #toggleButton5{color:#53535f}#sidebar{grid-area:sidebar;padding-bottom:360px;height:100vh;overflow-y:auto;position:fixed;scrollbar-width:none;transition:width .1s ease-in-out}#sidebar::-webkit-scrollbar{display:none}#sidebar .top-section{display:flex;align-items:center;justify-content:space-around;margin:12px 0 6px;line-height:17px}#sidebar .top-section>span{text-transform:uppercase;font-weight:550;font-size:14px;margin-top:6px;margin-bottom:2px}.users-section .vl-spacer-top,.users-section .vl-spacer-bottom{display:block;width:100%;flex-shrink:0}.users-section .user.show-more{max-height:0;opacity:0;padding-top:0;padding-bottom:0;pointer-events:none}.users-section .user{display:grid;grid-template-areas:"profile-picture username watchers" "profile-picture description blank";grid-template-columns:40px auto auto;padding:5px 10px;max-height:50px;opacity:1;overflow:hidden;content-visibility:auto;contain-intrinsic-size:0 60px;position:relative}.users-section .user:hover{cursor:pointer}.users-section .user .chzzk-pin-btn{display:none;position:absolute;right:6px;top:50%;transform:translateY(-50%);background:#1e1e23d1;border:1px solid rgba(255,255,255,.22);cursor:pointer;font-size:13px;padding:3px 6px;border-radius:5px;line-height:1;color:#c8c8cc;z-index:2;box-shadow:0 1px 4px #0006;transition:background .12s,border-color .12s}.users-section .user .chzzk-pin-btn:hover{background:#32323cf2;border-color:#ffffff73;color:#fff}.users-section .user .chzzk-pin-btn.pinned{color:gold;border-color:#ffd70080}.users-section .user:hover .chzzk-pin-btn{display:block}.users-section .user .profile-picture{grid-area:profile-picture;width:30px;height:30px;border-radius:50%;line-height:20px}.users-section .user .username{grid-area:username;font-size:14px;font-weight:600;letter-spacing:.6px;margin-left:1px;line-height:17px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.users-section .user .description{grid-area:description;font-size:13px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-left:1px;line-height:16px}.users-section .user .watchers{grid-area:watchers;display:flex;align-items:center;justify-content:flex-end;font-weight:400;font-size:14px;margin-right:2px;line-height:17px}.users-section .user .watchers .dot{font-size:10px;margin-right:5px;color:#ff2424}.users-section .user .watchers .dot.greendot{color:#34c76b!important}.tooltip-container{z-index:9999;width:460px;height:auto;position:fixed;display:flex;flex-direction:column;align-items:center;border-radius:10px;box-shadow:5px 5px 10px #00000080;opacity:0;overflow:hidden;pointer-events:none;background-color:#1a1a1b}.tooltip-container.visible{opacity:1;pointer-events:auto}.tooltip-container .thumbs-box{position:relative;width:100%;aspect-ratio:16 / 9;background-color:#000;overflow:hidden}.tooltip-container img{width:100%;height:100%;object-fit:cover;border-top-left-radius:10px;border-top-right-radius:10px}.tooltip-container .views{display:flex;align-items:center;background:#17191cd9;height:24px;padding:0 10px;border-radius:30px;color:#fff!important;font-size:13px;line-height:24px;z-index:5;position:relative}.tooltip-container .views:before{content:"";display:block;background:#ff2424;width:6px;height:6px;margin-right:4px;border-radius:50%}.tooltip-container.feed-mode{width:400px}.tooltip-container.feed-mode img{height:100%;object-fit:contain;background-color:#000}.tooltiptext{padding:14px 20px;font-size:18px;text-align:left;border-bottom-left-radius:10px;border-bottom-right-radius:10px;line-height:22px;width:100%;box-sizing:border-box}.tooltiptext .dot{font-size:11px;margin-right:2px;vertical-align:middle;line-height:22px;display:inline-block}.thumb-overlay-bottom{position:absolute;bottom:8px;left:8px;display:flex;gap:6px;z-index:10}.duration-overlay{display:flex;align-items:center;background:#17191cd9;height:24px;padding:0 10px;border-radius:30px;color:#fff!important;font-size:13px;line-height:24px;z-index:5;position:relative;top:auto;left:auto;right:auto;bottom:auto}.feed-stats-tooltip{display:flex;justify-content:flex-start;gap:15px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(128,128,128,.2);font-size:14px}.feed-stats-tooltip .stat{display:flex;align-items:center;gap:5px;opacity:.85}html[dark=true] .feed-stats-tooltip{border-top-color:#ffffff1a}html:not([dark=true]) .feed-stats-tooltip{border-top-color:#0000001a}.icon-feed-like,.icon-feed-view{display:inline-block;width:20px;height:20px;background-size:contain;background-repeat:no-repeat;background-position:center}.icon-feed-comment{display:inline-block;margin-top:2px;width:18px;height:18px;background-size:contain;background-repeat:no-repeat;background-position:center}.icon-feed-like{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23757B8A' stroke-width='1.4' d='M7.032 14.847v-6.93l1.95-4.614a1.667 1.667 0 0 1 1.714-1.009l.036.004a1.667 1.667 0 0 1 1.488 1.657v2.221c0 .23.187.417.417.417h3.293a1.5 1.5 0 0 1 1.47 1.798l-1.161 5.737a2.5 2.5 0 0 1-2.45 2.003H9.633c-.148 0-.295-.02-.438-.058l-1.549-.423a.833.833 0 0 1-.614-.803ZM3.563 9.582c0-.92.747-1.666 1.667-1.666h.966c.46 0 .834.373.834.833v5.8c0 .46-.373.833-.834.833H5.23c-.92 0-1.667-.746-1.667-1.666V9.582Z'/%3e%3c/svg%3e")}html[dark=true] .icon-feed-like{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23999' stroke-width='1.4' d='M7.032 14.847v-6.93l1.95-4.614a1.667 1.667 0 0 1 1.714-1.009l.036.004a1.667 1.667 0 0 1 1.488 1.657v2.221c0 .23.187.417.417.417h3.293a1.5 1.5 0 0 1 1.47 1.798l-1.161 5.737a2.5 2.5 0 0 1-2.45 2.003H9.633c-.148 0-.295-.02-.438-.058l-1.549-.423a.833.833 0 0 1-.614-.803ZM3.563 9.582c0-.92.747-1.666 1.667-1.666h.966c.46 0 .834.373.834.833v5.8c0 .46-.373.833-.834.833H5.23c-.92 0-1.667-.746-1.667-1.666V9.582Z'/%3e%3c/svg%3e")}.tooltip-feed-content{margin-top:12px;padding:10px;font-size:15px;line-height:1.6;text-align:left;border-radius:6px;opacity:.9;word-break:break-all;max-height:350px;overflow-y:auto}html[dark=true] .tooltip-feed-content{background-color:#ffffff0d;color:#ddd}html:not([dark=true]) .tooltip-feed-content{background-color:#00000008;color:#444}html[dark=true] .tooltip-container{background-color:#26262c}html[dark=true] .tooltiptext{color:#fff;background-color:#26262c}html[dark=true] .tooltip-username{color:#fff}html[dark=true] .tooltip-description{color:#a9a9b3}html:not([dark=true]) .tooltip-container{background-color:#f0f0f5;border:1px solid #dcdce6}html:not([dark=true]) .tooltiptext{color:#1a1a1b;background-color:#f0f0f5}html:not([dark=true]) .tooltip-username{color:#1a1a1b}html:not([dark=true]) .tooltip-description{color:#64646e}.tooltip-header{margin-bottom:6px;font-size:17px;display:flex;align-items:center;flex-wrap:wrap;gap:6px}.tooltip-username{font-weight:600}.tooltip-description{font-size:14px;margin-left:0;margin-top:2px;display:block;opacity:.8}.tooltip-title{line-height:1.4;font-size:17px;display:flex;align-items:center;gap:6px}.tooltip-time{font-size:14px;opacity:.55;font-weight:300;flex-shrink:0}.tooltiptext,.tooltiptext *{font-family:inherit}.profile-grayscale{filter:grayscale(100%) contrast(85%);opacity:.8}#sidebar.max .small-user-layout{grid-template-areas:"profile-picture username description watchers"!important;grid-template-columns:24px auto 1fr auto!important;padding:4px 10px!important;gap:8px!important;max-height:32px;opacity:1;overflow:hidden;transition:opacity .4s ease}#sidebar.max .small-user-layout.show-more{max-height:0;opacity:0;padding:0!important;pointer-events:none}#sidebar.max .small-user-layout .profile-picture{width:24px!important;height:24px!important;border-radius:20%!important;object-fit:cover}#sidebar.max .small-user-layout .username{max-width:80px!important;font-size:14px!important;line-height:24px!important;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}#sidebar.max .small-user-layout .description{font-size:12px!important;line-height:24px!important}#sidebar.max .small-user-layout .watchers{font-size:14px!important;line-height:24px!important}#sidebar.max .small-user-layout .watchers .dot{font-size:8px!important;margin-right:4px!important}.customSidebar #serviceHeader .a_d_banner{display:none!important}.customSidebar #serviceHeader .btn_flexible+.logo_wrap{left:24px!important}.customSidebar #serviceHeader .logo_wrap{left:24px!important}html[dark=true] .users-section .user.user-offline span{filter:grayscale(1) brightness(.8)}html:not([dark=true]) .users-section .user.user-offline span{opacity:.7}html[dark=true] #sidebar{color:#fff;background-color:#1f1f23}html[dark=true] #sidebar .top-section>span{color:#dedee3}html[dark=true] #sidebar .top-section>span>a{color:#dedee3}html[dark=true] #sidebar.max .button-fold-sidebar{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none slice' viewBox='0 0 7 11'%3e%3cpath fill='%23f9f9f9' d='M5.87 11.01L.01 5.51 5.87.01l1.08 1.01-4.74 4.45L7 9.96 5.87 11z'/%3e%3c/svg%3e")}html[dark=true] #sidebar.min .button-unfold-sidebar{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none slice' viewBox='0 0 7 11'%3e%3cpath fill='%23f9f9f9' d='M1.13 11.01l5.86-5.5L1.13.01.05 1.02l4.74 4.45L0 9.96 1.13 11z'/%3e%3c/svg%3e")}html[dark=true] .users-section .user:hover{background-color:#26262c}html[dark=true] .users-section .user .username{color:#dedee3}html[dark=true] .users-section .user .description{color:#a1a1a1}html[dark=true] .users-section .user .watchers{color:silver}html:not([dark=true]) #sidebar{color:#fff;background-color:#efeff1}html:not([dark=true]) #sidebar .top-section>span{color:#0e0e10}html:not([dark=true]) #sidebar .top-section>span>a{color:#0e0e10}html:not([dark=true]) #sidebar.max .button-fold-sidebar{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none slice' viewBox='0 0 7 11'%3e%3cpath fill='%23888' d='M5.87 11.01L.01 5.51 5.87.01l1.08 1.01-4.74 4.45L7 9.96 5.87 11z'/%3e%3c/svg%3e")}html:not([dark=true]) #sidebar.min .button-unfold-sidebar{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none slice' viewBox='0 0 7 11'%3e%3cpath fill='%23888' d='M1.13 11.01l5.86-5.5L1.13.01.05 1.02l4.74 4.45L0 9.96 1.13 11z'/%3e%3c/svg%3e")}html:not([dark=true]) .users-section .user:hover{background-color:#e6e6ea}html:not([dark=true]) .users-section .user .username{color:#1f1f23}html:not([dark=true]) .users-section .user .description{color:#53535f}html:not([dark=true]) .users-section .user .watchers{color:#000}.chat-icon{position:absolute;bottom:10px;right:6px;width:24px;height:24px;cursor:pointer;z-index:1000;background-size:contain;background-repeat:no-repeat}.chat-icon.statistics{right:7px;width:22px;height:22px;bottom:10px}.preview-modal{display:none;position:fixed;z-index:10000;left:0;top:0;width:100%;height:100%;overflow:hidden;background-color:#000000e6}.preview-modal-content{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:0;width:80%;max-width:800px;max-height:800px;border-radius:10px;border:1px solid #cccccc52;overflow:hidden;box-shadow:0 4px 30px #000000b3;pointer-events:auto}.preview-modal .preview-close{position:absolute;top:10px;right:15px;color:#fff;font-size:30px;font-weight:700;cursor:pointer;transition:color .3s ease;z-index:10}.preview-modal .preview-close:hover,.preview-modal .preview-close:focus{color:#e50914}.preview-modal .thumbnail-container{position:relative;width:100%;height:450px;background-color:#000;display:flex;justify-content:center;align-items:center}.preview-modal .thumbnail-container img{max-width:100%;max-height:100%;object-fit:cover}.preview-modal .preview-modal-content video{width:clamp(100%,50vw,800px);height:449px;display:none}.preview-modal .info{color:#fff;text-align:left;padding:28px;background-color:#000000a6}.preview-modal .streamer-name{font-size:50px;font-weight:700;letter-spacing:-2px}.preview-modal .video-title{font-size:20px;margin:20px 0 30px}.preview-modal .tags{display:flex;justify-content:left;flex-wrap:wrap;flex-direction:row;margin-left:-3px}.preview-modal .tags a{margin:5px;color:#fff;text-decoration:none;border:1px solid #fff;padding:5px 10px;border-radius:5px;transition:background-color .3s}.preview-modal .tags a:hover{background-color:#fff3}.preview-modal .start-button{background-color:#2d6bffba;color:#fff;padding:12px 20px;border:none;border-radius:5px;font-size:22px;cursor:pointer;display:inline-block;width:auto;text-align:center;text-decoration:none;transition:background-color .3s}.preview-modal .start-button:hover{background-color:#2d6bff8f}#category-group-wrapper,#favorite-group-wrapper{position:relative;margin-bottom:5px}#sidebar.min #category-group-wrapper,#sidebar.min #favorite-group-wrapper{display:none!important}.fav-group-scroll-btn{position:absolute;top:-1px;width:32px;height:100%;border:none;font-size:24px;font-weight:700;z-index:10;display:flex;align-items:center;justify-content:center;visibility:hidden;opacity:0;color:transparent;cursor:default;transition:opacity .2s,visibility .2s,color .2s}.fav-group-scroll-btn.visible{visibility:visible;opacity:1}#category-group-wrapper:hover .fav-group-scroll-btn.visible,#favorite-group-wrapper:hover .fav-group-scroll-btn.visible{cursor:pointer}.scroll-btn-left{left:0}.scroll-btn-right{right:0}#favorite-group-tabs,#category-group-tabs{display:flex;align-items:center;overflow-x:auto;overflow-y:hidden;box-sizing:border-box;scrollbar-width:none;-ms-overflow-style:none;margin-left:5px}#favorite-group-tabs::-webkit-scrollbar,#category-group-tabs::-webkit-scrollbar{display:none}.fav-group-tab{flex-shrink:0;padding:4px 10px;margin:0 3px;cursor:pointer;border-radius:15px;font-size:13px;border:1px solid transparent;transition:background-color .2s,color .2s}.fav-group-tab.active{font-weight:700}html[dark=true] #favorite-group-wrapper:hover .fav-group-scroll-btn.visible,html[dark=true] #category-group-wrapper:hover .fav-group-scroll-btn.visible{color:#dedee3}html[dark=true] .scroll-btn-left{background:linear-gradient(to right,#1f1f23,#1f1f2300)}html[dark=true] .scroll-btn-right{background:linear-gradient(to left,#1f1f23,#1f1f2300)}html[dark=true] .fav-group-tab{background-color:#2c2c31;color:#dedee3}html[dark=true] .fav-group-tab:hover{background-color:#3e3e44}html[dark=true] .fav-group-tab.active{background-color:#424242}html:not([dark=true]) #favorite-group-wrapper:hover .fav-group-scroll-btn.visible,html:not([dark=true]) #category-group-wrapper:hover .fav-group-scroll-btn.visible{color:#53535f}html:not([dark=true]) .scroll-btn-left{background:linear-gradient(to right,#efeff1,#efeff100)}html:not([dark=true]) .scroll-btn-right{background:linear-gradient(to left,#efeff1,#efeff100)}html:not([dark=true]) .fav-group-tab{background-color:#e6e6ea;color:#53535f}html:not([dark=true]) .fav-group-tab:hover{background-color:#dcdde1}html:not([dark=true]) .fav-group-tab.active{background-color:#d2d2d2}._moreDot_layer button{text-align:left}.customSidebar .btn_flexible{display:none}#sidebar{z-index:1401}body.customSidebar main{padding-left:238px!important}body.customSidebar .catch_webplayer_wrap{margin-left:24px!important}.default_logo.on{z-index:0!important}.screen_mode .left_navbar,.fullScreen_mode .left_navbar{display:none}html{overflow:auto;scrollbar-width:none;-ms-overflow-style:none}html::-webkit-scrollbar{display:none}.customSidebar #player,.customSidebar #webplayer #webplayer_contents #player_area .float_box,.customSidebar #webplayer #webplayer_contents #player_area{min-width:180px!important}.customSidebar.screen_mode #webplayer,.customSidebar.screen_mode #sidebar{transition:all .25s ease-in-out!important}@media screen and (max-width: 892px){.screen_mode.bottomChat #webplayer #player .view_ctrl,.screen_mode.bottomChat #webplayer .wrapping.side{display:block!important}}.customSidebar #webplayer_contents{width:calc(100vw - var(--wp-scroll-left))!important;gap:0!important;padding:0!important;margin:64px 0 0!important;left:var(--wp-scroll-left)!important}.customSidebar.top_hide #webplayer_contents,.customSidebar.top_hide #sidebar{top:0!important;margin-top:0!important;min-height:100vh!important}body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.max) #webplayer_contents{width:calc(100vw - 240px)!important;left:240px!important}body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_contents{width:calc(100vw - 52px)!important;left:52px!important}.customSidebar.screen_mode #webplayer #webplayer_contents,.customSidebar.fullScreen_mode #webplayer #webplayer_contents{top:0!important;left:0!important;width:100vw;height:100vh!important;margin:0!important}.customSidebar.screen_mode #sidebar{top:0!important}.customSidebar.screen_mode #sidebar .button-fold-sidebar,.customSidebar.screen_mode #sidebar .button-unfold-sidebar{display:none!important}.customSidebar.screen_mode.showSidebar #sidebar{display:flex!important}.customSidebar.screen_mode #webplayer_contents,.customSidebar.fullScreen_mode #webplayer_contents{width:100vw!important}.customSidebar.screen_mode.showSidebar:has(#sidebar.min) #webplayer_contents{width:calc(100vw - 52px)!important}.customSidebar.screen_mode.showSidebar:has(#sidebar.max) #webplayer_contents{width:calc(100vw - 240px)!important}.screen_mode.bottomChat #webplayer #webplayer_contents{top:0!important;margin:0!important}.screen_mode.bottomChat #player{min-height:auto!important}.screen_mode.bottomChat #webplayer #webplayer_contents{position:relative;box-sizing:border-box;flex:auto;display:flex;flex-direction:column!important;justify-content:flex-start!important}.screen_mode.bottomChat #webplayer #webplayer_contents .wrapping.side{width:100%!important;max-height:calc(100vh - 56.25vw)!important}.screen_mode.bottomChat.showSidebar:has(#sidebar.min) #webplayer #webplayer_contents .wrapping.side{width:100%!important;max-height:calc(100vh - ((100vw - 52px)*.5625))!important}.screen_mode.bottomChat.showSidebar:has(#sidebar.max) #webplayer #webplayer_contents .wrapping.side{width:100%!important;max-height:calc(100vh - ((100vw - 240px)*.5625))!important}.screen_mode.bottomChat #webplayer #webplayer_contents .wrapping.side section.box.chatting_box{height:100%!important}.screen_mode.bottomChat #webplayer #webplayer_contents .wrapping.side section.box.chatting_box #chatting_area{height:100%!important;min-height:10vh!important}.screen_mode.bottomChat #webplayer #webplayer_contents #player_area .htmlplayer_wrap,.screen_mode.bottomChat #webplayer #webplayer_contents #player_area .htmlplayer_content,.screen_mode.bottomChat #webplayer #webplayer_contents #player_area .float_box,.screen_mode.bottomChat #webplayer #webplayer_contents #player_area #player{height:auto!important;max-height:max-content}.customSidebar #player{max-height:100vh!important} `);
+(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(" :root{--nickname-width: 60px;--wp-scroll-left: 240px}.customSidebar #serviceLnb{display:none!important}.starting-line .chatting-list-item .message-container .username{width:var(--nickname-width)!important}#studioPlayKorPlayer,#studioPlayKor,#studioPlay,.btn-broadcast{display:none}._moreDot_layer button{text-align:left}.customSidebar #serviceHeader .a_d_banner{display:none!important}.customSidebar #serviceHeader .btn_flexible+.logo_wrap{left:24px!important}.customSidebar #serviceHeader .logo_wrap{left:24px!important}.customSidebar .btn_flexible{display:none}#sidebar{z-index:1401}#sidebar-refresh-bar{position:absolute;top:0;left:0;right:0;height:2px;overflow:hidden;z-index:1}#sidebar-refresh-fill{height:100%;background:currentColor;opacity:.25;transition:width .5s linear}#sidebar.min .chzzk-pin-btn{display:none}body.customSidebar main{padding-left:238px!important}body.customSidebar .catch_webplayer_wrap{margin-left:24px!important}.default_logo.on{z-index:0!important}html{overflow:auto;scrollbar-width:none;-ms-overflow-style:none}html::-webkit-scrollbar{display:none}.customSidebar #player,.customSidebar #webplayer #webplayer_contents #player_area .float_box,.customSidebar #webplayer #webplayer_contents #player_area{min-width:180px!important}.customSidebar.screen_mode #webplayer,.customSidebar.screen_mode #sidebar{transition:all .25s ease-in-out!important}@media screen and (max-width: 892px){.screen_mode.bottomChat #webplayer #player .view_ctrl,.screen_mode.bottomChat #webplayer .wrapping.side{display:block!important}}.customSidebar #webplayer_contents{width:calc(100vw - var(--wp-scroll-left))!important;gap:0!important;padding:0!important;margin:64px 0 0!important;left:var(--wp-scroll-left)!important}.customSidebar.top_hide #webplayer_contents,.customSidebar.top_hide #sidebar{top:0!important;margin-top:0!important;min-height:100vh!important}body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.max) #webplayer_contents{width:calc(100vw - 240px)!important;left:240px!important}body:not(.screen_mode):not(.fullScreen_mode):has(#sidebar.min) #webplayer_contents{width:calc(100vw - 52px)!important;left:52px!important}.customSidebar.screen_mode #webplayer #webplayer_contents,.customSidebar.fullScreen_mode #webplayer #webplayer_contents{top:0!important;left:0!important;width:100vw;height:100vh!important;margin:0!important}.customSidebar.screen_mode #sidebar{top:0!important;display:none!important}.customSidebar.screen_mode #sidebar .button-fold-sidebar,.customSidebar.screen_mode #sidebar .button-unfold-sidebar{display:none!important}.customSidebar.screen_mode.showSidebar #sidebar{display:flex!important}.customSidebar.screen_mode #webplayer_contents,.customSidebar.fullScreen_mode #webplayer_contents{width:100vw!important}.customSidebar.screen_mode.showSidebar:has(#sidebar.min) #webplayer_contents{width:calc(100vw - 52px)!important}.customSidebar.screen_mode.showSidebar:has(#sidebar.max) #webplayer_contents{width:calc(100vw - 240px)!important}.screen_mode.bottomChat #webplayer #webplayer_contents{top:0!important;margin:0!important}.screen_mode.bottomChat #player{min-height:auto!important}.screen_mode.bottomChat #webplayer #webplayer_contents{position:relative;box-sizing:border-box;flex:auto;display:flex;flex-direction:column!important;justify-content:flex-start!important}.screen_mode.bottomChat #webplayer #webplayer_contents .wrapping.side{width:100%!important;max-height:calc(100vh - 56.25vw)!important}.screen_mode.bottomChat.showSidebar:has(#sidebar.min) #webplayer #webplayer_contents .wrapping.side{width:100%!important;max-height:calc(100vh - ((100vw - 52px)*.5625))!important}.screen_mode.bottomChat.showSidebar:has(#sidebar.max) #webplayer #webplayer_contents .wrapping.side{width:100%!important;max-height:calc(100vh - ((100vw - 240px)*.5625))!important}.screen_mode.bottomChat #webplayer #webplayer_contents .wrapping.side section.box.chatting_box{height:100%!important}.screen_mode.bottomChat #webplayer #webplayer_contents .wrapping.side section.box.chatting_box #chatting_area{height:100%!important;min-height:10vh!important}.screen_mode.bottomChat #webplayer #webplayer_contents #player_area .htmlplayer_wrap,.screen_mode.bottomChat #webplayer #webplayer_contents #player_area .htmlplayer_content,.screen_mode.bottomChat #webplayer #webplayer_contents #player_area .float_box,.screen_mode.bottomChat #webplayer #webplayer_contents #player_area #player{height:auto!important;max-height:max-content}.customSidebar #player{max-height:100vh!important} ");
 
 (function () {
   'use strict';
@@ -53,7 +55,7 @@
     a = z$1 && a[z$1] || a["@@iterator"];
     return "function" === typeof a ? a : null;
   }
-  var B$1 = { isMounted: function() {
+  var B$2 = { isMounted: function() {
     return false;
   }, enqueueForceUpdate: function() {
   }, enqueueReplaceState: function() {
@@ -63,7 +65,7 @@
     this.props = a;
     this.context = b;
     this.refs = D$1;
-    this.updater = e || B$1;
+    this.updater = e || B$2;
   }
   E$1.prototype.isReactComponent = {};
   E$1.prototype.setState = function(a, b) {
@@ -80,7 +82,7 @@
     this.props = a;
     this.context = b;
     this.refs = D$1;
-    this.updater = e || B$1;
+    this.updater = e || B$2;
   }
   var H$1 = G$1.prototype = new F();
   H$1.constructor = G$1;
@@ -1378,7 +1380,7 @@
     }
     return null;
   }
-  var ac = ca.unstable_scheduleCallback, bc = ca.unstable_cancelCallback, cc = ca.unstable_shouldYield, dc = ca.unstable_requestPaint, B = ca.unstable_now, ec = ca.unstable_getCurrentPriorityLevel, fc = ca.unstable_ImmediatePriority, gc = ca.unstable_UserBlockingPriority, hc = ca.unstable_NormalPriority, ic = ca.unstable_LowPriority, jc = ca.unstable_IdlePriority, kc = null, lc = null;
+  var ac = ca.unstable_scheduleCallback, bc = ca.unstable_cancelCallback, cc = ca.unstable_shouldYield, dc = ca.unstable_requestPaint, B$1 = ca.unstable_now, ec = ca.unstable_getCurrentPriorityLevel, fc = ca.unstable_ImmediatePriority, gc = ca.unstable_UserBlockingPriority, hc = ca.unstable_NormalPriority, ic = ca.unstable_LowPriority, jc = ca.unstable_IdlePriority, kc = null, lc = null;
   function mc(a) {
     if (lc && "function" === typeof lc.onCommitFiberRoot) try {
       lc.onCommitFiberRoot(kc, a, void 0, 128 === (a.current.flags & 128));
@@ -4799,15 +4801,15 @@
             }
             a = a.sibling;
           }
-          null !== f2.tail && B() > Gj && (b.flags |= 128, d = true, Dj(f2, false), b.lanes = 4194304);
+          null !== f2.tail && B$1() > Gj && (b.flags |= 128, d = true, Dj(f2, false), b.lanes = 4194304);
         }
         else {
           if (!d) if (a = Ch(g), null !== a) {
             if (b.flags |= 128, d = true, c = a.updateQueue, null !== c && (b.updateQueue = c, b.flags |= 4), Dj(f2, true), null === f2.tail && "hidden" === f2.tailMode && !g.alternate && !I) return S(b), null;
-          } else 2 * B() - f2.renderingStartTime > Gj && 1073741824 !== c && (b.flags |= 128, d = true, Dj(f2, false), b.lanes = 4194304);
+          } else 2 * B$1() - f2.renderingStartTime > Gj && 1073741824 !== c && (b.flags |= 128, d = true, Dj(f2, false), b.lanes = 4194304);
           f2.isBackwards ? (g.sibling = b.child, b.child = g) : (c = f2.last, null !== c ? c.sibling = g : b.child = g, f2.last = g);
         }
-        if (null !== f2.tail) return b = f2.tail, f2.rendering = b, f2.tail = b.sibling, f2.renderingStartTime = B(), b.sibling = null, c = L.current, G(L, d ? c & 1 | 2 : c & 1), b;
+        if (null !== f2.tail) return b = f2.tail, f2.rendering = b, f2.tail = b.sibling, f2.renderingStartTime = B$1(), b.sibling = null, c = L.current, G(L, d ? c & 1 | 2 : c & 1), b;
         S(b);
         return null;
       case 22:
@@ -5264,7 +5266,7 @@
         ck(b, a);
         ek(a);
         e = a.child;
-        e.flags & 8192 && (f2 = null !== e.memoizedState, e.stateNode.isHidden = f2, !f2 || null !== e.alternate && null !== e.alternate.memoizedState || (fk = B()));
+        e.flags & 8192 && (f2 = null !== e.memoizedState, e.stateNode.isHidden = f2, !f2 || null !== e.alternate && null !== e.alternate.memoizedState || (fk = B$1()));
         d & 4 && ak(a);
         break;
       case 22:
@@ -5590,7 +5592,7 @@
   }
   var lk = Math.ceil, mk = ua.ReactCurrentDispatcher, nk = ua.ReactCurrentOwner, ok = ua.ReactCurrentBatchConfig, K = 0, Q = null, Y = null, Z = 0, fj = 0, ej = Uf(0), T = 0, pk = null, rh = 0, qk = 0, rk = 0, sk = null, tk = null, fk = 0, Gj = Infinity, uk = null, Oi = false, Pi = null, Ri = null, vk = false, wk = null, xk = 0, yk = 0, zk = null, Ak = -1, Bk = 0;
   function R() {
-    return 0 !== (K & 6) ? B() : -1 !== Ak ? Ak : Ak = B();
+    return 0 !== (K & 6) ? B$1() : -1 !== Ak ? Ak : Ak = B$1();
   }
   function yi(a) {
     if (0 === (a.mode & 1)) return 1;
@@ -5605,7 +5607,7 @@
   function gi(a, b, c, d) {
     if (50 < yk) throw yk = 0, zk = null, Error(p(185));
     Ac(a, c, d);
-    if (0 === (K & 2) || a !== Q) a === Q && (0 === (K & 2) && (qk |= c), 4 === T && Ck(a, Z)), Dk(a, d), 1 === c && 0 === K && 0 === (b.mode & 1) && (Gj = B() + 500, fg && jg());
+    if (0 === (K & 2) || a !== Q) a === Q && (0 === (K & 2) && (qk |= c), 4 === T && Ck(a, Z)), Dk(a, d), 1 === c && 0 === K && 0 === (b.mode & 1) && (Gj = B$1() + 500, fg && jg());
   }
   function Dk(a, b) {
     var c = a.callbackNode;
@@ -5654,7 +5656,7 @@
       var e = K;
       K |= 2;
       var f2 = Jk();
-      if (Q !== a || Z !== b) uk = null, Gj = B() + 500, Kk(a, b);
+      if (Q !== a || Z !== b) uk = null, Gj = B$1() + 500, Kk(a, b);
       do
         try {
           Lk();
@@ -5670,11 +5672,11 @@
     }
     if (0 !== b) {
       2 === b && (e = xc(a), 0 !== e && (d = e, b = Nk(a, e)));
-      if (1 === b) throw c = pk, Kk(a, 0), Ck(a, d), Dk(a, B()), c;
+      if (1 === b) throw c = pk, Kk(a, 0), Ck(a, d), Dk(a, B$1()), c;
       if (6 === b) Ck(a, d);
       else {
         e = a.current.alternate;
-        if (0 === (d & 30) && !Ok(e) && (b = Ik(a, d), 2 === b && (f2 = xc(a), 0 !== f2 && (d = f2, b = Nk(a, f2))), 1 === b)) throw c = pk, Kk(a, 0), Ck(a, d), Dk(a, B()), c;
+        if (0 === (d & 30) && !Ok(e) && (b = Ik(a, d), 2 === b && (f2 = xc(a), 0 !== f2 && (d = f2, b = Nk(a, f2))), 1 === b)) throw c = pk, Kk(a, 0), Ck(a, d), Dk(a, B$1()), c;
         a.finishedWork = e;
         a.finishedLanes = d;
         switch (b) {
@@ -5686,7 +5688,7 @@
             break;
           case 3:
             Ck(a, d);
-            if ((d & 130023424) === d && (b = fk + 500 - B(), 10 < b)) {
+            if ((d & 130023424) === d && (b = fk + 500 - B$1(), 10 < b)) {
               if (0 !== uc(a, 0)) break;
               e = a.suspendedLanes;
               if ((e & d) !== d) {
@@ -5711,7 +5713,7 @@
               d &= ~f2;
             }
             d = e;
-            d = B() - d;
+            d = B$1() - d;
             d = (120 > d ? 120 : 480 > d ? 480 : 1080 > d ? 1080 : 1920 > d ? 1920 : 3e3 > d ? 3e3 : 4320 > d ? 4320 : 1960 * lk(d / 1960)) - d;
             if (10 < d) {
               a.timeoutHandle = Ff(Pk.bind(null, a, tk, uk), d);
@@ -5727,7 +5729,7 @@
         }
       }
     }
-    Dk(a, B());
+    Dk(a, B$1());
     return a.callbackNode === c ? Gk.bind(null, a) : null;
   }
   function Nk(a, b) {
@@ -5783,18 +5785,18 @@
     if (0 !== (K & 6)) throw Error(p(327));
     Hk();
     var b = uc(a, 0);
-    if (0 === (b & 1)) return Dk(a, B()), null;
+    if (0 === (b & 1)) return Dk(a, B$1()), null;
     var c = Ik(a, b);
     if (0 !== a.tag && 2 === c) {
       var d = xc(a);
       0 !== d && (b = d, c = Nk(a, d));
     }
-    if (1 === c) throw c = pk, Kk(a, 0), Ck(a, b), Dk(a, B()), c;
+    if (1 === c) throw c = pk, Kk(a, 0), Ck(a, b), Dk(a, B$1()), c;
     if (6 === c) throw Error(p(345));
     a.finishedWork = a.current.alternate;
     a.finishedLanes = b;
     Pk(a, tk, uk);
-    Dk(a, B());
+    Dk(a, B$1());
     return null;
   }
   function Qk(a, b) {
@@ -5803,7 +5805,7 @@
     try {
       return a(b);
     } finally {
-      K = c, 0 === K && (Gj = B() + 500, fg && jg());
+      K = c, 0 === K && (Gj = B$1() + 500, fg && jg());
     }
   }
   function Rk(a) {
@@ -6115,7 +6117,7 @@
     f2 = a.pendingLanes;
     0 === f2 && (Ri = null);
     mc(c.stateNode);
-    Dk(a, B());
+    Dk(a, B$1());
     if (null !== b) for (d = a.onRecoverableError, c = 0; c < b.length; c++) e = b[c], d(e.value, { componentStack: e.stack, digest: e.digest });
     if (Oi) throw Oi = false, a = Pi, Pi = null, a;
     0 !== (xk & 1) && 0 !== a.tag && Hk();
@@ -6282,7 +6284,7 @@
     null !== d && d.delete(b);
     b = R();
     a.pingedLanes |= a.suspendedLanes & c;
-    Q === a && (Z & c) === c && (4 === T || 3 === T && (Z & 130023424) === Z && 500 > B() - fk ? Kk(a, 0) : rk |= c);
+    Q === a && (Z & c) === c && (4 === T || 3 === T && (Z & 130023424) === Z && 500 > B$1() - fk ? Kk(a, 0) : rk |= c);
     Dk(a, b);
   }
   function Yk(a, b) {
@@ -6826,7 +6828,7 @@
         var b = a.stateNode;
         if (b.current.memoizedState.isDehydrated) {
           var c = tc(b.pendingLanes);
-          0 !== c && (Cc(b, c | 1), Dk(b, B()), 0 === (K & 6) && (Gj = B() + 500, jg()));
+          0 !== c && (Cc(b, c | 1), Dk(b, B$1()), 0 === (K & 6) && (Gj = B$1() + 500, jg()));
         }
         break;
       case 13:
@@ -11429,7 +11431,10 @@
   observerBatching(reactDomExports.unstable_batchedUpdates);
   (_a = observerFinalizationRegistry["finalizeAllImmediately"]) !== null && _a !== void 0 ? _a : function() {
   };
-  class SettingsStore {
+  var _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != "undefined" ? GM_getValue : void 0)();
+  var _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != "undefined" ? GM_setValue : void 0)();
+  var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
+  const _SettingsStore = class _SettingsStore {
     constructor() {
       // 사이드바 전반
       __publicField(this, "isCustomSidebarEnabled");
@@ -11445,7 +11450,6 @@
       __publicField(this, "isPinnedOnlineOnlyEnabled");
       __publicField(this, "isSmallUserLayoutEnabled");
       __publicField(this, "isSendLoadBroadEnabled");
-      __publicField(this, "isOpenNewtabEnabled");
       __publicField(this, "isDuplicateRemovalEnabled");
       __publicField(this, "isTopDuplicateRemovalEnabled");
       __publicField(this, "myplusOrder");
@@ -11455,6 +11459,7 @@
       __publicField(this, "displayMyplus");
       __publicField(this, "displayMyplusvod");
       __publicField(this, "displayTop");
+      __publicField(this, "pollIntervalSeconds");
       // 사이드바 UI
       __publicField(this, "nicknameWidth");
       __publicField(this, "isAlignNicknameRightEnabled");
@@ -11472,8 +11477,9 @@
       __publicField(this, "isRemoveCarouselEnabled");
       __publicField(this, "isBroadTitleTextEllipsisEnabled");
       // LIVE 플레이어
+      __publicField(this, "isAutoReloadLiveEnabled");
       __publicField(this, "isNoAutoVODEnabled");
-      __publicField(this, "isAutoResumeVideoEnabled");
+      __publicField(this, "isAutoReloadAfterBroadcastEndEnabled");
       __publicField(this, "isRedirectLiveEnabled");
       __publicField(this, "redirectLiveSortOption");
       __publicField(this, "isHideEsportsInfoEnabled");
@@ -11483,11 +11489,10 @@
       __publicField(this, "isClickPlayerEventMapperEnabled");
       __publicField(this, "selectLeftClick");
       __publicField(this, "selectRightClick");
-      __publicField(this, "isShowBufferTimeEnabled");
-      __publicField(this, "isVideoSkipHandlerEnabled");
+      __publicField(this, "isShowBufferTimeTitleEnabled");
+      __publicField(this, "isShowBufferTimeChatEnabled");
       __publicField(this, "isSharpmodeShortcutEnabled");
       __publicField(this, "isLLShortcutEnabled");
-      __publicField(this, "isAdjustDelayNoGridEnabled");
       __publicField(this, "isQualityChangeShortcutEnabled");
       __publicField(this, "isMutedInactiveTabsEnabled");
       __publicField(this, "isAutoChangeQualityEnabled");
@@ -11496,6 +11501,9 @@
       __publicField(this, "isMouseOverSideBarEnabled");
       __publicField(this, "isChatPositionEnabled");
       __publicField(this, "isAutoScreenModeEnabled");
+      // LIVE 플레이어 추가
+      __publicField(this, "isAdaptiveSpeedControlEnabled");
+      __publicField(this, "isClickToMuteEnabled");
       // VOD 플레이어
       __publicField(this, "isSelectBestQualityEnabled");
       __publicField(this, "isRemoveShadowsFromCatchEnabled");
@@ -11509,206 +11517,88 @@
       __publicField(this, "isHideStreamerBadgeEnabled");
       __publicField(this, "isUnlockCopyPasteEnabled");
       __publicField(this, "isHideButtonsAboveChatInputEnabled");
+      __publicField(this, "isHideChatItemsEnabled");
       // 카테고리 데이터
       __publicField(this, "savedCategory");
       // 다크 모드
       __publicField(this, "isDarkMode");
-      this.isCustomSidebarEnabled = GM_getValue("isCustomSidebarEnabled", true);
-      this.isRandomSortEnabled = GM_getValue("isRandomSortEnabled", false);
-      this.isFavoriteGroupEnabled = GM_getValue("isFavoriteGroupEnabled", true);
-      this.isShortenFavoriteGroupNameEnabled = GM_getValue(
-        "isShortenFavoriteGroupNameEnabled",
-        false
-      );
-      this.isCategoryGroupEnabled = GM_getValue("isCategoryGroupEnabled", true);
-      this.isShortenCategoryNameEnabled = GM_getValue(
-        "isShortenCategoryNameEnabled",
-        false
-      );
-      this.isChannelFeedEnabled = GM_getValue("isChannelFeedEnabled", false);
-      this.isBlockedCategorySortingEnabled = GM_getValue(
-        "isBlockedCategorySortingEnabled",
-        true
-      );
-      this.isPinnedStreamWithNotificationEnabled = GM_getValue(
-        "isPinnedStreamWithNotificationEnabled",
-        true
-      );
-      this.isPinnedStreamWithPinEnabled = GM_getValue(
-        "isPinnedStreamWithPinEnabled",
-        false
-      );
-      this.isPinnedOnlineOnlyEnabled = GM_getValue(
-        "isPinnedOnlineOnlyEnabled",
-        false
-      );
-      this.isSmallUserLayoutEnabled = GM_getValue(
-        "isSmallUserLayoutEnabled",
-        false
-      );
-      this.isSendLoadBroadEnabled = GM_getValue("isSendLoadBroadEnabled", true);
-      this.isOpenNewtabEnabled = GM_getValue("isOpenNewtabEnabled", false);
-      this.isDuplicateRemovalEnabled = GM_getValue(
-        "isDuplicateRemovalEnabled",
-        true
-      );
-      this.isTopDuplicateRemovalEnabled = GM_getValue(
-        "isTopDuplicateRemovalEnabled",
-        true
-      );
-      this.myplusOrder = GM_getValue("myplusOrder", "viewerCount");
-      this.isChzzkFollowChannelsEnabled = GM_getValue(
-        "isChzzkFollowChannelsEnabled",
-        false
-      );
-      this.isChzzkTopChannelsEnabled = GM_getValue(
-        "isChzzkTopChannelsEnabled",
-        false
-      );
-      this.displayFollow = GM_getValue("displayFollow", true);
-      this.displayMyplus = GM_getValue("displayMyplus", true);
-      this.displayMyplusvod = GM_getValue("displayMyplusvod", false);
-      this.displayTop = GM_getValue("displayTop", true);
-      this.nicknameWidth = GM_getValue("nicknameWidth", 60);
-      this.isAlignNicknameRightEnabled = GM_getValue(
-        "isAlignNicknameRightEnabled",
-        false
-      );
-      this.isSidebarMinimized = GM_getValue("isSidebarMinimized", false);
-      this.sidebarSectionOrder = GM_getValue("sidebarSectionOrder", "");
-      this.selectedFavoriteGroupIdx = GM_getValue("selectedFavoriteGroupIdx", 0);
-      this.selectedPinnedCategoryIdx = GM_getValue(
-        "selectedPinnedCategoryIdx",
-        0
-      );
-      this.isThemeLockEnabled = GM_getValue("isThemeLockEnabled", false);
-      this.isRemoveRedistributionTagEnabled = GM_getValue(
-        "isRemoveRedistributionTagEnabled",
-        true
-      );
-      this.isRemoveWatchLaterButtonEnabled = GM_getValue(
-        "isRemoveWatchLaterButtonEnabled",
-        false
-      );
-      this.isRemoveBroadStartTimeTagEnabled = GM_getValue(
-        "isRemoveBroadStartTimeTagEnabled",
-        false
-      );
-      this.isReplaceEmptyThumbnailEnabled = GM_getValue(
-        "isReplaceEmptyThumbnailEnabled",
-        true
-      );
-      this.isThumbnailTooltipEnabled = GM_getValue(
-        "isThumbnailTooltipEnabled",
-        true
-      );
-      this.isRemoveCarouselEnabled = GM_getValue("isRemoveCarouselEnabled", true);
-      this.isBroadTitleTextEllipsisEnabled = GM_getValue(
-        "isBroadTitleTextEllipsisEnabled",
-        false
-      );
-      this.isNoAutoVODEnabled = GM_getValue("isNoAutoVODEnabled", true);
-      this.isAutoResumeVideoEnabled = GM_getValue(
-        "isAutoResumeVideoEnabled",
-        false
-      );
-      this.isRedirectLiveEnabled = GM_getValue("isRedirectLiveEnabled", false);
-      this.redirectLiveSortOption = GM_getValue(
-        "redirectLiveSortOption",
-        "viewerCount"
-      );
-      this.isHideEsportsInfoEnabled = GM_getValue(
-        "isHideEsportsInfoEnabled",
-        false
-      );
-      this.isShowPauseButtonEnabled = GM_getValue(
-        "isShowPauseButtonEnabled",
-        true
-      );
-      this.isCaptureButtonEnabled = GM_getValue("isCaptureButtonEnabled", false);
-      this.preferredQuality = GM_getValue("preferredQuality", "original");
-      this.isClickPlayerEventMapperEnabled = GM_getValue(
-        "isClickPlayerEventMapperEnabled",
-        false
-      );
-      this.selectLeftClick = GM_getValue("selectLeftClick", "play_pause");
-      this.selectRightClick = GM_getValue("selectRightClick", "mute");
-      this.isShowBufferTimeEnabled = GM_getValue(
-        "isShowBufferTimeEnabled",
-        false
-      );
-      this.isVideoSkipHandlerEnabled = GM_getValue(
-        "isVideoSkipHandlerEnabled",
-        true
-      );
-      this.isSharpmodeShortcutEnabled = GM_getValue(
-        "isSharpmodeShortcutEnabled",
-        false
-      );
-      this.isLLShortcutEnabled = GM_getValue("isLLShortcutEnabled", false);
-      this.isAdjustDelayNoGridEnabled = GM_getValue(
-        "isAdjustDelayNoGridEnabled",
-        false
-      );
-      this.isQualityChangeShortcutEnabled = GM_getValue(
-        "isQualityChangeShortcutEnabled",
-        false
-      );
-      this.isMutedInactiveTabsEnabled = GM_getValue(
-        "isMutedInactiveTabsEnabled",
-        false
-      );
-      this.isAutoChangeQualityEnabled = GM_getValue(
-        "isAutoChangeQualityEnabled",
-        false
-      );
-      this.isDocumentTitleUpdateEnabled = GM_getValue(
-        "isDocumentTitleUpdateEnabled",
-        false
-      );
-      this.isShowSidebarOnScreenModeAlwaysEnabled = GM_getValue(
-        "isShowSidebarOnScreenModeAlwaysEnabled",
-        false
-      );
-      this.isMouseOverSideBarEnabled = GM_getValue(
-        "isMouseOverSideBarEnabled",
-        false
-      );
-      this.isChatPositionEnabled = GM_getValue("isChatPositionEnabled", false);
-      this.isAutoScreenModeEnabled = GM_getValue(
-        "isAutoScreenModeEnabled",
-        false
-      );
-      this.isSelectBestQualityEnabled = GM_getValue(
-        "isSelectBestQualityEnabled",
-        false
-      );
-      this.isRemoveShadowsFromCatchEnabled = GM_getValue(
-        "isRemoveShadowsFromCatchEnabled",
-        false
-      );
-      this.isVODHighlightEnabled = GM_getValue("isVODHighlightEnabled", true);
-      this.isHideSupporterBadgeEnabled = GM_getValue(
-        "isHideSupporterBadge",
-        false
-      );
-      this.isHideFanBadgeEnabled = GM_getValue("isHideFanBadge", false);
-      this.isHideSubBadgeEnabled = GM_getValue("isHideSubBadge", false);
-      this.isHideVIPBadgeEnabled = GM_getValue("isHideVIPBadge", false);
-      this.isHideMngrBadgeEnabled = GM_getValue("isHideMngrBadge", false);
-      this.isHideStreamerBadgeEnabled = GM_getValue(
-        "isHideStreamerBadge",
-        false
-      );
-      this.isUnlockCopyPasteEnabled = GM_getValue(
-        "isUnlockCopyPasteEnabled",
-        false
-      );
-      this.isHideButtonsAboveChatInputEnabled = GM_getValue(
-        "isHideButtonsAboveChatInputEnabled",
-        false
-      );
-      this.savedCategory = GM_getValue("szBroadCategory", null);
+      this.isCustomSidebarEnabled = _GM_getValue("isCustomSidebarEnabled", true);
+      this.isRandomSortEnabled = _GM_getValue("isRandomSortEnabled", false);
+      this.isFavoriteGroupEnabled = _GM_getValue("isFavoriteGroupEnabled", true);
+      this.isShortenFavoriteGroupNameEnabled = _GM_getValue("isShortenFavoriteGroupNameEnabled", false);
+      this.isCategoryGroupEnabled = _GM_getValue("isCategoryGroupEnabled", true);
+      this.isShortenCategoryNameEnabled = _GM_getValue("isShortenCategoryNameEnabled", false);
+      this.isChannelFeedEnabled = _GM_getValue("isChannelFeedEnabled", false);
+      this.isBlockedCategorySortingEnabled = _GM_getValue("isBlockedCategorySortingEnabled", true);
+      this.isPinnedStreamWithNotificationEnabled = _GM_getValue("isPinnedStreamWithNotificationEnabled", true);
+      this.isPinnedStreamWithPinEnabled = _GM_getValue("isPinnedStreamWithPinEnabled", false);
+      this.isPinnedOnlineOnlyEnabled = _GM_getValue("isPinnedOnlineOnlyEnabled", false);
+      this.isSmallUserLayoutEnabled = _GM_getValue("isSmallUserLayoutEnabled", false);
+      this.isSendLoadBroadEnabled = _GM_getValue("isSendLoadBroadEnabled", true);
+      this.isDuplicateRemovalEnabled = _GM_getValue("isDuplicateRemovalEnabled", true);
+      this.isTopDuplicateRemovalEnabled = _GM_getValue("isTopDuplicateRemovalEnabled", true);
+      const storedMyplusOrder = _GM_getValue("myplusOrder", 1);
+      this.myplusOrder = typeof storedMyplusOrder === "number" ? storedMyplusOrder : storedMyplusOrder === "viewerCount" ? 0 : 1;
+      this.isChzzkFollowChannelsEnabled = _GM_getValue("isChzzkFollowChannelsEnabled", false);
+      this.isChzzkTopChannelsEnabled = _GM_getValue("isChzzkTopChannelsEnabled", false);
+      this.displayFollow = _GM_getValue("displayFollow", 6);
+      this.displayMyplus = _GM_getValue("displayMyplus", 6);
+      this.displayMyplusvod = _GM_getValue("displayMyplusvod", 4);
+      this.displayTop = _GM_getValue("displayTop", 6);
+      this.pollIntervalSeconds = _GM_getValue("pollIntervalSeconds", 30);
+      this.nicknameWidth = _GM_getValue("nicknameWidth", 60);
+      this.isAlignNicknameRightEnabled = _GM_getValue("isAlignNicknameRightEnabled", false);
+      this.isSidebarMinimized = _GM_getValue("isSidebarMinimized", false);
+      this.sidebarSectionOrder = _GM_getValue("sidebarSectionOrder", "");
+      this.selectedFavoriteGroupIdx = _GM_getValue("selectedFavoriteGroupIdx", 0);
+      this.selectedPinnedCategoryIdx = _GM_getValue("selectedPinnedCategoryIdx", 0);
+      this.isThemeLockEnabled = _GM_getValue("isThemeLockEnabled", false);
+      this.isRemoveRedistributionTagEnabled = _GM_getValue("isRemoveRedistributionTagEnabled", true);
+      this.isRemoveWatchLaterButtonEnabled = _GM_getValue("isRemoveWatchLaterButtonEnabled", false);
+      this.isRemoveBroadStartTimeTagEnabled = _GM_getValue("isRemoveBroadStartTimeTagEnabled", false);
+      this.isReplaceEmptyThumbnailEnabled = _GM_getValue("isReplaceEmptyThumbnailEnabled", true);
+      this.isThumbnailTooltipEnabled = _GM_getValue("isThumbnailTooltipEnabled", true);
+      this.isRemoveCarouselEnabled = _GM_getValue("isRemoveCarouselEnabled", true);
+      this.isBroadTitleTextEllipsisEnabled = _GM_getValue("isBroadTitleTextEllipsisEnabled", false);
+      this.isAutoReloadLiveEnabled = _GM_getValue("isAutoReloadLiveEnabled", true);
+      this.isNoAutoVODEnabled = _GM_getValue("isNoAutoVODEnabled", true);
+      this.isAutoReloadAfterBroadcastEndEnabled = _GM_getValue("isAutoReloadAfterBroadcastEndEnabled", true);
+      this.isRedirectLiveEnabled = _GM_getValue("isRedirectLiveEnabled", false);
+      this.redirectLiveSortOption = _GM_getValue("redirectLiveSortOption", "custom");
+      this.isHideEsportsInfoEnabled = _GM_getValue("isHideEsportsInfoEnabled", false);
+      this.isShowPauseButtonEnabled = _GM_getValue("isMakePauseButtonEnabled", true);
+      this.isCaptureButtonEnabled = _GM_getValue("isCaptureButtonEnabled", false);
+      this.preferredQuality = _GM_getValue("preferredQualitySetting", "off");
+      this.isClickPlayerEventMapperEnabled = _GM_getValue("isClickPlayerEventMapperEnabled", false);
+      this.selectLeftClick = _GM_getValue("livePlayerLeftClickFunction", "toggleMute");
+      this.selectRightClick = _GM_getValue("livePlayerRightClickFunction", "toggleScreenMode");
+      this.isShowBufferTimeTitleEnabled = _GM_getValue("isShowBufferTimeTitleEnabled", false);
+      this.isShowBufferTimeChatEnabled = _GM_getValue("isShowBufferTimeChatEnabled", false);
+      this.isSharpmodeShortcutEnabled = _GM_getValue("isMakeSharpModeShortcutEnabled", true);
+      this.isLLShortcutEnabled = _GM_getValue("isMakeLowLatencyShortcutEnabled", true);
+      this.isQualityChangeShortcutEnabled = _GM_getValue("isMakeQualityChangeShortcutEnabled", false);
+      this.isMutedInactiveTabsEnabled = _GM_getValue("isAutoChangeMuteEnabled", false);
+      this.isAutoChangeQualityEnabled = _GM_getValue("isAutoChangeQualityEnabled", false);
+      this.isDocumentTitleUpdateEnabled = _GM_getValue("isDocumentTitleUpdateEnabled", true);
+      this.isShowSidebarOnScreenModeAlwaysEnabled = _GM_getValue("showSidebarOnScreenModeAlways", false);
+      this.isMouseOverSideBarEnabled = _GM_getValue("showSidebarOnScreenMode", true);
+      this.isChatPositionEnabled = _GM_getValue("isBottomChatEnabled", false);
+      this.isAutoScreenModeEnabled = _GM_getValue("isAutoScreenModeEnabled", false);
+      this.isAdaptiveSpeedControlEnabled = _GM_getValue("isAdaptiveSpeedControlEnabled", false);
+      this.isClickToMuteEnabled = _GM_getValue("isClickToMuteEnabled", false);
+      this.isSelectBestQualityEnabled = _GM_getValue("isSelectBestQualityEnabled", false);
+      this.isRemoveShadowsFromCatchEnabled = _GM_getValue("isRemoveShadowsFromCatchEnabled", false);
+      this.isVODHighlightEnabled = _GM_getValue("isVODHighlightEnabled", true);
+      this.isHideSupporterBadgeEnabled = _GM_getValue("isHideSupporterBadgeEnabled", false);
+      this.isHideFanBadgeEnabled = _GM_getValue("isHideFanBadgeEnabled", false);
+      this.isHideSubBadgeEnabled = _GM_getValue("isHideSubBadgeEnabled", false);
+      this.isHideVIPBadgeEnabled = _GM_getValue("isHideVIPBadgeEnabled", false);
+      this.isHideMngrBadgeEnabled = _GM_getValue("isHideManagerBadgeEnabled", false);
+      this.isHideStreamerBadgeEnabled = _GM_getValue("isHideStreamerBadgeEnabled", false);
+      this.isUnlockCopyPasteEnabled = _GM_getValue("isUnlockCopyPasteEnabled", false);
+      this.isHideButtonsAboveChatInputEnabled = _GM_getValue("ishideButtonsAboveChatInputEnabled", false);
+      this.isHideChatItemsEnabled = _GM_getValue("isHideChatItemsEnabled", false);
+      this.savedCategory = _GM_getValue("szBroadCategory", null);
       this.isDarkMode = document.documentElement.getAttribute("dark") === "true" || document.documentElement.classList.contains("dark");
       makeObservable(this, {
         isCustomSidebarEnabled: observable,
@@ -11724,7 +11614,6 @@
         isPinnedOnlineOnlyEnabled: observable,
         isSmallUserLayoutEnabled: observable,
         isSendLoadBroadEnabled: observable,
-        isOpenNewtabEnabled: observable,
         isDuplicateRemovalEnabled: observable,
         isTopDuplicateRemovalEnabled: observable,
         myplusOrder: observable,
@@ -11734,6 +11623,7 @@
         displayMyplus: observable,
         displayMyplusvod: observable,
         displayTop: observable,
+        pollIntervalSeconds: observable,
         nicknameWidth: observable,
         isAlignNicknameRightEnabled: observable,
         isSidebarMinimized: observable,
@@ -11748,8 +11638,9 @@
         isThumbnailTooltipEnabled: observable,
         isRemoveCarouselEnabled: observable,
         isBroadTitleTextEllipsisEnabled: observable,
+        isAutoReloadLiveEnabled: observable,
         isNoAutoVODEnabled: observable,
-        isAutoResumeVideoEnabled: observable,
+        isAutoReloadAfterBroadcastEndEnabled: observable,
         isRedirectLiveEnabled: observable,
         redirectLiveSortOption: observable,
         isHideEsportsInfoEnabled: observable,
@@ -11759,11 +11650,10 @@
         isClickPlayerEventMapperEnabled: observable,
         selectLeftClick: observable,
         selectRightClick: observable,
-        isShowBufferTimeEnabled: observable,
-        isVideoSkipHandlerEnabled: observable,
+        isShowBufferTimeTitleEnabled: observable,
+        isShowBufferTimeChatEnabled: observable,
         isSharpmodeShortcutEnabled: observable,
         isLLShortcutEnabled: observable,
-        isAdjustDelayNoGridEnabled: observable,
         isQualityChangeShortcutEnabled: observable,
         isMutedInactiveTabsEnabled: observable,
         isAutoChangeQualityEnabled: observable,
@@ -11772,6 +11662,8 @@
         isMouseOverSideBarEnabled: observable,
         isChatPositionEnabled: observable,
         isAutoScreenModeEnabled: observable,
+        isAdaptiveSpeedControlEnabled: observable,
+        isClickToMuteEnabled: observable,
         isSelectBestQualityEnabled: observable,
         isRemoveShadowsFromCatchEnabled: observable,
         isVODHighlightEnabled: observable,
@@ -11783,6 +11675,7 @@
         isHideStreamerBadgeEnabled: observable,
         isUnlockCopyPasteEnabled: observable,
         isHideButtonsAboveChatInputEnabled: observable,
+        isHideChatItemsEnabled: observable,
         savedCategory: observable,
         isDarkMode: observable,
         setSetting: action,
@@ -11791,32 +11684,64 @@
     }
     setSetting(key, value) {
       this[key] = value;
-      GM_setValue(key, value);
+      const storageKey = _SettingsStore.STORAGE_KEY_MAP[key] ?? key;
+      _GM_setValue(storageKey, value);
       if (key === "nicknameWidth") {
-        document.documentElement.style.setProperty(
-          "--nickname-width",
-          `${value}px`
-        );
+        document.documentElement.style.setProperty("--nickname-width", `${value}px`);
       }
     }
     setDarkMode(val) {
       this.isDarkMode = val;
     }
-  }
+  };
+  // React 프로퍼티명 → sample.js GM 스토리지 키 매핑
+  __publicField(_SettingsStore, "STORAGE_KEY_MAP", {
+    isShowPauseButtonEnabled: "isMakePauseButtonEnabled",
+    preferredQuality: "preferredQualitySetting",
+    selectLeftClick: "livePlayerLeftClickFunction",
+    selectRightClick: "livePlayerRightClickFunction",
+    isSharpmodeShortcutEnabled: "isMakeSharpModeShortcutEnabled",
+    isLLShortcutEnabled: "isMakeLowLatencyShortcutEnabled",
+    isQualityChangeShortcutEnabled: "isMakeQualityChangeShortcutEnabled",
+    isMutedInactiveTabsEnabled: "isAutoChangeMuteEnabled",
+    isShowSidebarOnScreenModeAlwaysEnabled: "showSidebarOnScreenModeAlways",
+    isMouseOverSideBarEnabled: "showSidebarOnScreenMode",
+    isChatPositionEnabled: "isBottomChatEnabled",
+    isHideSupporterBadgeEnabled: "isHideSupporterBadgeEnabled",
+    isHideFanBadgeEnabled: "isHideFanBadgeEnabled",
+    isHideSubBadgeEnabled: "isHideSubBadgeEnabled",
+    isHideVIPBadgeEnabled: "isHideVIPBadgeEnabled",
+    isHideMngrBadgeEnabled: "isHideManagerBadgeEnabled",
+    isHideStreamerBadgeEnabled: "isHideStreamerBadgeEnabled",
+    isHideButtonsAboveChatInputEnabled: "ishideButtonsAboveChatInputEnabled"
+  });
+  let SettingsStore = _SettingsStore;
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const customLog = {
     log: (...args) => console.log("[SOOP-EXT]", ...args),
     warn: (...args) => console.warn("[SOOP-EXT]", ...args),
     error: (...args) => console.error("[SOOP-EXT]", ...args)
   };
-  const awaitElement = (selector) => {
+  const waitForElementAsync = (selector, timeout = 1e4) => {
     return new Promise((resolve) => {
-      const el2 = document.querySelector(selector);
-      if (el2) return resolve(el2);
-      const observer2 = new MutationObserver(() => {
-        const target = document.querySelector(selector);
-        if (target) {
+      const element = document.querySelector(selector);
+      if (element) {
+        resolve(element);
+        return;
+      }
+      let observer2 = null;
+      const timeoutId = setTimeout(() => {
+        if (observer2) {
           observer2.disconnect();
-          resolve(target);
+          resolve(null);
+        }
+      }, timeout);
+      observer2 = new MutationObserver(() => {
+        const targetElement = document.querySelector(selector);
+        if (targetElement) {
+          observer2.disconnect();
+          clearTimeout(timeoutId);
+          resolve(targetElement);
         }
       });
       observer2.observe(document.body, { childList: true, subtree: true });
@@ -11828,6 +11753,47 @@
     const tag = (_a2 = active == null ? void 0 : active.tagName) == null ? void 0 : _a2.toUpperCase();
     return tag === "INPUT" || tag === "TEXTAREA" || (active == null ? void 0 : active.isContentEditable) || (active == null ? void 0 : active.id) === "write_area";
   };
+  const observeUrlChanges = (() => {
+    let lastUrl = window.location.pathname;
+    const callbacks = /* @__PURE__ */ new Set();
+    let isObserving = false;
+    const triggerCallbacks = (newUrl) => {
+      if (newUrl !== lastUrl) {
+        lastUrl = newUrl;
+        callbacks.forEach((cb2) => cb2(newUrl));
+      }
+    };
+    const startObserving = () => {
+      if (isObserving) return;
+      isObserving = true;
+      window.addEventListener("popstate", () => {
+        triggerCallbacks(window.location.pathname);
+      });
+      const originalPushState = history.pushState;
+      const originalReplaceState = history.replaceState;
+      history.pushState = function(...args) {
+        var _a2;
+        originalPushState.apply(this, args);
+        triggerCallbacks(
+          ((_a2 = args[2]) == null ? void 0 : _a2.toString()) || window.location.pathname
+        );
+      };
+      history.replaceState = function(...args) {
+        var _a2;
+        originalReplaceState.apply(this, args);
+        triggerCallbacks(
+          ((_a2 = args[2]) == null ? void 0 : _a2.toString()) || window.location.pathname
+        );
+      };
+    };
+    return function registerCallback(callback) {
+      startObserving();
+      callbacks.add(callback);
+      return function disconnect() {
+        callbacks.delete(callback);
+      };
+    };
+  })();
   const _fetchInFlight = /* @__PURE__ */ new Map();
   const _isPerChannelUrl = (url) => /\/channels\/[0-9a-f]{32}\//i.test(url);
   const _parseAndValidateCache = (cachedDataString, expiryMs) => {
@@ -11840,17 +11806,16 @@
     }
     return null;
   };
-  const fetchBroadList = async (url, expiry_seconds = 50, timeout = 5e3) => {
+  const fetchBroadList = async (url, expiry_seconds = 50, timeout = 0) => {
     const CACHE_EXPIRY_MS = expiry_seconds * 1e3;
     const cacheKey = `fetchCache_${encodeURIComponent(url)}`;
     const skipGM = _isPerChannelUrl(url);
-    const localData = _parseAndValidateCache(
-      localStorage.getItem(cacheKey),
-      CACHE_EXPIRY_MS
-    );
-    if (localData) return localData;
+    const localData = _parseAndValidateCache(localStorage.getItem(cacheKey), CACHE_EXPIRY_MS);
+    if (localData) {
+      return localData;
+    }
     if (!skipGM) {
-      const gmDataString = await GM_getValue(cacheKey, null);
+      const gmDataString = await _GM_getValue(cacheKey, null);
       const gmData = _parseAndValidateCache(gmDataString, CACHE_EXPIRY_MS);
       if (gmData) {
         if (gmDataString) localStorage.setItem(cacheKey, gmDataString);
@@ -11865,10 +11830,11 @@
       if (timeout) {
         timeoutId = setTimeout(() => {
           customLog.error(url, `Request timed out after ${timeout} ms`);
+          console.error(`[SOOP API] 타임아웃 (${timeout}ms):`, url);
           resolve([]);
         }, timeout);
       }
-      GM_xmlhttpRequest({
+      _GM_xmlhttpRequest({
         method: "GET",
         url,
         headers: { "Content-Type": "application/json" },
@@ -11879,12 +11845,14 @@
             if (response.status >= 200 && response.status < 300) {
               const jsonResponse = JSON.parse(response.responseText);
               if ((jsonResponse == null ? void 0 : jsonResponse.RESULT) === -1 || (jsonResponse == null ? void 0 : jsonResponse.code) && jsonResponse.code < 0) {
-                customLog.error(
+                customLog.error(url, `API Error: ${jsonResponse.MSG || jsonResponse.message}`);
+                console.error(
+                  `[SOOP API] API 오류 (RESULT=${(jsonResponse == null ? void 0 : jsonResponse.RESULT) ?? (jsonResponse == null ? void 0 : jsonResponse.code)}):`,
                   url,
-                  `API Error: ${jsonResponse.MSG || jsonResponse.message}`
+                  jsonResponse
                 );
                 localStorage.removeItem(cacheKey);
-                if (!skipGM) await GM_setValue(cacheKey, void 0);
+                if (!skipGM) await _GM_setValue(cacheKey, void 0);
                 resolve([]);
               } else {
                 const cacheData = JSON.stringify({
@@ -11892,7 +11860,7 @@
                   data: jsonResponse
                 });
                 localStorage.setItem(cacheKey, cacheData);
-                if (!skipGM) await GM_setValue(cacheKey, cacheData);
+                if (!skipGM) await _GM_setValue(cacheKey, cacheData);
                 resolve(jsonResponse);
               }
             } else if (response.status === 401) {
@@ -11919,10 +11887,7 @@
     return fetchPromise;
   };
   const fetchFavoriteGroups = async () => {
-    const response = await fetchBroadList(
-      "https://myapi.sooplive.com/api/favorite/group/list",
-      50
-    );
+    const response = await fetchBroadList("https://myapi.sooplive.com/api/favorite/group/list", 50);
     return (response == null ? void 0 : response.data) ?? [];
   };
   const getHiddenbjList = async () => {
@@ -11939,14 +11904,77 @@
     const response = await fetchBroadList(feedUrl, 150);
     return (response == null ? void 0 : response.data) ?? [];
   };
+  const loadCategoryData = () => {
+    const currentTime = (/* @__PURE__ */ new Date()).getTime();
+    const lastExecutionTime = _GM_getValue("lastExecutionTime", 0);
+    if (currentTime - lastExecutionTime >= 9e5) {
+      const url = `https://live.sooplive.com/script/locale/ko_KR/broad_category.js?${currentTime}`;
+      _GM_xmlhttpRequest({
+        method: "GET",
+        url,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+        onload: function(response) {
+          if (response.status === 200) {
+            let szBroadCategory = response.responseText;
+            szBroadCategory = JSON.parse(szBroadCategory.split("var szBroadCategory = ")[1].slice(0, -1));
+            if (szBroadCategory.CHANNEL.RESULT === "1") {
+              const stripCategoryKeys = (categories) => categories.map(({ cate_no, cate_name, child }) => ({
+                cate_no,
+                cate_name,
+                ...(child == null ? void 0 : child.length) ? { child: stripCategoryKeys(child) } : {}
+              }));
+              const cleanData = {
+                CHANNEL: {
+                  RESULT: szBroadCategory.CHANNEL.RESULT,
+                  BROAD_CATEGORY: stripCategoryKeys(szBroadCategory.CHANNEL.BROAD_CATEGORY)
+                }
+              };
+              _GM_setValue("szBroadCategory", cleanData);
+              _GM_setValue("lastExecutionTime", currentTime);
+            }
+          } else {
+            customLog.error("Failed to load category data:", response.statusText);
+          }
+        },
+        onerror: function(error) {
+          customLog.error("Error loading category data:", error);
+        }
+      });
+    }
+  };
+  const getCategoryName = (cateNo) => {
+    var _a2;
+    if (!cateNo) return "";
+    const saved = _GM_getValue("szBroadCategory", null);
+    if (!((_a2 = saved == null ? void 0 : saved.CHANNEL) == null ? void 0 : _a2.BROAD_CATEGORY)) return "";
+    const search = (categories) => {
+      var _a3;
+      for (const cat of categories) {
+        if (String(cat.cate_no) === String(cateNo)) return cat.cate_name;
+        if ((_a3 = cat.child) == null ? void 0 : _a3.length) {
+          const found = search(cat.child);
+          if (found) return found;
+        }
+      }
+      return "";
+    };
+    return search(saved.CHANNEL.BROAD_CATEGORY);
+  };
   const blockUser = (userId, userName, currentList, onUpdate) => {
     if (currentList.some((u2) => u2.userId === userId)) return;
     const newList = [...currentList, { userId, userName }];
-    GM_setValue("blockedUsers", JSON.stringify(newList));
+    _GM_setValue("blockedUsers", JSON.stringify(newList));
     onUpdate(newList);
   };
   const isUserBlocked = (userId, blockedUsers) => blockedUsers.some((u2) => u2.userId === userId);
   const isCategoryBlocked = (categoryId, blockedCategories) => blockedCategories.some((c) => c.categoryId === categoryId);
+  function getViewerCount(c) {
+    var _a2, _b2, _c, _d;
+    if (c.type === "chzzk") {
+      return ((_b2 = (_a2 = c.channel) == null ? void 0 : _a2.liveInfo) == null ? void 0 : _b2.concurrentUserCount) ?? ((_c = c.channel) == null ? void 0 : _c.concurrentUserCount) ?? 0;
+    }
+    return ((_d = c.channel) == null ? void 0 : _d.total_view_cnt) ?? 0;
+  }
   class SidebarStore {
     constructor(settings) {
       // 데이터 맵 (섹션 ID → 채널 배열)
@@ -11971,35 +11999,33 @@
       __publicField(this, "isFollowLoading", false);
       __publicField(this, "isMyplusLoading", false);
       __publicField(this, "isTopLoading", false);
+      // 마지막 fetch 시각 (프로그래스바용)
+      __publicField(this, "lastFetchTime", 0);
       // 폴링 타이머
       __publicField(this, "_pollTimer", null);
       __publicField(this, "_settings");
+      // 원본 API 데이터 캐시 (설정 변경 시 재처리용)
+      __publicField(this, "_rawFollow", null);
+      __publicField(this, "_rawMyplus", null);
+      __publicField(this, "_rawTop", null);
       this._settings = settings;
       try {
-        this.blockedUsers = JSON.parse(
-          GM_getValue("blockedUsers", "[]")
-        );
+        this.blockedUsers = JSON.parse(GM_getValue("blockedUsers", "[]"));
       } catch {
         this.blockedUsers = [];
       }
       try {
-        this.blockedCategories = JSON.parse(
-          GM_getValue("blockedCategories", "[]")
-        );
+        this.blockedCategories = JSON.parse(GM_getValue("blockedCategories", "[]"));
       } catch {
         this.blockedCategories = [];
       }
       try {
-        this.pinnedCategories = JSON.parse(
-          GM_getValue("pinnedCategories", "[]")
-        );
+        this.pinnedCategories = JSON.parse(GM_getValue("pinnedCategories", "[]"));
       } catch {
         this.pinnedCategories = [];
       }
       try {
-        this.pinnedChzzkUsers = JSON.parse(
-          GM_getValue("pinnedChzzkUsers", "[]")
-        );
+        this.pinnedChzzkUsers = JSON.parse(GM_getValue("pinnedChzzkUsers", "[]"));
       } catch {
         this.pinnedChzzkUsers = [];
       }
@@ -12010,6 +12036,7 @@
       }
       this.selectedFavoriteGroupIdx = settings.selectedFavoriteGroupIdx;
       this.selectedPinnedCategoryIdx = settings.selectedPinnedCategoryIdx;
+      this._initFromLocalStorageCache();
       makeObservable(this, {
         followChannels: observable,
         myplusChannels: observable,
@@ -12027,6 +12054,7 @@
         isFollowLoading: observable,
         isMyplusLoading: observable,
         isTopLoading: observable,
+        lastFetchTime: observable,
         setFollowChannels: action,
         setMyplusChannels: action,
         setTopChannels: action,
@@ -12037,7 +12065,10 @@
         setBlockedCategories: action,
         setPinnedCategories: action,
         setPinnedChzzkUsers: action,
-        setAllFollowUserIds: action
+        setAllFollowUserIds: action,
+        reprocessFollow: action,
+        reprocessMyplus: action,
+        reprocessTop: action
       });
     }
     // ===========================
@@ -12078,51 +12109,117 @@
     setPinnedChzzkUsers(users) {
       this.pinnedChzzkUsers = users;
       GM_setValue("pinnedChzzkUsers", JSON.stringify(users));
+      this.reprocessFollow();
     }
     setAllFollowUserIds(ids) {
       this.allFollowUserIds = ids;
+    }
+    // 설정 변경 시 저장된 원본 데이터로 즉시 재처리
+    reprocessFollow() {
+      if (!this._rawFollow) return;
+      const { soopData, chzzkRes, hiddenBjList, feedItems } = this._rawFollow;
+      const processed = this._processFollowData(soopData, chzzkRes, hiddenBjList, feedItems);
+      this._diffApply(this.followChannels, processed);
+    }
+    reprocessMyplus() {
+      if (!this._rawMyplus) return;
+      const { liveList } = this._rawMyplus;
+      let liveChannels = liveList.filter((item) => !isUserBlocked(item.user_id, this.blockedUsers)).filter((item) => !isCategoryBlocked(item.broad_cate_no, this.blockedCategories)).map((item) => ({ channel: item, type: "soop_live", args: [] }));
+      if (!this._settings.myplusOrder) {
+        liveChannels = liveChannels.sort(
+          (a, b) => (b.channel.total_view_cnt ?? 0) - (a.channel.total_view_cnt ?? 0)
+        );
+      }
+      this._diffApply(this.myplusChannels, liveChannels);
+    }
+    reprocessTop() {
+      var _a2, _b2;
+      if (!this._rawTop) return;
+      const { soopData, chzzkRes } = this._rawTop;
+      const result = [];
+      for (const item of soopData) {
+        if (this.hiddenBjList.includes(item.user_id)) continue;
+        if (isUserBlocked(item.user_id, this.blockedUsers)) continue;
+        if (isCategoryBlocked(item.broad_cate_no, this.blockedCategories)) continue;
+        if (this._settings.isTopDuplicateRemovalEnabled && this.allFollowUserIds.includes(item.user_id)) continue;
+        result.push({ channel: item, type: "soop_live", args: [] });
+      }
+      if (this.selectedPinnedCategoryIdx === 0 && ((_a2 = chzzkRes == null ? void 0 : chzzkRes.content) == null ? void 0 : _a2.data)) {
+        const chzzkFollowSet = new Set(
+          this._settings.isTopDuplicateRemovalEnabled ? this.followChannels.filter((c) => c.type === "chzzk").map((c) => {
+            var _a3, _b3;
+            return (_b3 = (_a3 = c.channel) == null ? void 0 : _a3.channel) == null ? void 0 : _b3.channelId;
+          }).filter(Boolean) : []
+        );
+        for (const item of chzzkRes.content.data) {
+          if (chzzkFollowSet.has((_b2 = item.channel) == null ? void 0 : _b2.channelId)) continue;
+          result.push({ channel: item, type: "chzzk", args: [] });
+        }
+      }
+      result.sort((a, b) => getViewerCount(b) - getViewerCount(a));
+      this._diffApply(this.topChannels, result);
     }
     // ===========================
     // 데이터 fetch
     // ===========================
     async fetchFollowData() {
       if (!this._settings.displayFollow) return;
-      runInAction(() => {
-        this.isFollowLoading = true;
-      });
+      if (this.followChannels.length === 0) {
+        runInAction(() => {
+          this.isFollowLoading = true;
+        });
+      }
       try {
         const groupIdx = this.selectedFavoriteGroupIdx;
-        const url = groupIdx > 0 ? `https://myapi.sooplive.com/api/favorite?group_idx=${groupIdx}` : "https://myapi.sooplive.com/api/favorite?cate_type=LIVEON";
-        const res = await fetchBroadList(url, 50);
-        const data = (res == null ? void 0 : res.data) ?? [];
-        const hiddenBjList = await getHiddenbjList();
-        const feedItems = await getStationFeed(this._settings.isChannelFeedEnabled);
+        const soopUrl = groupIdx > 0 ? `https://myapi.sooplive.com/api/favorite/${groupIdx}` : "https://myapi.sooplive.com/api/favorite";
+        const [soopRes, chzzkRes, hiddenBjList, feedItems] = await Promise.all([
+          fetchBroadList(soopUrl, 50),
+          groupIdx === 0 && this._settings.isChzzkFollowChannelsEnabled ? fetchBroadList("https://api.chzzk.naver.com/service/v1/channels/followings/live", 50) : Promise.resolve(null),
+          getHiddenbjList(),
+          getStationFeed(this._settings.isChannelFeedEnabled)
+        ]);
+        const hasSoopError = Array.isArray(soopRes);
+        const soopData = hasSoopError ? [] : (soopRes == null ? void 0 : soopRes.data) ?? [];
+        if (hasSoopError && this.followChannels.length > 0) {
+          runInAction(() => {
+            this.hiddenBjList = hiddenBjList;
+            this.isFollowLoading = false;
+          });
+          return;
+        }
+        if (groupIdx === 0 && (soopRes == null ? void 0 : soopRes.data)) {
+          runInAction(() => {
+            this.allFollowUserIds = soopData.map((item) => item.user_id).filter(Boolean);
+          });
+        }
+        const processed = this._processFollowData(soopData, chzzkRes, hiddenBjList, feedItems);
         runInAction(() => {
+          this._rawFollow = { soopData, chzzkRes, hiddenBjList, feedItems };
           this.hiddenBjList = hiddenBjList;
           this.isFollowLoading = false;
-          this.followChannels = this._processFollowData(data, hiddenBjList, feedItems);
+          this._diffApply(this.followChannels, processed);
         });
       } catch (e) {
+        console.error("[SOOP Sidebar] fetchFollowData 에러:", e);
         runInAction(() => {
           this.isFollowLoading = false;
         });
       }
     }
-    _processFollowData(data, hiddenBjList, feedItems) {
-      var _a2;
+    _processFollowData(soopData, chzzkRes, hiddenBjList, feedItems) {
+      var _a2, _b2, _c, _d, _e, _f;
       const s = this._settings;
       const result = [];
-      for (const item of data) {
+      for (const item of soopData) {
         const userId = item.user_id;
         if (hiddenBjList.includes(userId)) continue;
         if (isUserBlocked(userId, this.blockedUsers)) continue;
         if ((_a2 = item.broad_info) == null ? void 0 : _a2.length) {
           for (const broad of item.broad_info) {
-            if (isCategoryBlocked(broad.broad_cate_no, this.blockedCategories)) continue;
-            const isPinned = s.isPinnedStreamWithNotificationEnabled && item.is_mobile_push === "Y" || s.isPinnedStreamWithPinEnabled && item.is_pin;
-            const chzzkChannelId = this.pinnedChzzkUsers.find(
-              (c) => c === userId
-            );
+            const catBlocked = isCategoryBlocked(broad.broad_cate_no, this.blockedCategories);
+            if (catBlocked && !s.isBlockedCategorySortingEnabled) continue;
+            const isPinned = !catBlocked && (s.isPinnedStreamWithNotificationEnabled && item.is_mobile_push === "Y" || s.isPinnedStreamWithPinEnabled && item.is_pin);
+            const chzzkChannelId = this.pinnedChzzkUsers.find((c) => c === userId);
             result.push({
               channel: {
                 ...broad,
@@ -12131,6 +12228,7 @@
                 is_mobile_push: item.is_mobile_push,
                 is_pin: item.is_pin,
                 isPinned,
+                _isCategoryBlocked: catBlocked,
                 chzzkChannelId
               },
               type: "soop_live",
@@ -12138,15 +12236,15 @@
             });
           }
         } else if (s.isChannelFeedEnabled) {
-          const feed = feedItems.find(
-            (f2) => f2.station_user_id === userId
-          );
+          const isPinned = !s.isPinnedOnlineOnlyEnabled && (s.isPinnedStreamWithNotificationEnabled && item.is_mobile_push === "Y" || s.isPinnedStreamWithPinEnabled && item.is_pin);
+          const feed = feedItems.find((f2) => f2.station_user_id === userId);
           if (feed) {
             result.push({
               channel: {
                 ...feed,
                 user_nick: item.user_nick || userId,
-                profile_image: item.profile_image
+                profile_image: item.profile_image,
+                isPinned
               },
               type: "soop_feed",
               args: []
@@ -12156,7 +12254,8 @@
               channel: {
                 user_id: userId,
                 user_nick: item.user_nick || userId,
-                profile_image: item.profile_image
+                profile_image: item.profile_image,
+                isPinned
               },
               type: "soop_offline",
               args: []
@@ -12164,29 +12263,67 @@
           }
         }
       }
+      if ((chzzkRes == null ? void 0 : chzzkRes.code) === 200) {
+        const followingList = ((_b2 = chzzkRes.content) == null ? void 0 : _b2.followingList) ?? [];
+        for (const item of followingList) {
+          const channelId = ((_c = item == null ? void 0 : item.channel) == null ? void 0 : _c.channelId) ?? (item == null ? void 0 : item.channelId);
+          const isMobilePush = s.isPinnedStreamWithNotificationEnabled && ((_f = (_e = (_d = item == null ? void 0 : item.channel) == null ? void 0 : _d.personalData) == null ? void 0 : _e.following) == null ? void 0 : _f.notification) ? "Y" : "N";
+          const isPinned = channelId ? this.pinnedChzzkUsers.includes(channelId) : false;
+          result.push({
+            channel: { ...item, isPinned },
+            type: "chzzk",
+            args: [isMobilePush]
+          });
+        }
+      }
       if (s.isRandomSortEnabled) {
         result.sort(() => Math.random() - 0.5);
       }
-      const pinned = result.filter((c) => c.channel.isPinned);
-      const rest = result.filter((c) => !c.channel.isPinned);
-      return [...pinned, ...rest];
+      const blockedCat = result.filter((c) => c.channel._isCategoryBlocked);
+      const main = result.filter((c) => !c.channel._isCategoryBlocked);
+      const pinned = main.filter((c) => c.channel.isPinned);
+      const rest = main.filter((c) => !c.channel.isPinned);
+      if (!s.isRandomSortEnabled) {
+        rest.sort((a, b) => getViewerCount(b) - getViewerCount(a));
+      }
+      return [...pinned, ...rest, ...blockedCat];
     }
     async fetchMyplusData() {
+      var _a2, _b2;
       if (!this._settings.displayMyplus) return;
-      runInAction(() => {
-        this.isMyplusLoading = true;
-      });
-      try {
-        const url = "https://myapi.sooplive.com/api/my-plus/on-air?type=LIVEON&page=1&per_page=200";
-        const res = await fetchBroadList(url, 50);
-        const data = (res == null ? void 0 : res.data) ?? [];
+      if (this.myplusChannels.length === 0) {
         runInAction(() => {
+          this.isMyplusLoading = true;
+        });
+      }
+      try {
+        const url = "https://live.sooplive.com/api/myplus/preferbjLiveVodController.php?nInitCnt=6&szRelationType=C";
+        const res = await fetchBroadList(url, 50);
+        const liveList = ((_a2 = res == null ? void 0 : res.DATA) == null ? void 0 : _a2.live_list) ?? [];
+        const vodList = ((_b2 = res == null ? void 0 : res.DATA) == null ? void 0 : _b2.vod_list) ?? [];
+        runInAction(() => {
+          this._rawMyplus = { liveList, vodList };
           this.isMyplusLoading = false;
-          this.myplusChannels = data.filter((item) => !isUserBlocked(item.user_id, this.blockedUsers)).filter((item) => !isCategoryBlocked(item.broad_cate_no, this.blockedCategories)).map((item) => ({
-            channel: item,
-            type: "soop_live",
-            args: []
-          }));
+          let liveChannels = liveList.filter((item) => !isUserBlocked(item.user_id, this.blockedUsers)).filter((item) => !isCategoryBlocked(item.broad_cate_no, this.blockedCategories)).map(
+            (item) => ({
+              channel: item,
+              type: "soop_live",
+              args: []
+            })
+          );
+          if (!this._settings.myplusOrder) {
+            liveChannels = liveChannels.sort(
+              (a, b) => (b.channel.total_view_cnt ?? 0) - (a.channel.total_view_cnt ?? 0)
+            );
+          }
+          this._diffApply(this.myplusChannels, liveChannels);
+          this.myplusVodChannels = vodList.filter((item) => !isUserBlocked(item.user_id, this.blockedUsers)).map(
+            (item) => ({
+              channel: item,
+              type: "soop_live",
+              args: []
+            })
+          );
         });
       } catch (e) {
         runInAction(() => {
@@ -12195,21 +12332,47 @@
       }
     }
     async fetchTopData() {
+      var _a2, _b2;
       if (!this._settings.displayTop) return;
-      runInAction(() => {
-        this.isTopLoading = true;
-      });
+      if (this.topChannels.length === 0) {
+        runInAction(() => {
+          this.isTopLoading = true;
+        });
+      }
       try {
-        const url = "https://live.sooplive.com/api/get_station_list.php?type=html5&szOrder=view_cnt&nPageNo=1&nListCnt=50&szBjId=&szSearchWord=&nCateNo=0";
-        const res = await fetchBroadList(url, 50);
-        const data = (res == null ? void 0 : res.DATA) ?? [];
+        const catIdx = this.selectedPinnedCategoryIdx;
+        const soopUrl = catIdx === 0 ? "https://live.sooplive.com/api/main_broad_list_api.php?selectType=action&orderType=view_cnt&pageNo=1&lang=ko_KR" : `https://live.sooplive.com/api/main_broad_list_api.php?selectType=cate&selectValue=${catIdx}&orderType=view_cnt&pageNo=1&lang=ko_KR`;
+        const [soopRes, chzzkRes] = await Promise.all([
+          fetchBroadList(soopUrl, 100),
+          this._settings.isChzzkTopChannelsEnabled ? fetchBroadList("https://api.chzzk.naver.com/service/v1/lives?size=50&sortType=POPULAR", 100) : Promise.resolve(null)
+        ]);
+        const soopData = (soopRes == null ? void 0 : soopRes.broad) ?? [];
+        const result = [];
+        this._rawTop = { soopData, chzzkRes };
+        for (const item of soopData) {
+          if (this.hiddenBjList.includes(item.user_id)) continue;
+          if (isUserBlocked(item.user_id, this.blockedUsers)) continue;
+          if (isCategoryBlocked(item.broad_cate_no, this.blockedCategories)) continue;
+          if (this._settings.isTopDuplicateRemovalEnabled && this.allFollowUserIds.includes(item.user_id))
+            continue;
+          result.push({ channel: item, type: "soop_live", args: [] });
+        }
+        if (catIdx === 0 && ((_a2 = chzzkRes == null ? void 0 : chzzkRes.content) == null ? void 0 : _a2.data)) {
+          const chzzkFollowSet = new Set(
+            this._settings.isTopDuplicateRemovalEnabled ? this.followChannels.filter((c) => c.type === "chzzk").map((c) => {
+              var _a3, _b3;
+              return (_b3 = (_a3 = c.channel) == null ? void 0 : _a3.channel) == null ? void 0 : _b3.channelId;
+            }).filter(Boolean) : []
+          );
+          for (const item of chzzkRes.content.data) {
+            if (chzzkFollowSet.has((_b2 = item.channel) == null ? void 0 : _b2.channelId)) continue;
+            result.push({ channel: item, type: "chzzk", args: [] });
+          }
+        }
+        result.sort((a, b) => getViewerCount(b) - getViewerCount(a));
         runInAction(() => {
           this.isTopLoading = false;
-          this.topChannels = data.filter((item) => !isUserBlocked(item.user_id, this.blockedUsers)).filter((item) => !isCategoryBlocked(item.broad_cate_no, this.blockedCategories)).map((item) => ({
-            channel: item,
-            type: "soop_live",
-            args: []
-          }));
+          this._diffApply(this.topChannels, result);
         });
       } catch (e) {
         runInAction(() => {
@@ -12218,22 +12381,145 @@
       }
     }
     async fetchAllData() {
-      await Promise.all([
-        this.fetchFollowData(),
-        this.fetchMyplusData(),
-        this.fetchTopData()
-      ]);
+      runInAction(() => {
+        this.lastFetchTime = Date.now();
+      });
+      await Promise.all([this.fetchFollowData(), this.fetchMyplusData(), this.fetchTopData()]);
     }
     startPolling(intervalSeconds = 30) {
+      this.stopPolling();
       this.fetchAllData();
-      this._pollTimer = setInterval(() => {
+      this._pollTimer = setTimeout(() => {
         this.fetchAllData();
-      }, intervalSeconds * 1e3);
+        this._pollTimer = setInterval(() => {
+          this.fetchAllData();
+        }, intervalSeconds * 1e3);
+      }, 10 * 1e3);
     }
     stopPolling() {
       if (this._pollTimer) {
-        clearInterval(this._pollTimer);
+        clearTimeout(this._pollTimer);
         this._pollTimer = null;
+      }
+    }
+    // ===========================
+    // 주요 업데이트
+    // ===========================
+    /** localStorage 캐시에서 이전 데이터 동기 로드 — 첫 렌더링 종료 전에 채널 표시 */
+    _initFromLocalStorageCache() {
+      var _a2, _b2, _c, _d, _e;
+      const readCache = (url, expiryMs) => {
+        try {
+          const raw = localStorage.getItem(`fetchCache_${encodeURIComponent(url)}`);
+          if (!raw) return null;
+          const { timestamp, data } = JSON.parse(raw);
+          return Date.now() - timestamp < expiryMs ? data : null;
+        } catch {
+          return null;
+        }
+      };
+      const followData = readCache("https://myapi.sooplive.com/api/favorite", 5e4);
+      if ((_a2 = followData == null ? void 0 : followData.data) == null ? void 0 : _a2.length) {
+        const channels = [];
+        for (const item of followData.data) {
+          if ((_b2 = item.broad_info) == null ? void 0 : _b2.length) {
+            for (const broad of item.broad_info) {
+              channels.push({
+                channel: {
+                  ...broad,
+                  user_nick: item.user_nick || broad.user_nick || item.user_id,
+                  profile_image: item.profile_image,
+                  is_mobile_push: item.is_mobile_push
+                },
+                type: "soop_live",
+                args: []
+              });
+            }
+          }
+        }
+        if (channels.length > 0) {
+          this.followChannels = channels;
+        }
+      }
+      const myplusData = readCache(
+        "https://live.sooplive.com/api/myplus/preferbjLiveVodController.php?nInitCnt=6&szRelationType=C",
+        5e4
+      );
+      if ((_d = (_c = myplusData == null ? void 0 : myplusData.DATA) == null ? void 0 : _c.live_list) == null ? void 0 : _d.length) {
+        this.myplusChannels = myplusData.DATA.live_list.map(
+          (item) => ({
+            channel: item,
+            type: "soop_live",
+            args: []
+          })
+        );
+      }
+      const topData = readCache(
+        "https://live.sooplive.com/api/main_broad_list_api.php?selectType=action&orderType=view_cnt&pageNo=1&lang=ko_KR",
+        1e5
+      );
+      if ((_e = topData == null ? void 0 : topData.broad) == null ? void 0 : _e.length) {
+        this.topChannels = topData.broad.map(
+          (item) => ({
+            channel: item,
+            type: "soop_live",
+            args: []
+          })
+        );
+      }
+    }
+    // ===========================
+    // 채널 목록 diff 업데이트
+    // ===========================
+    _getChannelKey(c) {
+      var _a2, _b2, _c, _d, _e, _f, _g, _h, _i;
+      if (c.type === "chzzk") {
+        return `chzzk_${((_b2 = (_a2 = c.channel) == null ? void 0 : _a2.channel) == null ? void 0 : _b2.channelId) ?? ((_c = c.channel) == null ? void 0 : _c.channelId) ?? ""}`;
+      }
+      if (c.type === "soop_feed") return `feed_${((_d = c.channel) == null ? void 0 : _d.user_id) ?? ""}`;
+      if (c.type === "soop_offline") return `offline_${((_e = c.channel) == null ? void 0 : _e.user_id) ?? ""}`;
+      if (c.type === "soop_vod") return `vod_${((_f = c.channel) == null ? void 0 : _f.user_id) ?? ""}_${((_g = c.channel) == null ? void 0 : _g.title_no) ?? ""}`;
+      return `soop_${((_h = c.channel) == null ? void 0 : _h.user_id) ?? ""}_${((_i = c.channel) == null ? void 0 : _i.broad_no) ?? ""}`;
+    }
+    _updateMutableFields(existing, next) {
+      const e = existing.channel;
+      const n2 = next.channel;
+      if (existing.type === "soop_live") {
+        e.total_view_cnt = n2.total_view_cnt;
+        e.broad_title = n2.broad_title;
+        e.category_name = n2.category_name;
+        e.broad_cate_no = n2.broad_cate_no;
+        e.is_mobile_push = n2.is_mobile_push;
+        e.isPinned = n2.isPinned;
+      } else if (existing.type === "chzzk") {
+        if (n2.liveInfo) e.liveInfo = n2.liveInfo;
+        if (n2.concurrentUserCount != null) e.concurrentUserCount = n2.concurrentUserCount;
+        if (n2.liveTitle != null) e.liveTitle = n2.liveTitle;
+        if (n2.liveCategoryValue != null) e.liveCategoryValue = n2.liveCategoryValue;
+      }
+    }
+    /** 기존 배열을 in-place로 diff 업데이트. 없어진 채널 제거, 기존 채널 필드 업데이트, 새 채널 삽입, 순서 재정렬 */
+    _diffApply(current, next) {
+      const nextMap = new Map(next.map((c) => [this._getChannelKey(c), c]));
+      const currentMap = new Map(current.map((c) => [this._getChannelKey(c), c]));
+      for (let i = current.length - 1; i >= 0; i--) {
+        if (!nextMap.has(this._getChannelKey(current[i]))) {
+          current.splice(i, 1);
+        }
+      }
+      for (const [key, existing] of currentMap) {
+        const newItem = nextMap.get(key);
+        if (newItem) this._updateMutableFields(existing, newItem);
+      }
+      for (let targetIdx = 0; targetIdx < next.length; targetIdx++) {
+        const key = this._getChannelKey(next[targetIdx]);
+        const curIdx = current.findIndex((c) => this._getChannelKey(c) === key);
+        if (curIdx < 0) {
+          current.splice(targetIdx, 0, next[targetIdx]);
+        } else if (curIdx !== targetIdx) {
+          const [item] = current.splice(curIdx, 1);
+          current.splice(targetIdx, 0, item);
+        }
       }
     }
   }
@@ -12245,14 +12531,12 @@
       this.sidebarStore = new SidebarStore(this.settingsStore);
     }
   }
-  const rootStore = new RootStore();
-  const StoreContext = reactExports.createContext(rootStore);
+  const StoreContext = reactExports.createContext(null);
   const useSettingsStore = () => reactExports.useContext(StoreContext).settingsStore;
   const useSidebarStore = () => reactExports.useContext(StoreContext).sidebarStore;
-  const StoreProvider = ({
-    children
-  }) => {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(StoreContext.Provider, { value: rootStore, children });
+  const StoreProvider = ({ children }) => {
+    const [store] = React$1.useState(() => new RootStore());
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(StoreContext.Provider, { value: store, children });
   };
   const addNumberSeparator = (number) => {
     const n2 = Number(number);
@@ -12306,13 +12590,55 @@
     const settings = useSettingsStore();
     const sidebarStore = useSidebarStore();
     const { channel } = data;
-    const handleClick = (e) => {
-      if (settings.isOpenNewtabEnabled) {
+    const liveUrl = `https://play.sooplive.com/${channel.user_id}/${channel.broad_no}`;
+    const isOnPlayerPage = window.location.href.includes("play.sooplive.com");
+    const handleClick = async (e) => {
+      if (settings.isSendLoadBroadEnabled && isOnPlayerPage && !e.ctrlKey) {
         e.preventDefault();
-        window.open(
-          `https://play.sooplive.com/${channel.user_id}/${channel.broad_no}`,
-          "_blank"
-        );
+        e.stopPropagation();
+        const liveView = unsafeWindow.liveView ?? window.liveView;
+        const loadingEl = document.querySelector("div.loading");
+        const isLoading = loadingEl ? window.getComputedStyle(loadingEl).display !== "none" : false;
+        if (!isLoading && liveView) {
+          try {
+            const stopBtn = document.querySelector("#play.stop");
+            if (stopBtn) {
+              stopBtn.click();
+              await sleep(250);
+            }
+            liveView.playerController.sendLoadBroad(channel.user_id, channel.broad_no);
+            await sleep(200);
+            if (document.querySelector("._Modal_UI_Wrap.dimed")) {
+              window.location.href = liveUrl;
+            }
+          } catch {
+            window.location.href = liveUrl;
+          }
+        } else {
+          window.location.href = liveUrl;
+        }
+        return;
+      }
+    };
+    const handleProfileClick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const sidebar = document.getElementById("sidebar");
+      const isSidebarMinimized = sidebar ? sidebar.offsetWidth <= 52 : false;
+      const targetUrl = isSidebarMinimized ? liveUrl : `https://ch.sooplive.com/${channel.user_id}`;
+      if (!isSidebarMinimized) {
+        window.open(targetUrl, "_blank");
+        return;
+      }
+      if (e.ctrlKey) {
+        window.open(liveUrl, "_blank");
+        return;
+      }
+      const liveView = unsafeWindow.liveView ?? window.liveView;
+      if (settings.isSendLoadBroadEnabled && liveView) {
+        liveView.playerController.sendLoadBroad(channel.user_id, channel.broad_no);
+      } else {
+        window.location.href = liveUrl;
       }
     };
     const handleContextMenu = (e) => {
@@ -12326,8 +12652,7 @@
         );
       }
     };
-    const liveUrl = `https://play.sooplive.com/${channel.user_id}/${channel.broad_no}`;
-    const profileUrl = channel.profile_image || `//profile.img.sooplive.com/LOGO/${channel.user_id.slice(0, 2)}/${channel.user_id}/${channel.user_id}.jpg`;
+    const profileUrl = channel.profile_image || `https://stimg.sooplive.com/LOGO/${channel.user_id.slice(0, 2)}/${channel.user_id}/m/${channel.user_id}.webp`;
     const isPinned = channel.isPinned;
     const isNotified = channel.is_mobile_push === "Y";
     return /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -12335,11 +12660,16 @@
       {
         className: `user${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}`,
         href: liveUrl,
-        target: settings.isOpenNewtabEnabled ? "_blank" : "_self",
+        target: "_self",
         rel: "noreferrer",
         onClick: handleClick,
         onContextMenu: handleContextMenu,
-        title: `${channel.user_nick}: ${channel.broad_title}`,
+        "data-broadcast-no": channel.broad_no,
+        "data-user-id": channel.user_id,
+        "data-user-nick": channel.user_nick,
+        "data-broad-title": channel.broad_title,
+        "data-broad-start": channel.broad_start,
+        "data-total-view-cnt": channel.total_view_cnt,
         children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             "img",
@@ -12348,17 +12678,22 @@
               src: profileUrl,
               alt: channel.user_nick,
               loading: "lazy",
+              onClick: isOnPlayerPage ? handleProfileClick : void 0,
               onError: (e) => {
-                e.target.src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
+                const img = e.target;
+                const uid = channel.user_id;
+                img.src = `https://profile.img.sooplive.com/LOGO/${uid.slice(0, 2)}/${uid}/m/${uid}.jpg`;
+                img.onerror = () => {
+                  img.src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
+                };
               }
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "username", children: [
-            isPinned && "📌",
-            isNotified && "🔔",
+            (isPinned || isNotified) && "🖈",
             channel.user_nick
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: channel.broad_title }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: channel.category_name || getCategoryName(channel.broad_cate_no) || "" }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "watchers", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "dot", children: "●" }),
             addNumberSeparator(channel.total_view_cnt)
@@ -12367,134 +12702,97 @@
       }
     );
   });
-  const ChannelItemChzzk = observer(
-    ({ data }) => {
-      var _a2, _b2, _c, _d, _e;
-      const settings = useSettingsStore();
-      const sidebarStore = useSidebarStore();
-      const { channel } = data;
-      const channelId = ((_a2 = channel.channel) == null ? void 0 : _a2.channelId) ?? channel.channelId;
-      const channelName = ((_b2 = channel.channel) == null ? void 0 : _b2.channelName) ?? channel.channelName ?? channelId;
-      const liveTitle = ((_c = channel.liveInfo) == null ? void 0 : _c.liveTitle) ?? channel.liveTitle ?? "";
-      const viewers = ((_d = channel.liveInfo) == null ? void 0 : _d.concurrentUserCount) ?? channel.concurrentUserCount ?? 0;
-      const profileUrl = ((_e = channel.channel) == null ? void 0 : _e.channelImageUrl) ?? channel.channelImageUrl;
-      const isPinned = sidebarStore.pinnedChzzkUsers.includes(channelId);
-      const handlePinClick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (isPinned) {
-          sidebarStore.setPinnedChzzkUsers(
-            sidebarStore.pinnedChzzkUsers.filter((id2) => id2 !== channelId)
-          );
-        } else {
-          sidebarStore.setPinnedChzzkUsers([
-            ...sidebarStore.pinnedChzzkUsers,
-            channelId
-          ]);
-        }
-      };
-      const handleContextMenu = (e) => {
-        e.preventDefault();
-        if (confirm(`"${channelName}" (${channelId}) 를 차단하시겠습니까?`)) {
-          blockUser(
-            channelId,
-            channelName,
-            sidebarStore.blockedUsers,
-            (newList) => sidebarStore.setBlockedUsers(newList)
-          );
-        }
-      };
-      const liveUrl = `https://chzzk.naver.com/live/${channelId}`;
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "a",
-        {
-          className: `user${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}`,
-          href: liveUrl,
-          target: "_blank",
-          rel: "noreferrer",
-          onContextMenu: handleContextMenu,
-          children: [
-            profileUrl && /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "img",
-              {
-                className: "profile-picture",
-                src: profileUrl,
-                alt: channelName,
-                loading: "lazy"
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "username", children: [
-              isPinned && "📌",
-              channelName
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: liveTitle }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "watchers", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "dot greendot", children: "●" }),
-              addNumberSeparator(viewers)
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "button",
-              {
-                className: `chzzk-pin-btn${isPinned ? " pinned" : ""}`,
-                onClick: handlePinClick,
-                title: isPinned ? "고정 해제" : "고정",
-                children: isPinned ? "📌" : "📍"
-              }
-            )
-          ]
-        }
-      );
-    }
-  );
-  const ChannelItemOffline = observer(
-    ({ data }) => {
-      var _a2;
-      const settings = useSettingsStore();
-      const { channel } = data;
-      const userId = channel.user_id ?? channel.station_user_id;
-      const userNick = channel.user_nick ?? userId;
-      const profileUrl = channel.profile_image || `//profile.img.sooplive.com/LOGO/${userId.slice(0, 2)}/${userId}/${userId}.jpg`;
-      const isFeed = data.type === "soop_feed";
-      const stationUrl = `https://www.sooplive.com/${userId}`;
-      if (isFeed) {
-        return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "a",
-          {
-            className: `user user-offline${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}`,
-            href: stationUrl,
-            target: settings.isOpenNewtabEnabled ? "_blank" : "_self",
-            rel: "noreferrer",
-            title: `${userNick} - 피드`,
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "img",
-                {
-                  className: "profile-picture profile-grayscale",
-                  src: profileUrl,
-                  alt: userNick,
-                  loading: "lazy",
-                  onError: (e) => {
-                    e.target.src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
-                  }
-                }
-              ),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "username", children: userNick }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: channel.title ?? ((_a2 = channel.content) == null ? void 0 : _a2.slice(0, 30)) ?? "피드" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "watchers", children: channel.reg_timestamp ? timeSince(
-                new Date(channel.reg_timestamp * 1e3).toISOString()
-              ) : "" })
-            ]
-          }
+  const ChannelItemChzzk = observer(({ data }) => {
+    var _a2, _b2, _c, _d, _e, _f, _g, _h;
+    const settings = useSettingsStore();
+    const sidebarStore = useSidebarStore();
+    const { channel } = data;
+    const channelId = ((_a2 = channel.channel) == null ? void 0 : _a2.channelId) ?? channel.channelId;
+    const channelName = ((_b2 = channel.channel) == null ? void 0 : _b2.channelName) ?? channel.channelName ?? channelId;
+    const liveTitle = ((_c = channel.liveInfo) == null ? void 0 : _c.liveTitle) ?? channel.liveTitle ?? "";
+    const category = ((_d = channel.liveInfo) == null ? void 0 : _d.liveCategoryValue) ?? channel.liveCategoryValue ?? "";
+    const viewers = ((_e = channel.liveInfo) == null ? void 0 : _e.concurrentUserCount) ?? channel.concurrentUserCount ?? 0;
+    const profileUrl = ((_f = channel.channel) == null ? void 0 : _f.channelImageUrl) ?? channel.channelImageUrl;
+    const liveImageUrl = (((_g = channel.liveInfo) == null ? void 0 : _g.liveImageUrl) ?? channel.liveImageUrl ?? "").replace("{type}", "360");
+    const openDate = ((_h = channel.liveInfo) == null ? void 0 : _h.openDate) ?? channel.openDate ?? "";
+    const isPinned = sidebarStore.pinnedChzzkUsers.includes(channelId);
+    const handlePinClick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (isPinned) {
+        sidebarStore.setPinnedChzzkUsers(sidebarStore.pinnedChzzkUsers.filter((id2) => id2 !== channelId));
+      } else {
+        sidebarStore.setPinnedChzzkUsers([...sidebarStore.pinnedChzzkUsers, channelId]);
+      }
+    };
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+      if (confirm(`"${channelName}" (${channelId}) 를 차단하시겠습니까?`)) {
+        blockUser(
+          channelId,
+          channelName,
+          sidebarStore.blockedUsers,
+          (newList) => sidebarStore.setBlockedUsers(newList)
         );
       }
+    };
+    const liveUrl = `https://chzzk.naver.com/live/${channelId}`;
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "a",
+      {
+        className: `user${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}`,
+        href: liveUrl,
+        target: "_blank",
+        rel: "noreferrer",
+        onContextMenu: handleContextMenu,
+        "data-chzzk-channel-id": channelId,
+        "data-channel-name": channelName,
+        "data-live-title": liveTitle,
+        "data-concurrent-user-count": viewers,
+        "data-live-image-url": liveImageUrl,
+        "data-open-date": openDate,
+        children: [
+          profileUrl && /* @__PURE__ */ jsxRuntimeExports.jsx("img", { className: "profile-picture", src: profileUrl, alt: channelName, loading: "lazy" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "username", children: [
+            isPinned && "🖈",
+            channelName
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: category }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "watchers", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "dot greendot", children: "●" }),
+            addNumberSeparator(viewers)
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              className: `chzzk-pin-btn${isPinned ? " pinned" : ""}`,
+              onClick: handlePinClick,
+              title: isPinned ? "고정 해제" : "상단 고정",
+              children: "🖈"
+            }
+          )
+        ]
+      }
+    );
+  });
+  const ChannelItemOffline = observer(({ data }) => {
+    var _a2;
+    const settings = useSettingsStore();
+    const { channel } = data;
+    const userId = channel.user_id ?? channel.station_user_id;
+    const userNick = channel.user_nick ?? userId;
+    const profileUrl = channel.profile_image || `https://stimg.sooplive.com/LOGO/${userId.slice(0, 2)}/${userId}/m/${userId}.webp`;
+    const isFeed = data.type === "soop_feed";
+    const stationUrl = `https://www.sooplive.com/${userId}`;
+    if (isFeed) {
       return /* @__PURE__ */ jsxRuntimeExports.jsxs(
         "a",
         {
           className: `user user-offline${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}`,
           href: stationUrl,
-          target: settings.isOpenNewtabEnabled ? "_blank" : "_self",
+          target: "_self",
           rel: "noreferrer",
-          title: userNick,
+          title: `${userNick} - 피드`,
           children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(
               "img",
@@ -12504,90 +12802,99 @@
                 alt: userNick,
                 loading: "lazy",
                 onError: (e) => {
-                  e.target.src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
+                  const img = e.target;
+                  img.src = `https://profile.img.sooplive.com/LOGO/${userId.slice(0, 2)}/${userId}/m/${userId}.jpg`;
+                  img.onerror = () => {
+                    img.src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
+                  };
                 }
               }
             ),
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "username", children: userNick }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: "오프라인" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "watchers" })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: channel.title ?? ((_a2 = channel.content) == null ? void 0 : _a2.slice(0, 30)) ?? "피드" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "watchers", children: channel.reg_timestamp ? timeSince(new Date(channel.reg_timestamp * 1e3).toISOString()) : "" })
           ]
         }
       );
     }
-  );
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "a",
+      {
+        className: `user user-offline${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}`,
+        href: stationUrl,
+        target: "_self",
+        rel: "noreferrer",
+        title: userNick,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "img",
+            {
+              className: "profile-picture profile-grayscale",
+              src: profileUrl,
+              alt: userNick,
+              loading: "lazy",
+              onError: (e) => {
+                const img = e.target;
+                img.src = `https://profile.img.sooplive.com/LOGO/${userId.slice(0, 2)}/${userId}/m/${userId}.jpg`;
+                img.onerror = () => {
+                  img.src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
+                };
+              }
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "username", children: userNick }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: "오프라인" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "watchers", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "dot profile-grayscale", role: "img", children: "●" }),
+            "오프라인"
+          ] })
+        ]
+      }
+    );
+  });
   const DEFAULT_SHOW_COUNT = 30;
+  const SECTION_FA_ICONS = {
+    follow: "fa-star",
+    myplus: "fa-thumbs-up",
+    top: "fa-fire"
+  };
   const SidebarSection = observer(
-    ({
-      id: id2,
-      title,
-      href,
-      channels,
-      isLoading = false,
-      isMinimized = false,
-      defaultExpanded = true
-    }) => {
+    ({ id: id2, title, href, channels, isLoading = false, maxCount, children }) => {
+      useSettingsStore();
       const [showAll, setShowAll] = reactExports.useState(false);
-      const [collapsed, setCollapsed] = reactExports.useState(!defaultExpanded);
-      const visibleChannels = reactExports.useMemo(() => {
-        if (collapsed) return [];
-        if (showAll) return channels;
-        return channels.slice(0, DEFAULT_SHOW_COUNT);
-      }, [channels, showAll, collapsed]);
+      const limit = maxCount && maxCount > 0 ? maxCount : DEFAULT_SHOW_COUNT;
+      reactExports.useEffect(() => {
+        setShowAll(false);
+      }, [limit]);
+      const visibleChannels = showAll ? channels : channels.slice(0, limit);
       const renderChannel = (data, idx) => {
         var _a2;
         switch (data.type) {
           case "chzzk":
-            return /* @__PURE__ */ jsxRuntimeExports.jsx(ChannelItemChzzk, { data }, `${(_a2 = data.channel.channel) == null ? void 0 : _a2.channelId}_${idx}`);
+            return /* @__PURE__ */ jsxRuntimeExports.jsx(ChannelItemChzzk, { data }, `chzzk_${((_a2 = data.channel.channel) == null ? void 0 : _a2.channelId) ?? idx}`);
           case "soop_offline":
           case "soop_feed":
-            return /* @__PURE__ */ jsxRuntimeExports.jsx(ChannelItemOffline, { data }, `${data.channel.user_id}_${idx}`);
+            return /* @__PURE__ */ jsxRuntimeExports.jsx(ChannelItemOffline, { data }, `${data.type}_${data.channel.user_id ?? idx}`);
           default:
-            return /* @__PURE__ */ jsxRuntimeExports.jsx(
-              ChannelItem,
-              {
-                data
-              },
-              `${data.channel.user_id}_${data.channel.broad_no}_${idx}`
-            );
+            return /* @__PURE__ */ jsxRuntimeExports.jsx(ChannelItem, { data }, `soop_${data.channel.user_id}_${data.channel.broad_no}`);
         }
       };
-      if (isMinimized) {
+      if (channels.length === 0 && !isLoading) {
         return null;
       }
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "users-section", id: id2, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "top-section", children: [
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `section-wrapper ${id2}`, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `top-section ${id2}`, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "max", children: /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href, target: "_blank", rel: "noreferrer", children: title }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              id: `toggleButton_${id2}`,
-              onClick: () => setCollapsed((p2) => !p2),
-              title: collapsed ? "펼치기" : "접기",
-              children: collapsed ? "▶" : "▼"
-            }
-          )
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "min", children: /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href, target: "_blank", rel: "noreferrer", children: /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: `fa ${SECTION_FA_ICONS[id2] ?? "fa-list"} section-icon` }) }) })
         ] }),
-        !collapsed && /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: isLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "8px 10px", fontSize: 13, color: "#888" }, children: "로딩 중..." }) : channels.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "8px 10px", fontSize: 13, color: "#888" }, children: "방송 중인 채널이 없습니다." }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        children,
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `users-section ${id2}`, children: isLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "8px 10px", fontSize: 13, color: "#888" }, children: "로딩 중..." }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
           visibleChannels.map((data, idx) => renderChannel(data, idx)),
-          !showAll && channels.length > DEFAULT_SHOW_COUNT && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              className: "user show-more",
-              style: {
-                maxHeight: "initial",
-                opacity: 1,
-                padding: "4px 0",
-                pointerEvents: "initial"
-              },
-              onClick: () => setShowAll(true),
-              children: [
-                "+ ",
-                channels.length - DEFAULT_SHOW_COUNT,
-                "개 더보기"
-              ]
-            }
-          )
+          !showAll && channels.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "user show-more", onClick: () => setShowAll(true), children: [
+            "+ ",
+            channels.length - limit,
+            "개 더보기"
+          ] })
         ] }) })
       ] });
     }
@@ -12688,9 +12995,7 @@
         {
           className: `fav-group-tab${sidebarStore.selectedPinnedCategoryIdx === Number(cat.categoryId) ? " active" : ""}`,
           onClick: () => {
-            sidebarStore.setSelectedPinnedCategoryIdx(
-              Number(cat.categoryId)
-            );
+            sidebarStore.setSelectedPinnedCategoryIdx(Number(cat.categoryId));
           },
           children: cat.categoryName
         },
@@ -12719,7 +13024,35 @@
     const [visible, setVisible] = reactExports.useState(false);
     const [pos, setPos] = reactExports.useState({ x: 0, y: 0 });
     const [data, setData] = reactExports.useState(null);
+    const [resolvedThumbnail, setResolvedThumbnail] = reactExports.useState(null);
     const ref = reactExports.useRef(null);
+    reactExports.useEffect(() => {
+      if (!data) {
+        setResolvedThumbnail(null);
+        return;
+      }
+      const direct = data.thumbnailUrl || (data.broadNo ? `https://liveimg.sooplive.com/m/${data.broadNo}.jpg` : null);
+      if (direct) {
+        setResolvedThumbnail(direct);
+        return;
+      }
+      if (data.platform === "chzzk" && data.userId) {
+        setResolvedThumbnail(null);
+        fetchBroadList(
+          `https://api.chzzk.naver.com/service/v1/channels/${data.userId}/data?fields=topExposedVideos`,
+          100
+        ).then((res) => {
+          var _a2, _b2, _c;
+          const liveImageUrl = (_c = (_b2 = (_a2 = res == null ? void 0 : res.content) == null ? void 0 : _a2.topExposedVideos) == null ? void 0 : _b2.openLive) == null ? void 0 : _c.liveImageUrl;
+          if (liveImageUrl) {
+            setResolvedThumbnail(liveImageUrl.replace("{type}", "360"));
+          }
+        }).catch(() => {
+        });
+      } else {
+        setResolvedThumbnail(null);
+      }
+    }, [data]);
     reactExports.useEffect(() => {
       globalShowFn = (tooltipData, x2, y2) => {
         if (!settings.isThumbnailTooltipEnabled) return;
@@ -12747,146 +13080,444 @@
       el2.style.top = `${y2}px`;
     }, [visible, pos]);
     if (!settings.isThumbnailTooltipEnabled || !visible || !data) return null;
-    const thumbnailSrc = data.thumbnailUrl || (data.broadNo ? `https://liveimg.sooplive.com/m/${data.broadNo}.jpg` : null);
+    const cacheBuster = `?${Math.floor(Date.now() / 1e4)}`;
+    const thumbnailSrc = resolvedThumbnail ? resolvedThumbnail + (resolvedThumbnail.startsWith("http") && !resolvedThumbnail.startsWith("https://stimg.") ? cacheBuster : "") : null;
     const elapsed = data.broadStart && data.type === "live" ? getElapsedTime(data.broadStart) : null;
-    return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      "div",
-      {
-        ref,
-        className: `tooltip-container${visible ? " visible" : ""}`,
-        style: { position: "fixed" },
-        children: [
-          thumbnailSrc && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "thumbs-box", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: thumbnailSrc, alt: data.broadTitle }),
-            data.totalViewCnt !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "thumb-overlay-bottom", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "views", children: [
-                addNumberSeparator(data.totalViewCnt),
-                "명"
-              ] }),
-              elapsed && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "duration-overlay", children: elapsed })
-            ] })
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { ref, className: `tooltip-container${visible ? " visible" : ""}`, style: { position: "fixed" }, children: [
+      thumbnailSrc && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "thumbs-box", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: thumbnailSrc, alt: data.broadTitle }),
+        data.totalViewCnt !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "thumb-overlay-bottom", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "views", children: [
+            addNumberSeparator(data.totalViewCnt),
+            "명"
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "tooltiptext", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "tooltip-header", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "tooltip-username", children: data.userNick }),
-              elapsed && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "tooltip-time", children: elapsed })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "tooltip-description", children: data.broadTitle })
-          ] })
-        ]
-      }
-    );
+          elapsed && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "duration-overlay", children: elapsed })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "tooltiptext", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "tooltip-header", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "tooltip-username", children: data.userNick }),
+          elapsed && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "tooltip-time", children: elapsed })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "tooltip-description", children: data.broadTitle })
+      ] })
+    ] });
   });
   const SidebarView = observer(() => {
     const settings = useSettingsStore();
     const sidebarStore = useSidebarStore();
     reactExports.useEffect(() => {
+      loadCategoryData();
       if (settings.isFavoriteGroupEnabled) {
-        fetchFavoriteGroups().then(
-          (groups) => sidebarStore.setFavoriteGroups(groups)
-        );
+        fetchFavoriteGroups().then((groups) => sidebarStore.setFavoriteGroups(groups));
       }
-      sidebarStore.startPolling(30);
+      sidebarStore.startPolling(settings.pollIntervalSeconds);
       return () => {
         sidebarStore.stopPolling();
       };
     }, []);
+    reactExports.useEffect(() => {
+      sidebarStore.stopPolling();
+      sidebarStore.startPolling(settings.pollIntervalSeconds);
+    }, [settings.pollIntervalSeconds]);
+    reactExports.useEffect(() => {
+      sidebarStore.reprocessFollow();
+    }, [
+      settings.isPinnedStreamWithNotificationEnabled,
+      settings.isPinnedStreamWithPinEnabled,
+      settings.isPinnedOnlineOnlyEnabled,
+      settings.isRandomSortEnabled,
+      settings.isBlockedCategorySortingEnabled,
+      settings.isChannelFeedEnabled
+    ]);
+    reactExports.useEffect(() => {
+      sidebarStore.reprocessMyplus();
+    }, [settings.myplusOrder]);
+    reactExports.useEffect(() => {
+      if (!settings.isThumbnailTooltipEnabled) return;
+      const handleMouseOver = (e) => {
+        const target = e.target;
+        const soopItem = target.closest("[data-broadcast-no]");
+        if (soopItem) {
+          const broadNo = soopItem.dataset.broadcastNo;
+          const userId = soopItem.dataset.userId ?? "";
+          const userNick = soopItem.dataset.userNick ?? "";
+          const broadTitle = soopItem.dataset.broadTitle ?? "";
+          if (!broadNo) return;
+          const broadStart = soopItem.dataset.broadStart;
+          const totalViewCntRaw = soopItem.dataset.totalViewCnt;
+          const totalViewCnt = totalViewCntRaw !== void 0 ? parseInt(totalViewCntRaw, 10) : void 0;
+          showTooltip(
+            { userId, userNick, broadTitle, broadNo, broadStart, totalViewCnt, type: "live" },
+            e.clientX,
+            e.clientY
+          );
+          return;
+        }
+        const chzzkItem = target.closest("[data-chzzk-channel-id]");
+        if (chzzkItem) {
+          const userId = chzzkItem.dataset.chzzkChannelId ?? "";
+          const userNick = chzzkItem.dataset.channelName ?? "";
+          const broadTitle = chzzkItem.dataset.liveTitle ?? "";
+          const thumbnailUrl = chzzkItem.dataset.liveImageUrl || void 0;
+          const broadStart = chzzkItem.dataset.openDate || void 0;
+          const viewsRaw = chzzkItem.dataset.concurrentUserCount;
+          const totalViewCnt = viewsRaw !== void 0 ? parseInt(viewsRaw, 10) : void 0;
+          showTooltip(
+            {
+              userId,
+              userNick,
+              broadTitle,
+              thumbnailUrl,
+              broadStart,
+              totalViewCnt,
+              type: "live",
+              platform: "chzzk"
+            },
+            e.clientX,
+            e.clientY
+          );
+        }
+      };
+      const handleMouseOut = () => hideTooltip();
+      document.addEventListener("mouseover", handleMouseOver);
+      document.addEventListener("mouseout", handleMouseOut);
+      return () => {
+        document.removeEventListener("mouseover", handleMouseOver);
+        document.removeEventListener("mouseout", handleMouseOut);
+      };
+    }, [settings.isThumbnailTooltipEnabled]);
+    reactExports.useEffect(() => {
+      sidebarStore.reprocessTop();
+    }, [settings.isTopDuplicateRemovalEnabled]);
+    const [refreshProgress, setRefreshProgress] = reactExports.useState(0);
+    reactExports.useEffect(() => {
+      const INTERVAL = settings.pollIntervalSeconds * 1e3;
+      const tick = () => {
+        const elapsed = sidebarStore.lastFetchTime ? Date.now() - sidebarStore.lastFetchTime : 0;
+        setRefreshProgress(Math.min(100, elapsed / INTERVAL * 100));
+      };
+      tick();
+      const timer = setInterval(tick, 500);
+      return () => clearInterval(timer);
+    }, [sidebarStore.lastFetchTime, settings.pollIntervalSeconds]);
     const sidebarClass = `${settings.isSidebarMinimized ? "min" : "max"}`;
-    const handleFoldClick = () => {
-      settings.setSetting("isSidebarMinimized", true);
-    };
-    const handleUnfoldClick = () => {
-      settings.setSetting("isSidebarMinimized", false);
-    };
+    const handleToggle = () => settings.setSetting("isSidebarMinimized", !settings.isSidebarMinimized);
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "sidebar", className: sidebarClass, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          className: "button-fold-sidebar",
-          onClick: handleFoldClick,
-          title: "사이드바 접기"
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          className: "button-unfold-sidebar",
-          onClick: handleUnfoldClick,
-          title: "사이드바 펼치기"
-        }
-      ),
-      settings.isFavoriteGroupEnabled && !settings.isSidebarMinimized && /* @__PURE__ */ jsxRuntimeExports.jsx(FavoriteGroupTabs, {}),
-      settings.isCategoryGroupEnabled && !settings.isSidebarMinimized && sidebarStore.pinnedCategories.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(CategoryGroupTabs, {}),
-      settings.displayFollow && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "sidebar-refresh-bar", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "sidebar-refresh-fill", style: { width: `${refreshProgress}%` } }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "button-fold-sidebar", role: "button", onClick: handleToggle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "sidebar-refresh-countdown" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "button-unfold-sidebar", role: "button", onClick: handleToggle }),
+      settings.displayFollow > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
         SidebarSection,
         {
-          id: "users-section-follow",
-          title: "즐겨찾기",
-          href: "https://www.sooplive.com/myplus",
+          id: "follow",
+          title: "즐겨찾기 채널",
+          href: "https://www.sooplive.com/my/favorite",
           channels: sidebarStore.followChannels,
           isLoading: sidebarStore.isFollowLoading,
-          isMinimized: settings.isSidebarMinimized,
-          defaultExpanded: true
+          maxCount: settings.displayFollow,
+          children: settings.isFavoriteGroupEnabled && /* @__PURE__ */ jsxRuntimeExports.jsx(FavoriteGroupTabs, {})
         }
       ),
-      settings.displayMyplus && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      settings.displayMyplus > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
         SidebarSection,
         {
-          id: "users-section-myplus",
-          title: "마이플러스",
+          id: "myplus",
+          title: "추천 채널",
           href: "https://www.sooplive.com/myplus",
           channels: sidebarStore.myplusChannels,
           isLoading: sidebarStore.isMyplusLoading,
-          isMinimized: settings.isSidebarMinimized
+          maxCount: settings.displayMyplus
         }
       ),
-      settings.displayTop && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      settings.displayTop > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
         SidebarSection,
         {
-          id: "users-section-top",
-          title: "인기 방송",
-          href: "https://www.sooplive.com/",
+          id: "top",
+          title: "인기 채널",
+          href: "https://www.sooplive.com/live/all",
           channels: sidebarStore.topChannels,
           isLoading: sidebarStore.isTopLoading,
-          isMinimized: settings.isSidebarMinimized
+          maxCount: settings.displayTop,
+          children: settings.isCategoryGroupEnabled && sidebarStore.pinnedCategories.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(CategoryGroupTabs, {})
         }
       ),
       /* @__PURE__ */ jsxRuntimeExports.jsx(TooltipPreview, {})
     ] });
   });
-  const SECTIONS = [
-    { id: "broadcast-list", label: "방송 목록" },
-    { id: "sidebar", label: "사이드바" },
-    { id: "live-player", label: "LIVE 플레이어" },
-    { id: "vod-player", label: "VOD 플레이어" },
-    { id: "chat", label: "채팅창" },
-    { id: "misc", label: "기타" },
-    { id: "block-info", label: "차단/부가설명" }
+  const BUTTON_DATA = [
+    { id: "nav-live", label: "LIVE", href: "https://www.sooplive.com/live/all", onClickTarget: "#live > a" },
+    { id: "nav-my", label: "MY", href: "https://www.sooplive.com/my/favorite", onClickTarget: "#my > a" },
+    {
+      id: "nav-search",
+      label: "탐색",
+      href: "https://www.sooplive.com/directory/category",
+      onClickTarget: "#cate > a"
+    },
+    { id: "nav-catch", label: "캐치", href: "https://vod.sooplive.com/player/catch", onClickTarget: "#catch > a" }
   ];
-  const Toggle = ({ checked, onChange, id: id2 }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "switch_v8xK4z", htmlFor: id2, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "input",
-      {
-        id: id2,
-        type: "checkbox",
-        checked,
-        onChange: (e) => onChange(e.target.checked)
+  const isMainPage = () => window.location.href.startsWith("https://www.sooplive.com");
+  const NavButtons = observer(() => {
+    useSettingsStore();
+    const handleClick = (e, onClickTarget) => {
+      if (isMainPage() && onClickTarget) {
+        const targetEl = document.querySelector(onClickTarget);
+        if (targetEl) {
+          e.preventDefault();
+          targetEl.click();
+        }
       }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "slider_v8xK4z" })
+    };
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: [...BUTTON_DATA].reverse().map((btn) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "a",
+      {
+        id: btn.id,
+        href: btn.href,
+        target: "_self",
+        rel: "noreferrer",
+        onClick: (e) => handleClick(e, btn.onClickTarget),
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", className: "left_nav_button", children: btn.label })
+      },
+      btn.id
+    )) });
+  });
+  const NavBar = observer(() => {
+    const [container, setContainer] = reactExports.useState(null);
+    reactExports.useEffect(() => {
+      const existing = document.querySelector(".left_navbar");
+      if (existing) {
+        setContainer(existing);
+        return;
+      }
+      const div = document.createElement("div");
+      div.className = "left_navbar";
+      waitForElementAsync("#serviceHeader").then((serviceHeader) => {
+        if (serviceHeader) {
+          serviceHeader.prepend(div);
+        } else {
+          document.body.prepend(div);
+        }
+        setContainer(div);
+      });
+    }, []);
+    if (!container) return null;
+    return ReactDOM.createPortal(/* @__PURE__ */ jsxRuntimeExports.jsx(NavButtons, {}), container);
+  });
+  const EXPORT_KEYS = [
+    "isCustomSidebarEnabled",
+    "isRandomSortEnabled",
+    "isFavoriteGroupEnabled",
+    "isShortenFavoriteGroupNameEnabled",
+    "isCategoryGroupEnabled",
+    "isShortenCategoryNameEnabled",
+    "isChannelFeedEnabled",
+    "isBlockedCategorySortingEnabled",
+    "isPinnedStreamWithNotificationEnabled",
+    "isPinnedStreamWithPinEnabled",
+    "isPinnedOnlineOnlyEnabled",
+    "isSmallUserLayoutEnabled",
+    "isSendLoadBroadEnabled",
+    "isDuplicateRemovalEnabled",
+    "isTopDuplicateRemovalEnabled",
+    "myplusOrder",
+    "isChzzkFollowChannelsEnabled",
+    "isChzzkTopChannelsEnabled",
+    "displayFollow",
+    "displayMyplus",
+    "pollIntervalSeconds",
+    "displayMyplusvod",
+    "displayTop",
+    "nicknameWidth",
+    "isAlignNicknameRightEnabled",
+    "isThemeLockEnabled",
+    "isRemoveRedistributionTagEnabled",
+    "isRemoveWatchLaterButtonEnabled",
+    "isRemoveBroadStartTimeTagEnabled",
+    "isReplaceEmptyThumbnailEnabled",
+    "isThumbnailTooltipEnabled",
+    "isRemoveCarouselEnabled",
+    "isBroadTitleTextEllipsisEnabled",
+    "isAutoReloadLiveEnabled",
+    "isNoAutoVODEnabled",
+    "isAutoReloadAfterBroadcastEndEnabled",
+    "isRedirectLiveEnabled",
+    "redirectLiveSortOption",
+    "isHideEsportsInfoEnabled",
+    "isShowPauseButtonEnabled",
+    "isCaptureButtonEnabled",
+    "preferredQuality",
+    "isClickPlayerEventMapperEnabled",
+    "selectLeftClick",
+    "selectRightClick",
+    "isShowBufferTimeTitleEnabled",
+    "isShowBufferTimeChatEnabled",
+    "isSharpmodeShortcutEnabled",
+    "isLLShortcutEnabled",
+    "isQualityChangeShortcutEnabled",
+    "isMutedInactiveTabsEnabled",
+    "isAutoChangeQualityEnabled",
+    "isDocumentTitleUpdateEnabled",
+    "isShowSidebarOnScreenModeAlwaysEnabled",
+    "isMouseOverSideBarEnabled",
+    "isChatPositionEnabled",
+    "isAutoScreenModeEnabled",
+    "isAdaptiveSpeedControlEnabled",
+    "isClickToMuteEnabled",
+    "isSelectBestQualityEnabled",
+    "isRemoveShadowsFromCatchEnabled",
+    "isVODHighlightEnabled",
+    "isHideSupporterBadgeEnabled",
+    "isHideFanBadgeEnabled",
+    "isHideSubBadgeEnabled",
+    "isHideVIPBadgeEnabled",
+    "isHideMngrBadgeEnabled",
+    "isHideStreamerBadgeEnabled",
+    "isUnlockCopyPasteEnabled",
+    "isHideButtonsAboveChatInputEnabled",
+    "isHideChatItemsEnabled"
+  ];
+  async function compressSettings(data) {
+    const encoded = new TextEncoder().encode(JSON.stringify(data));
+    const cs = new CompressionStream("deflate-raw");
+    const writer = cs.writable.getWriter();
+    writer.write(encoded);
+    writer.close();
+    const chunks = [];
+    const reader = cs.readable.getReader();
+    for (; ; ) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+    }
+    const bytes = new Uint8Array(chunks.reduce((n2, c) => n2 + c.length, 0));
+    let off = 0;
+    for (const c of chunks) {
+      bytes.set(c, off);
+      off += c.length;
+    }
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  }
+  async function decompressSettings(b64) {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const ds = new DecompressionStream("deflate-raw");
+    const writer = ds.writable.getWriter();
+    writer.write(bytes);
+    writer.close();
+    const chunks = [];
+    const reader = ds.readable.getReader();
+    for (; ; ) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+    }
+    const combined = new Uint8Array(chunks.reduce((n2, c) => n2 + c.length, 0));
+    let off = 0;
+    for (const c of chunks) {
+      combined.set(c, off);
+      off += c.length;
+    }
+    return JSON.parse(new TextDecoder().decode(combined));
+  }
+  const SECTIONS = [
+    { id: "broadcast-options-title", label: "방송 목록" },
+    { id: "sidebar-options-title", label: "사이드바" },
+    { id: "live-player-options-title", label: "LIVE 플레이어" },
+    { id: "vod-player-options-title", label: "VOD 플레이어" },
+    { id: "chat-options-title", label: "채팅창" },
+    { id: "etc-options-title", label: "기타" },
+    { id: "management-title", label: "차단/부가설명" }
+  ];
+  const Toggle = ({ checked, onChange, id: id2 }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "switch_v8xK4z", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("input", { id: id2, type: "checkbox", checked, onChange: (e) => onChange(e.target.checked) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "slider_v8xK4z round" })
   ] });
-  const OptionRow = ({ label, checked, onChange, id: id2, details }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: id2, children: label }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Toggle, { checked, onChange, id: id2 }),
-    details && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "option-details_v8xK4z", children: details })
+  const BADGE_CONFIG = {
+    list: { label: "목록", bg: "rgba(121,134,203,0.18)", color: "#7986cb" },
+    sidebar: { label: "사이드바", bg: "rgba(77,182,172,0.18)", color: "#4db6ac" },
+    follow: { label: "즐겨찾기", bg: "rgba(249,168,37,0.18)", color: "#f9a825" },
+    myplus: { label: "추천채널", bg: "rgba(102,187,106,0.18)", color: "#66bb6a" },
+    top: { label: "인기채널", bg: "rgba(239,83,80,0.18)", color: "#ef5350" },
+    live: { label: "LIVE", bg: "rgba(229,57,53,0.18)", color: "#ef5350" },
+    vod: { label: "VOD", bg: "rgba(103,58,183,0.18)", color: "#9575cd" },
+    etc: { label: "기타", bg: "rgba(158,158,158,0.18)", color: "#9e9e9e" },
+    player: { label: "플레이어", bg: "rgba(33,150,243,0.18)", color: "#42a5f5" },
+    chat: { label: "채팅창", bg: "rgba(0,188,212,0.18)", color: "#26c6da" },
+    shortcut: { label: "단축키", bg: "rgba(156,39,176,0.18)", color: "#ce93d8" },
+    tab: { label: "탭", bg: "rgba(96,125,139,0.18)", color: "#90a4ae" },
+    screen: { label: "스크린", bg: "rgba(25,118,210,0.18)", color: "#64b5f6" },
+    nickname: { label: "닉네임", bg: "rgba(233,30,99,0.18)", color: "#f48fb1" }
+  };
+  const B = ({ k: k2 }) => {
+    const c = BADGE_CONFIG[k2];
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "span",
+      {
+        style: {
+          display: "inline-block",
+          padding: "1px 6px",
+          marginRight: 8,
+          borderRadius: 3,
+          fontSize: "10px",
+          fontWeight: 700,
+          lineHeight: "16px",
+          verticalAlign: "middle",
+          background: c.bg,
+          color: c.color,
+          border: `1px solid ${c.color}55`,
+          whiteSpace: "nowrap",
+          flexShrink: 0
+        },
+        children: c.label
+      }
+    );
+  };
+  const Opt = ({ id: id2, badge, label, checked, onChange }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: id2, children: [
+      badge != null && /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: badge }),
+      label
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Toggle, { checked, onChange, id: id2 })
   ] });
   const SettingModal = observer(() => {
-    var _a2, _b2;
+    var _a2;
     const s = useSettingsStore();
     const [open, setOpen] = reactExports.useState(false);
     const [activeSection, setActiveSection] = reactExports.useState(SECTIONS[0].id);
     const [searchText, setSearchText] = reactExports.useState("");
+    const [exportMsg, setExportMsg] = reactExports.useState("");
+    const [importMsg, setImportMsg] = reactExports.useState("");
     const bodyRef = reactExports.useRef(null);
+    const [triggerContainer, setTriggerContainer] = reactExports.useState(null);
+    reactExports.useEffect(() => {
+      const containerDiv = document.createElement("div");
+      containerDiv.setAttribute("id", "openModalBtn");
+      const attach = (serviceUtil) => {
+        serviceUtil.prepend(containerDiv);
+        setTriggerContainer(containerDiv);
+      };
+      const existing = document.querySelector("div.serviceUtil");
+      if (existing) {
+        attach(existing);
+      } else {
+        const observer2 = new MutationObserver(() => {
+          const el2 = document.querySelector("div.serviceUtil");
+          if (el2) {
+            observer2.disconnect();
+            attach(el2);
+          }
+        });
+        observer2.observe(document.body, { childList: true, subtree: true });
+        return () => {
+          observer2.disconnect();
+          containerDiv.remove();
+        };
+      }
+      return () => containerDiv.remove();
+    }, []);
     const openModal = () => setOpen(true);
     const closeModal = () => setOpen(false);
     reactExports.useEffect(() => {
@@ -12897,755 +13528,1052 @@
       document.addEventListener("keydown", handler);
       return () => document.removeEventListener("keydown", handler);
     }, [open]);
+    reactExports.useEffect(() => {
+      if (!open) return;
+      const container = bodyRef.current;
+      if (!container) return;
+      const updateActive = () => {
+        let active = SECTIONS[0].id;
+        const containerTop = container.getBoundingClientRect().top;
+        for (const sec of SECTIONS) {
+          const el2 = container.querySelector(`#${sec.id}`);
+          if (!el2) continue;
+          const relTop = el2.getBoundingClientRect().top - containerTop;
+          if (relTop <= 80) {
+            active = sec.id;
+          }
+        }
+        setActiveSection(active);
+      };
+      container.addEventListener("scroll", updateActive, { passive: true });
+      return () => container.removeEventListener("scroll", updateActive);
+    }, [open]);
     const scrollToSection = (id2) => {
       var _a3;
       setActiveSection(id2);
-      const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`[data-section-id="${id2}"]`);
+      const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") ?? "";
-    const SectionTitle = ({
-      id: id2,
-      label
-    }) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "div",
-      {
-        className: "section-title_v8xK4z",
-        "data-section-id": id2,
-        id: `section-${id2}`,
-        children: label
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260523110851";
+    const handleExport = async () => {
+      const data = {};
+      for (const key of EXPORT_KEYS) {
+        data[key] = s[key];
       }
-    );
+      try {
+        const compressed = await compressSettings(data);
+        await navigator.clipboard.writeText(compressed);
+        setExportMsg("복사됨");
+        setTimeout(() => setExportMsg(""), 2500);
+      } catch {
+        setExportMsg("복사 실패");
+        setTimeout(() => setExportMsg(""), 3e3);
+      }
+    };
+    const handleImport = async () => {
+      try {
+        const text = (await navigator.clipboard.readText()).trim();
+        if (!text) throw new Error("empty");
+        let data;
+        try {
+          data = await decompressSettings(text);
+        } catch {
+          data = JSON.parse(text);
+        }
+        if (typeof data !== "object" || data === null) throw new Error("invalid");
+        for (const [key, value] of Object.entries(data)) {
+          if (EXPORT_KEYS.includes(key)) {
+            s.setSetting(key, value);
+          }
+        }
+        setImportMsg("적용 완료");
+        setTimeout(() => setImportMsg(""), 3e3);
+      } catch {
+        setImportMsg("올바르지 않은 설정 코드");
+        setTimeout(() => setImportMsg(""), 3e3);
+      }
+    };
     const modal = open ? /* @__PURE__ */ jsxRuntimeExports.jsx(
       "div",
       {
         id: "myModal",
+        className: "modal_v8xK4z",
         style: { display: "block" },
         onClick: (e) => {
           if (e.target === e.currentTarget) closeModal();
         },
         children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "modal-content_v8xK4z", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "modal-index_v8xK4z", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "index-title_v8xK4z", children: "설정" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("nav", { className: "modal-index_v8xK4z", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "index-title_v8xK4z", children: "설정 메뉴" }),
             SECTIONS.map((sec) => /* @__PURE__ */ jsxRuntimeExports.jsx(
               "button",
               {
                 className: `index-button_v8xK4z${activeSection === sec.id ? " active" : ""}`,
+                "data-target-id": sec.id,
                 onClick: () => scrollToSection(sec.id),
                 children: sec.label
               },
               sec.id
             )),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "div",
+              {
+                style: {
+                  marginTop: "auto",
+                  padding: "6px 0 0",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4
+                },
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "button",
+                    {
+                      className: "index-button_v8xK4z",
+                      onClick: handleExport,
+                      disabled: !!exportMsg,
+                      style: {
+                        textAlign: "left",
+                        color: exportMsg === "복사 실패" ? "#f44336" : exportMsg ? "#4caf50" : void 0
+                      },
+                      children: exportMsg || "내보내기"
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "button",
+                    {
+                      className: "index-button_v8xK4z",
+                      onClick: handleImport,
+                      disabled: !!importMsg,
+                      style: {
+                        textAlign: "left",
+                        color: importMsg === "올바르지 않은 설정 코드" ? "#f44336" : importMsg ? "#4caf50" : void 0
+                      },
+                      children: importMsg || "불러오기"
+                    }
+                  )
+                ]
+              }
+            ),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "modal-version_v8xK4z", children: [
-              "버전: ",
-              version,
+              "SOOP Sidebar UI",
               /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "a",
-                {
-                  href: "https://github.com/bcong/soop-sidebar-extension",
-                  target: "_blank",
-                  rel: "noreferrer",
-                  children: "GitHub"
-                }
-              )
+              "(",
+              version,
+              ")"
             ] })
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "modal-main-content_v8xK4z", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "modal-header_v8xK4z", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "modal-breadcrumb_v8xK4z", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "breadcrumb-root_v8xK4z", children: "설정" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "breadcrumb-sep_v8xK4z", children: "›" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "breadcrumb-current_v8xK4z", children: ((_b2 = SECTIONS.find((s2) => s2.id === activeSection)) == null ? void 0 : _b2.label) ?? "" })
-              ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "modal-header_v8xK4z", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "modal-search-container_v8xK4z", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "search-input-wrapper_v8xK4z", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "search-icon_v8xK4z", children: "🔍" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "search-icon_v8xK4z", children: /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-search" }) }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
                   "input",
                   {
                     id: "modal-search-input_v8xK4z",
                     type: "text",
                     placeholder: "설정 검색...",
+                    autoComplete: "off",
                     value: searchText,
                     onChange: (e) => setSearchText(e.target.value)
                   }
                 ),
-                searchText && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
                   "button",
                   {
                     id: "modal-search-clear_v8xK4z",
+                    title: "검색 비우기",
+                    style: { display: searchText ? void 0 : "none" },
                     onClick: () => setSearchText(""),
-                    children: "✕"
+                    children: "×"
                   }
                 )
               ] }) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "button",
-                {
-                  className: "close-button_v8xK4z",
-                  onClick: closeModal,
-                  children: "×"
-                }
-              )
+              /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "close-button_v8xK4z", "aria-label": "닫기", onClick: closeModal, children: "×" })
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "modal-body_v8xK4z", ref: bodyRef, children: [
               /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SectionTitle, { id: "broadcast-list", label: "방송 목록" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { id: "broadcast-options-title", className: "section-title_v8xK4z", children: "방송 목록 옵션" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z multi-option_v8xK4z", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Opt,
+                    {
+                      id: "switchRemoveRedistributionTag",
+                      badge: "list",
+                      label: "탐방허용 태그 숨기기",
+                      checked: s.isRemoveRedistributionTagEnabled,
+                      onChange: (v2) => s.setSetting("isRemoveRedistributionTagEnabled", v2)
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Opt,
+                    {
+                      id: "switchRemoveWatchLaterButton",
+                      badge: "list",
+                      label: "나중에 보기 버튼 숨기기",
+                      checked: s.isRemoveWatchLaterButtonEnabled,
+                      onChange: (v2) => s.setSetting("isRemoveWatchLaterButtonEnabled", v2)
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Opt,
+                    {
+                      id: "switchRemoveBroadStartTimeTag",
+                      badge: "list",
+                      label: "방송 시작 시간 숨기기",
+                      checked: s.isRemoveBroadStartTimeTagEnabled,
+                      onChange: (v2) => s.setSetting("isRemoveBroadStartTimeTagEnabled", v2)
+                    }
+                  )
+                ] }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
+                  Opt,
                   {
-                    label: "커스텀 사이드바 활성화",
-                    checked: s.isCustomSidebarEnabled,
-                    onChange: (v2) => s.setSetting("isCustomSidebarEnabled", v2),
-                    id: "isCustomSidebarEnabled"
+                    id: "switchReplaceEmptyThumbnail",
+                    badge: "list",
+                    label: "마우스 오버시 연령 제한 썸네일 보기",
+                    checked: s.isReplaceEmptyThumbnailEnabled,
+                    onChange: (v2) => s.setSetting("isReplaceEmptyThumbnailEnabled", v2)
                   }
                 ),
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
+                  Opt,
                   {
-                    label: "즐겨찾기 그룹 탭",
-                    checked: s.isFavoriteGroupEnabled,
-                    onChange: (v2) => s.setSetting("isFavoriteGroupEnabled", v2),
-                    id: "isFavoriteGroupEnabled"
+                    id: "switchThumbnailTooltip",
+                    badge: "list",
+                    label: "마우스 오버시 썸네일 미리보기 툴팁",
+                    checked: s.isThumbnailTooltipEnabled,
+                    onChange: (v2) => s.setSetting("isThumbnailTooltipEnabled", v2)
                   }
                 ),
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
+                  Opt,
                   {
-                    label: "즐겨찾기 그룹 이름 줄이기",
-                    checked: s.isShortenFavoriteGroupNameEnabled,
-                    onChange: (v2) => s.setSetting("isShortenFavoriteGroupNameEnabled", v2),
-                    id: "isShortenFavoriteGroupNameEnabled"
+                    id: "switchRemoveCarousel",
+                    badge: "list",
+                    label: "자동 재생되는 채널 전광판 숨기기",
+                    checked: s.isRemoveCarouselEnabled,
+                    onChange: (v2) => s.setSetting("isRemoveCarouselEnabled", v2)
                   }
                 ),
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
+                  Opt,
                   {
-                    label: "카테고리 그룹 탭",
-                    checked: s.isCategoryGroupEnabled,
-                    onChange: (v2) => s.setSetting("isCategoryGroupEnabled", v2),
-                    id: "isCategoryGroupEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "카테고리 이름 줄이기",
-                    checked: s.isShortenCategoryNameEnabled,
-                    onChange: (v2) => s.setSetting("isShortenCategoryNameEnabled", v2),
-                    id: "isShortenCategoryNameEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "채널 피드 표시",
-                    checked: s.isChannelFeedEnabled,
-                    onChange: (v2) => s.setSetting("isChannelFeedEnabled", v2),
-                    id: "isChannelFeedEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "차단 카테고리 하단 정렬",
-                    checked: s.isBlockedCategorySortingEnabled,
-                    onChange: (v2) => s.setSetting("isBlockedCategorySortingEnabled", v2),
-                    id: "isBlockedCategorySortingEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "알림 방송 상단 고정",
-                    checked: s.isPinnedStreamWithNotificationEnabled,
-                    onChange: (v2) => s.setSetting("isPinnedStreamWithNotificationEnabled", v2),
-                    id: "isPinnedStreamWithNotificationEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "핀 방송 상단 고정",
-                    checked: s.isPinnedStreamWithPinEnabled,
-                    onChange: (v2) => s.setSetting("isPinnedStreamWithPinEnabled", v2),
-                    id: "isPinnedStreamWithPinEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "고정 채널 온라인만 표시",
-                    checked: s.isPinnedOnlineOnlyEnabled,
-                    onChange: (v2) => s.setSetting("isPinnedOnlineOnlyEnabled", v2),
-                    id: "isPinnedOnlineOnlyEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "마이플러스 방송 표시",
-                    checked: s.displayMyplus,
-                    onChange: (v2) => s.setSetting("displayMyplus", v2),
-                    id: "displayMyplus"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "마이플러스 VOD 표시",
-                    checked: s.displayMyplusvod,
-                    onChange: (v2) => s.setSetting("displayMyplusvod", v2),
-                    id: "displayMyplusvod"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "인기 방송 표시",
-                    checked: s.displayTop,
-                    onChange: (v2) => s.setSetting("displayTop", v2),
-                    id: "displayTop"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "치지직 팔로우 채널 표시",
-                    checked: s.isChzzkFollowChannelsEnabled,
-                    onChange: (v2) => s.setSetting("isChzzkFollowChannelsEnabled", v2),
-                    id: "isChzzkFollowChannelsEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "치지직 인기 채널 표시",
-                    checked: s.isChzzkTopChannelsEnabled,
-                    onChange: (v2) => s.setSetting("isChzzkTopChannelsEnabled", v2),
-                    id: "isChzzkTopChannelsEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "즐겨찾기 중복 제거",
-                    checked: s.isDuplicateRemovalEnabled,
-                    onChange: (v2) => s.setSetting("isDuplicateRemovalEnabled", v2),
-                    id: "isDuplicateRemovalEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "인기 중복 제거",
-                    checked: s.isTopDuplicateRemovalEnabled,
-                    onChange: (v2) => s.setSetting("isTopDuplicateRemovalEnabled", v2),
-                    id: "isTopDuplicateRemovalEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "랜덤 정렬",
-                    checked: s.isRandomSortEnabled,
-                    onChange: (v2) => s.setSetting("isRandomSortEnabled", v2),
-                    id: "isRandomSortEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "새 탭으로 열기",
-                    checked: s.isOpenNewtabEnabled,
-                    onChange: (v2) => s.setSetting("isOpenNewtabEnabled", v2),
-                    id: "isOpenNewtabEnabled"
+                    id: "switchBroadTitleTextEllipsis",
+                    badge: "list",
+                    label: "방송 제목이 긴 경우 ...으로 생략하기",
+                    checked: s.isBroadTitleTextEllipsisEnabled,
+                    onChange: (v2) => s.setSetting("isBroadTitleTextEllipsisEnabled", v2)
                   }
                 )
               ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "divider_v8xK4z" }),
               /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SectionTitle, { id: "sidebar", label: "사이드바" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { id: "sidebar-options-title", className: "section-title_v8xK4z", children: "사이드바 옵션" }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
+                  Opt,
                   {
-                    label: "작은 레이아웃",
-                    checked: s.isSmallUserLayoutEnabled,
-                    onChange: (v2) => s.setSetting("isSmallUserLayoutEnabled", v2),
-                    id: "isSmallUserLayoutEnabled"
+                    id: "switchCustomSidebar",
+                    badge: "sidebar",
+                    label: "사이드바 사용 (해제시 기본 사이드바)",
+                    checked: s.isCustomSidebarEnabled,
+                    onChange: (v2) => s.setSetting("isCustomSidebarEnabled", v2)
                   }
                 ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "닉네임 오른쪽 정렬",
-                    checked: s.isAlignNicknameRightEnabled,
-                    onChange: (v2) => s.setSetting("isAlignNicknameRightEnabled", v2),
-                    id: "isAlignNicknameRightEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z range-option_v8xK4z", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "nicknameWidth", children: "닉네임 너비" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z range-option_v8xK4z customSidebarOptionsContainer", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "favoriteChannelsDisplay", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "follow" }),
+                    "즐겨찾기 채널 표시 수"
+                  ] }),
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "range-container_v8xK4z", children: [
                     /* @__PURE__ */ jsxRuntimeExports.jsx(
                       "input",
                       {
-                        id: "nicknameWidth",
                         type: "range",
-                        min: 40,
-                        max: 160,
+                        id: "favoriteChannelsDisplay",
+                        min: 0,
+                        max: 100,
+                        title: "0 = 숨김",
+                        value: s.displayFollow,
+                        onChange: (e) => s.setSetting("displayFollow", Number(e.target.value))
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { id: "favoriteChannelsDisplayValue", className: "range-value_v8xK4z", children: s.displayFollow })
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z range-option_v8xK4z customSidebarOptionsContainer", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "myPlusChannelsDisplay", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "myplus" }),
+                    "추천 채널 표시 수"
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "range-container_v8xK4z", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "input",
+                      {
+                        type: "range",
+                        id: "myPlusChannelsDisplay",
+                        min: 0,
+                        max: 40,
+                        title: "0 = 숨김",
+                        value: s.displayMyplus,
+                        onChange: (e) => s.setSetting("displayMyplus", Number(e.target.value))
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { id: "myPlusChannelsDisplayValue", className: "range-value_v8xK4z", children: s.displayMyplus })
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z range-option_v8xK4z customSidebarOptionsContainer", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "myPlusVODDisplay", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "myplus" }),
+                    "추천 VOD 표시 수"
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "range-container_v8xK4z", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "input",
+                      {
+                        type: "range",
+                        id: "myPlusVODDisplay",
+                        min: 0,
+                        max: 40,
+                        title: "0 = 숨김",
+                        value: s.displayMyplusvod,
+                        onChange: (e) => s.setSetting("displayMyplusvod", Number(e.target.value))
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { id: "myPlusVODDisplayValue", className: "range-value_v8xK4z", children: s.displayMyplusvod })
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z range-option_v8xK4z customSidebarOptionsContainer", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "popularChannelsDisplay", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "top" }),
+                    "인기 채널 표시 수"
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "range-container_v8xK4z", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "input",
+                      {
+                        type: "range",
+                        id: "popularChannelsDisplay",
+                        min: 0,
+                        max: 40,
+                        title: "0 = 숨김",
+                        value: s.displayTop,
+                        onChange: (e) => s.setSetting("displayTop", Number(e.target.value))
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { id: "popularChannelsDisplayValue", className: "range-value_v8xK4z", children: s.displayTop })
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z customSidebarOptionsContainer", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "pollIntervalSelect", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "sidebar" }),
+                    "새로고침 주기"
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mapper-setting_v8xK4z", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "select",
+                    {
+                      id: "pollIntervalSelect",
+                      value: s.pollIntervalSeconds,
+                      onChange: (e) => s.setSetting("pollIntervalSeconds", Number(e.target.value)),
+                      children: Array.from({ length: 12 }, (_, i) => (i + 1) * 5).map((sec) => /* @__PURE__ */ jsxRuntimeExports.jsxs("option", { value: sec, children: [
+                        sec,
+                        "초"
+                      ] }, sec))
+                    }
+                  ) })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "div",
+                  {
+                    className: "divider_v8xK4z customSidebarOptionsContainer",
+                    style: { marginTop: 15, marginBottom: 15 }
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchSmallUserLayout",
+                    badge: "sidebar",
+                    label: "미니 방송 목록",
+                    checked: s.isSmallUserLayoutEnabled,
+                    onChange: (v2) => s.setSetting("isSmallUserLayoutEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "sendLoadBroadCheck",
+                    badge: "sidebar",
+                    label: "새로고침 없는 방송 전환 사용",
+                    checked: s.isSendLoadBroadEnabled,
+                    onChange: (v2) => s.setSetting("isSendLoadBroadEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchFavoriteGroups",
+                    badge: "follow",
+                    label: "그룹 탭 표시",
+                    checked: s.isFavoriteGroupEnabled,
+                    onChange: (v2) => s.setSetting("isFavoriteGroupEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchShortenFavoriteGroupName",
+                    badge: "follow",
+                    label: "그룹 탭 이름을 한 글자로 축약",
+                    checked: s.isShortenFavoriteGroupNameEnabled,
+                    onChange: (v2) => s.setSetting("isShortenFavoriteGroupNameEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchRandomSort",
+                    badge: "sidebar",
+                    label: "랜덤 정렬 (해제시 시청자 많은 순)",
+                    checked: s.isRandomSortEnabled,
+                    onChange: (v2) => s.setSetting("isRandomSortEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchChannelFeed",
+                    badge: "follow",
+                    label: "오프라인 채널의 최신 글 보기",
+                    checked: s.isChannelFeedEnabled,
+                    onChange: (v2) => s.setSetting("isChannelFeedEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchBlockedCategorySorting",
+                    badge: "follow",
+                    label: "차단된 카테고리를 하단으로 이동",
+                    checked: s.isBlockedCategorySortingEnabled,
+                    onChange: (v2) => s.setSetting("isBlockedCategorySortingEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "fixNotificationChannel",
+                    badge: "follow",
+                    label: "알림 설정된 채널을 상단 고정",
+                    checked: s.isPinnedStreamWithNotificationEnabled,
+                    onChange: (v2) => s.setSetting("isPinnedStreamWithNotificationEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "fixFixedChannel",
+                    badge: "follow",
+                    label: "스트리머 관리에서 고정된 채널을 상단 고정",
+                    checked: s.isPinnedStreamWithPinEnabled,
+                    onChange: (v2) => s.setSetting("isPinnedStreamWithPinEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchPinnedOnlineOnly",
+                    badge: "follow",
+                    label: "온라인일 때만 상단 고정하기",
+                    checked: s.isPinnedOnlineOnlyEnabled,
+                    onChange: (v2) => s.setSetting("isPinnedOnlineOnlyEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "mpSortByViewers",
+                    badge: "sidebar",
+                    label: "정렬을 추천순으로 변경 (해제시 시청자순)",
+                    checked: Boolean(s.myplusOrder),
+                    onChange: (v2) => s.setSetting("myplusOrder", v2 ? 1 : 0)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "removeDuplicates",
+                    badge: "follow",
+                    label: "즐겨찾기 중복 제거",
+                    checked: s.isDuplicateRemovalEnabled,
+                    onChange: (v2) => s.setSetting("isDuplicateRemovalEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchTopDuplicateRemoval",
+                    badge: "top",
+                    label: "인기채널 즐겨찾기 중복 제거",
+                    checked: s.isTopDuplicateRemovalEnabled,
+                    onChange: (v2) => s.setSetting("isTopDuplicateRemovalEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchCategoryGroups",
+                    badge: "top",
+                    label: "카테고리 탭 표시",
+                    checked: s.isCategoryGroupEnabled,
+                    onChange: (v2) => s.setSetting("isCategoryGroupEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchShortenCategoryName",
+                    badge: "top",
+                    label: "카테고리 탭 이름을 한 글자로 축약",
+                    checked: s.isShortenCategoryNameEnabled,
+                    onChange: (v2) => s.setSetting("isShortenCategoryNameEnabled", v2)
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "divider_v8xK4z" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { id: "live-player-options-title", className: "section-title_v8xK4z", children: "LIVE 플레이어 옵션" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchNoAutoVOD",
+                    badge: "live",
+                    label: "방송 종료 후 자동 VOD 재생 중지",
+                    checked: s.isNoAutoVODEnabled,
+                    onChange: (v2) => s.setSetting("isNoAutoVODEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchAutoReloadAfterBroadcastEnd",
+                    badge: "live",
+                    label: "방종 후 방송 재시작 시 자동 진입",
+                    checked: s.isAutoReloadAfterBroadcastEndEnabled,
+                    onChange: (v2) => s.setSetting("isAutoReloadAfterBroadcastEndEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchAutoReloadLive",
+                    badge: "live",
+                    label: "LIVE 방송 자동 새로고침",
+                    checked: s.isAutoReloadLiveEnabled,
+                    onChange: (v2) => s.setSetting("isAutoReloadLiveEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z", id: "redirectLiveOptionContainer", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "switchRedirectLive", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "live" }),
+                    "방송 종료 후 자동 LIVE 이동",
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("sup", { children: "3)" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mapper-setting_v8xK4z", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                      "select",
+                      {
+                        id: "redirectLiveSortOption",
+                        value: s.redirectLiveSortOption,
+                        onChange: (e) => s.setSetting("redirectLiveSortOption", e.target.value),
+                        children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "custom", children: "커스텀" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "mostViewers", children: "시청자 많은 순" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "leastViewers", children: "시청자 적은 순" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "random", children: "랜덤" })
+                        ]
+                      }
+                    ) })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Toggle,
+                    {
+                      checked: s.isRedirectLiveEnabled,
+                      onChange: (v2) => s.setSetting("isRedirectLiveEnabled", v2),
+                      id: "switchRedirectLive"
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchHideEsportsInfo",
+                    badge: "live",
+                    label: "E-Sports 정보 숨기기",
+                    checked: s.isHideEsportsInfoEnabled,
+                    onChange: (v2) => s.setSetting("isHideEsportsInfoEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "showPauseButton",
+                    badge: "player",
+                    label: "일시정지 버튼",
+                    checked: s.isShowPauseButtonEnabled,
+                    onChange: (v2) => s.setSetting("isShowPauseButtonEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchCaptureButton",
+                    badge: "player",
+                    label: "LIVE / VOD 스크린샷 버튼",
+                    checked: s.isCaptureButtonEnabled,
+                    onChange: (v2) => s.setSetting("isCaptureButtonEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchClickToMute",
+                    badge: "player",
+                    label: "클릭으로 음소거",
+                    checked: s.isClickToMuteEnabled,
+                    onChange: (v2) => s.setSetting("isClickToMuteEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "selectPreferredQuality", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "player" }),
+                    "방송 진입시 화질 고정"
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mapper-setting_v8xK4z", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                    "select",
+                    {
+                      id: "selectPreferredQuality",
+                      value: s.preferredQuality,
+                      onChange: (e) => s.setSetting("preferredQuality", e.target.value),
+                      children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "off", children: "사용 안함" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "max", children: "최대화질" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "1440", children: "1440p" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "1080", children: "1080p" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "720", children: "720p" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "540", children: "540p" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "360", children: "360p" })
+                      ]
+                    }
+                  ) })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "switchClickPlayerEventMapper", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "player" }),
+                    "클릭/우클릭 기능 매핑"
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 8 }, children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mapper-setting_v8xK4z", style: { marginLeft: 0 }, children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "selectLeftClick", children: "좌" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                        "select",
+                        {
+                          id: "selectLeftClick",
+                          value: s.selectLeftClick,
+                          onChange: (e) => s.setSetting("selectLeftClick", e.target.value),
+                          children: [
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "none", children: "없음" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleMute", children: "음소거" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "togglePause", children: "일시정지" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleStop", children: "정지" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleScreenMode", children: "스크린모드" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleFullscreen", children: "전체화면" })
+                          ]
+                        }
+                      )
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mapper-setting_v8xK4z", style: { marginLeft: 0 }, children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "selectRightClick", children: "우" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                        "select",
+                        {
+                          id: "selectRightClick",
+                          value: s.selectRightClick,
+                          onChange: (e) => s.setSetting("selectRightClick", e.target.value),
+                          children: [
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "none", children: "없음" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleMute", children: "음소거" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "togglePause", children: "일시정지" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleStop", children: "정지" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleScreenMode", children: "스크린 모드" }),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleFullscreen", children: "전체화면" })
+                          ]
+                        }
+                      )
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      Toggle,
+                      {
+                        checked: s.isClickPlayerEventMapperEnabled,
+                        onChange: (v2) => s.setSetting("isClickPlayerEventMapperEnabled", v2),
+                        id: "switchClickPlayerEventMapper"
+                      }
+                    )
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "showBufferTimeChat",
+                    badge: "chat",
+                    label: "방송 딜레이 표시",
+                    checked: s.isShowBufferTimeChatEnabled,
+                    onChange: (v2) => s.setSetting("isShowBufferTimeChatEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchSharpmodeShortcut",
+                    badge: "shortcut",
+                    label: "'선명한 모드'(e) 활성화",
+                    checked: s.isSharpmodeShortcutEnabled,
+                    onChange: (v2) => s.setSetting("isSharpmodeShortcutEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchLLShortcut",
+                    badge: "shortcut",
+                    label: "'시차 단축'(d) 활성화",
+                    checked: s.isLLShortcutEnabled,
+                    onChange: (v2) => s.setSetting("isLLShortcutEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchQualityChangeShortcut",
+                    badge: "shortcut",
+                    label: "화질 변경(숫자) 활성화",
+                    checked: s.isQualityChangeShortcutEnabled,
+                    onChange: (v2) => s.setSetting("isQualityChangeShortcutEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "mutedInactiveTabs",
+                    badge: "tab",
+                    label: "전환시 음소거",
+                    checked: s.isMutedInactiveTabsEnabled,
+                    onChange: (v2) => s.setSetting("isMutedInactiveTabsEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchAutoChangeQuality",
+                    badge: "tab",
+                    label: "전환시 화질 낮추기",
+                    checked: s.isAutoChangeQualityEnabled,
+                    onChange: (v2) => s.setSetting("isAutoChangeQualityEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchDocumentTitleUpdate",
+                    badge: "tab",
+                    label: "제목에 시청자 수 표시",
+                    checked: s.isDocumentTitleUpdateEnabled,
+                    onChange: (v2) => s.setSetting("isDocumentTitleUpdateEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "showBufferTimeTitle",
+                    badge: "tab",
+                    label: "제목에 방송 딜레이 표시",
+                    checked: s.isShowBufferTimeTitleEnabled,
+                    onChange: (v2) => s.setSetting("isShowBufferTimeTitleEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchShowSidebarOnScreenModeAlways",
+                    badge: "screen",
+                    label: "항상 사이드바 보기",
+                    checked: s.isShowSidebarOnScreenModeAlwaysEnabled,
+                    onChange: (v2) => s.setSetting("isShowSidebarOnScreenModeAlwaysEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "mouseOverSideBar",
+                    badge: "screen",
+                    label: "좌상단 마우스 오버시 사이드바 보기",
+                    checked: s.isMouseOverSideBarEnabled,
+                    onChange: (v2) => s.setSetting("isMouseOverSideBarEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "chatPosition",
+                    badge: "screen",
+                    label: "세로로 긴 화면에서 채팅창을 아래에 위치",
+                    checked: s.isChatPositionEnabled,
+                    onChange: (v2) => s.setSetting("isChatPositionEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchAutoScreenMode",
+                    badge: "screen",
+                    label: "자동 스크린 모드",
+                    checked: s.isAutoScreenModeEnabled,
+                    onChange: (v2) => s.setSetting("isAutoScreenModeEnabled", v2)
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "divider_v8xK4z" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { id: "vod-player-options-title", className: "section-title_v8xK4z", children: "VOD 플레이어 옵션" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "selectBestQuality",
+                    badge: "vod",
+                    label: "최고화질 자동 선택",
+                    checked: s.isSelectBestQualityEnabled,
+                    onChange: (v2) => s.setSetting("isSelectBestQualityEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchRemoveShadowsFromCatch",
+                    badge: "vod",
+                    label: "CATCH 플레이어 하단의 그림자 효과 숨기기",
+                    checked: s.isRemoveShadowsFromCatchEnabled,
+                    onChange: (v2) => s.setSetting("isRemoveShadowsFromCatchEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchVODHighlight",
+                    badge: "vod",
+                    label: "VOD 하이라이트(별별랭킹) 타임라인 활성화",
+                    checked: s.isVODHighlightEnabled,
+                    onChange: (v2) => s.setSetting("isVODHighlightEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchAdaptiveSpeedControl",
+                    badge: "vod",
+                    label: "적응형 재생 속도 조절",
+                    checked: s.isAdaptiveSpeedControlEnabled,
+                    onChange: (v2) => s.setSetting("isAdaptiveSpeedControlEnabled", v2)
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "divider_v8xK4z" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { id: "chat-options-title", className: "section-title_v8xK4z", children: "채팅창 옵션" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z range-option_v8xK4z", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "nicknameWidthDisplay", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "nickname" }),
+                    "가로 크기 (채팅 메시지 정렬시)"
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "range-container_v8xK4z", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "input",
+                      {
+                        type: "range",
+                        id: "nicknameWidthDisplay",
+                        min: 86,
+                        max: 186,
                         value: s.nicknameWidth,
                         onChange: (e) => s.setSetting("nicknameWidth", Number(e.target.value))
                       }
                     ),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "range-value_v8xK4z", children: [
-                      s.nicknameWidth,
-                      "px"
-                    ] })
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { id: "nicknameWidthDisplayValue", className: "range-value_v8xK4z", children: s.nicknameWidth })
                   ] })
                 ] }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
+                  Opt,
                   {
-                    label: "썸네일 툴팁",
-                    checked: s.isThumbnailTooltipEnabled,
-                    onChange: (v2) => s.setSetting("isThumbnailTooltipEnabled", v2),
-                    id: "isThumbnailTooltipEnabled"
+                    id: "switchAlignNicknameRight",
+                    badge: "nickname",
+                    label: "오른쪽으로 붙이기 (채팅 메시지 정렬시)",
+                    checked: s.isAlignNicknameRightEnabled,
+                    onChange: (v2) => s.setSetting("isAlignNicknameRightEnabled", v2)
                   }
                 ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "캐러셀 제거",
-                    checked: s.isRemoveCarouselEnabled,
-                    onChange: (v2) => s.setSetting("isRemoveCarouselEnabled", v2),
-                    id: "isRemoveCarouselEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "방송 제목 말줄임표",
-                    checked: s.isBroadTitleTextEllipsisEnabled,
-                    onChange: (v2) => s.setSetting("isBroadTitleTextEllipsisEnabled", v2),
-                    id: "isBroadTitleTextEllipsisEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "재배포 태그 제거",
-                    checked: s.isRemoveRedistributionTagEnabled,
-                    onChange: (v2) => s.setSetting("isRemoveRedistributionTagEnabled", v2),
-                    id: "isRemoveRedistributionTagEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "나중에 보기 버튼 제거",
-                    checked: s.isRemoveWatchLaterButtonEnabled,
-                    onChange: (v2) => s.setSetting("isRemoveWatchLaterButtonEnabled", v2),
-                    id: "isRemoveWatchLaterButtonEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "방송 시작 시간 태그 제거",
-                    checked: s.isRemoveBroadStartTimeTagEnabled,
-                    onChange: (v2) => s.setSetting("isRemoveBroadStartTimeTagEnabled", v2),
-                    id: "isRemoveBroadStartTimeTagEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "빈 썸네일 교체",
-                    checked: s.isReplaceEmptyThumbnailEnabled,
-                    onChange: (v2) => s.setSetting("isReplaceEmptyThumbnailEnabled", v2),
-                    id: "isReplaceEmptyThumbnailEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "다크 모드 고정",
-                    checked: s.isThemeLockEnabled,
-                    onChange: (v2) => s.setSetting("isThemeLockEnabled", v2),
-                    id: "isThemeLockEnabled"
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SectionTitle, { id: "live-player", label: "LIVE 플레이어" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "VOD 자동 재생 방지",
-                    checked: s.isNoAutoVODEnabled,
-                    onChange: (v2) => s.setSetting("isNoAutoVODEnabled", v2),
-                    id: "isNoAutoVODEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "자동 재생 재개",
-                    checked: s.isAutoResumeVideoEnabled,
-                    onChange: (v2) => s.setSetting("isAutoResumeVideoEnabled", v2),
-                    id: "isAutoResumeVideoEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "LIVE 리다이렉트",
-                    checked: s.isRedirectLiveEnabled,
-                    onChange: (v2) => s.setSetting("isRedirectLiveEnabled", v2),
-                    id: "isRedirectLiveEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "e스포츠 정보 숨기기",
-                    checked: s.isHideEsportsInfoEnabled,
-                    onChange: (v2) => s.setSetting("isHideEsportsInfoEnabled", v2),
-                    id: "isHideEsportsInfoEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "일시정지 버튼",
-                    checked: s.isShowPauseButtonEnabled,
-                    onChange: (v2) => s.setSetting("isShowPauseButtonEnabled", v2),
-                    id: "isShowPauseButtonEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "캡처 버튼",
-                    checked: s.isCaptureButtonEnabled,
-                    onChange: (v2) => s.setSetting("isCaptureButtonEnabled", v2),
-                    id: "isCaptureButtonEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "버퍼 타임 표시",
-                    checked: s.isShowBufferTimeEnabled,
-                    onChange: (v2) => s.setSetting("isShowBufferTimeEnabled", v2),
-                    id: "isShowBufferTimeEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "동영상 스킵 핸들러",
-                    checked: s.isVideoSkipHandlerEnabled,
-                    onChange: (v2) => s.setSetting("isVideoSkipHandlerEnabled", v2),
-                    id: "isVideoSkipHandlerEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "고화질 단축키 (Alt+S)",
-                    checked: s.isSharpmodeShortcutEnabled,
-                    onChange: (v2) => s.setSetting("isSharpmodeShortcutEnabled", v2),
-                    id: "isSharpmodeShortcutEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "저지연 단축키 (Alt+L)",
-                    checked: s.isLLShortcutEnabled,
-                    onChange: (v2) => s.setSetting("isLLShortcutEnabled", v2),
-                    id: "isLLShortcutEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "지연 조절 단축키",
-                    checked: s.isAdjustDelayNoGridEnabled,
-                    onChange: (v2) => s.setSetting("isAdjustDelayNoGridEnabled", v2),
-                    id: "isAdjustDelayNoGridEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "화질 단축키 (Alt+Q)",
-                    checked: s.isQualityChangeShortcutEnabled,
-                    onChange: (v2) => s.setSetting("isQualityChangeShortcutEnabled", v2),
-                    id: "isQualityChangeShortcutEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "비활성 탭 음소거",
-                    checked: s.isMutedInactiveTabsEnabled,
-                    onChange: (v2) => s.setSetting("isMutedInactiveTabsEnabled", v2),
-                    id: "isMutedInactiveTabsEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "자동 화질 변경",
-                    checked: s.isAutoChangeQualityEnabled,
-                    onChange: (v2) => s.setSetting("isAutoChangeQualityEnabled", v2),
-                    id: "isAutoChangeQualityEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "문서 제목 업데이트",
-                    checked: s.isDocumentTitleUpdateEnabled,
-                    onChange: (v2) => s.setSetting("isDocumentTitleUpdateEnabled", v2),
-                    id: "isDocumentTitleUpdateEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "화면 모드에서 사이드바 항상 표시",
-                    checked: s.isShowSidebarOnScreenModeAlwaysEnabled,
-                    onChange: (v2) => s.setSetting("isShowSidebarOnScreenModeAlwaysEnabled", v2),
-                    id: "isShowSidebarOnScreenModeAlwaysEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "마우스 오버로 사이드바 열기",
-                    checked: s.isMouseOverSideBarEnabled,
-                    onChange: (v2) => s.setSetting("isMouseOverSideBarEnabled", v2),
-                    id: "isMouseOverSideBarEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "채팅 위치 변경",
-                    checked: s.isChatPositionEnabled,
-                    onChange: (v2) => s.setSetting("isChatPositionEnabled", v2),
-                    id: "isChatPositionEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "자동 화면 모드",
-                    checked: s.isAutoScreenModeEnabled,
-                    onChange: (v2) => s.setSetting("isAutoScreenModeEnabled", v2),
-                    id: "isAutoScreenModeEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "클릭 이벤트 매퍼",
-                    checked: s.isClickPlayerEventMapperEnabled,
-                    onChange: (v2) => s.setSetting("isClickPlayerEventMapperEnabled", v2),
-                    id: "isClickPlayerEventMapperEnabled",
-                    details: s.isClickPlayerEventMapperEnabled ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "mapper-setting_v8xK4z", children: [
-                        "좌클릭:",
-                        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                          "select",
-                          {
-                            value: s.selectLeftClick,
-                            onChange: (e) => s.setSetting("selectLeftClick", e.target.value),
-                            children: [
-                              /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "play_pause", children: "재생/정지" }),
-                              /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "mute", children: "음소거" }),
-                              /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "none", children: "없음" })
-                            ]
-                          }
-                        )
-                      ] }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "mapper-setting_v8xK4z", children: [
-                        "우클릭:",
-                        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                          "select",
-                          {
-                            value: s.selectRightClick,
-                            onChange: (e) => s.setSetting("selectRightClick", e.target.value),
-                            children: [
-                              /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "play_pause", children: "재생/정지" }),
-                              /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "mute", children: "음소거" }),
-                              /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "none", children: "없음" })
-                            ]
-                          }
-                        )
-                      ] })
-                    ] }) : void 0
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "preferredQuality", children: "선호 화질" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                    "select",
-                    {
-                      id: "preferredQuality",
-                      value: s.preferredQuality,
-                      onChange: (e) => s.setSetting("preferredQuality", e.target.value),
-                      children: [
-                        /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "original", children: "원본" }),
-                        /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "hd", children: "HD" }),
-                        /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "sd", children: "SD" }),
-                        /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "mobile", children: "모바일" })
-                      ]
-                    }
-                  )
-                ] })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SectionTitle, { id: "vod-player", label: "VOD 플레이어" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "최고 화질 자동 선택",
-                    checked: s.isSelectBestQualityEnabled,
-                    onChange: (v2) => s.setSetting("isSelectBestQualityEnabled", v2),
-                    id: "isSelectBestQualityEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "캐치 그림자 제거",
-                    checked: s.isRemoveShadowsFromCatchEnabled,
-                    onChange: (v2) => s.setSetting("isRemoveShadowsFromCatchEnabled", v2),
-                    id: "isRemoveShadowsFromCatchEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "VOD 하이라이트",
-                    checked: s.isVODHighlightEnabled,
-                    onChange: (v2) => s.setSetting("isVODHighlightEnabled", v2),
-                    id: "isVODHighlightEnabled"
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SectionTitle, { id: "chat", label: "채팅창" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "서포터 뱃지 숨기기",
-                    checked: s.isHideSupporterBadgeEnabled,
-                    onChange: (v2) => s.setSetting("isHideSupporterBadgeEnabled", v2),
-                    id: "isHideSupporterBadgeEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "팬 뱃지 숨기기",
-                    checked: s.isHideFanBadgeEnabled,
-                    onChange: (v2) => s.setSetting("isHideFanBadgeEnabled", v2),
-                    id: "isHideFanBadgeEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "구독 뱃지 숨기기",
-                    checked: s.isHideSubBadgeEnabled,
-                    onChange: (v2) => s.setSetting("isHideSubBadgeEnabled", v2),
-                    id: "isHideSubBadgeEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "VIP 뱃지 숨기기",
-                    checked: s.isHideVIPBadgeEnabled,
-                    onChange: (v2) => s.setSetting("isHideVIPBadgeEnabled", v2),
-                    id: "isHideVIPBadgeEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "매니저 뱃지 숨기기",
-                    checked: s.isHideMngrBadgeEnabled,
-                    onChange: (v2) => s.setSetting("isHideMngrBadgeEnabled", v2),
-                    id: "isHideMngrBadgeEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "스트리머 뱃지 숨기기",
-                    checked: s.isHideStreamerBadgeEnabled,
-                    onChange: (v2) => s.setSetting("isHideStreamerBadgeEnabled", v2),
-                    id: "isHideStreamerBadgeEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "복사/붙여넣기 잠금 해제",
-                    checked: s.isUnlockCopyPasteEnabled,
-                    onChange: (v2) => s.setSetting("isUnlockCopyPasteEnabled", v2),
-                    id: "isUnlockCopyPasteEnabled"
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "채팅 입력 위 버튼 숨기기",
-                    checked: s.isHideButtonsAboveChatInputEnabled,
-                    onChange: (v2) => s.setSetting("isHideButtonsAboveChatInputEnabled", v2),
-                    id: "isHideButtonsAboveChatInputEnabled"
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SectionTitle, { id: "misc", label: "기타" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  OptionRow,
-                  {
-                    label: "방송 로드 시 전송",
-                    checked: s.isSendLoadBroadEnabled,
-                    onChange: (v2) => s.setSetting("isSendLoadBroadEnabled", v2),
-                    id: "isSendLoadBroadEnabled"
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SectionTitle, { id: "block-info", label: "차단/부가설명" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "description_v8xK4z", children: [
-                  "채널 항목에서 우클릭 → 차단/차단 해제",
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-                  "설정 저장 위치: Tampermonkey GM 스토리지"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bug-report_v8xK4z description_v8xK4z", children: [
-                  "버그 제보 및 기능 요청:",
-                  " ",
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z multi-option_v8xK4z", children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsx(
-                    "a",
+                    Opt,
                     {
-                      href: "https://github.com/bcong/soop-sidebar-extension/issues",
-                      target: "_blank",
-                      rel: "noreferrer",
-                      children: "GitHub Issues"
+                      id: "selectHideSupporterBadge",
+                      badge: "chat",
+                      label: "서포터 배지 숨기기",
+                      checked: s.isHideSupporterBadgeEnabled,
+                      onChange: (v2) => s.setSetting("isHideSupporterBadgeEnabled", v2)
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Opt,
+                    {
+                      id: "selectHideFanBadge",
+                      badge: "chat",
+                      label: "팬 배지 숨기기",
+                      checked: s.isHideFanBadgeEnabled,
+                      onChange: (v2) => s.setSetting("isHideFanBadgeEnabled", v2)
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Opt,
+                    {
+                      id: "selectHideSubBadge",
+                      badge: "chat",
+                      label: "구독팬 배지 숨기기",
+                      checked: s.isHideSubBadgeEnabled,
+                      onChange: (v2) => s.setSetting("isHideSubBadgeEnabled", v2)
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Opt,
+                    {
+                      id: "selectHideVIPBadge",
+                      badge: "chat",
+                      label: "열혈팬 배지 숨기기",
+                      checked: s.isHideVIPBadgeEnabled,
+                      onChange: (v2) => s.setSetting("isHideVIPBadgeEnabled", v2)
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Opt,
+                    {
+                      id: "selectHideMngrBadge",
+                      badge: "chat",
+                      label: "매니저 배지 숨기기",
+                      checked: s.isHideMngrBadgeEnabled,
+                      onChange: (v2) => s.setSetting("isHideMngrBadgeEnabled", v2)
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Opt,
+                    {
+                      id: "selectHideStreamerBadge",
+                      badge: "chat",
+                      label: "스트리머 배지 숨기기",
+                      checked: s.isHideStreamerBadgeEnabled,
+                      onChange: (v2) => s.setSetting("isHideStreamerBadgeEnabled", v2)
                     }
                   )
-                ] })
-              ] })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchUnlockCopyPaste",
+                    badge: "chat",
+                    label: "복사/붙여넣기 기능 복원",
+                    checked: s.isUnlockCopyPasteEnabled,
+                    onChange: (v2) => s.setSetting("isUnlockCopyPasteEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchHideButtonsAboveChatInput",
+                    badge: "chat",
+                    label: "버튼 탭 숨기기",
+                    checked: s.isHideButtonsAboveChatInputEnabled,
+                    onChange: (v2) => s.setSetting("isHideButtonsAboveChatInputEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchHideChatItems",
+                    badge: "chat",
+                    label: "채팅창 메뉴 숨기기",
+                    checked: s.isHideChatItemsEnabled,
+                    onChange: (v2) => s.setSetting("isHideChatItemsEnabled", v2)
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "divider_v8xK4z" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { id: "etc-options-title", className: "section-title_v8xK4z", children: "기타 옵션" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z multi-option_v8xK4z", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Opt,
+                    {
+                      id: "switchChzzkFollowChannels",
+                      badge: "etc",
+                      label: /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+                        "치지직 팔로우 채널 통합",
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("sup", { children: "4)" })
+                      ] }),
+                      checked: s.isChzzkFollowChannelsEnabled,
+                      onChange: (v2) => s.setSetting("isChzzkFollowChannelsEnabled", v2)
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    Opt,
+                    {
+                      id: "switchChzzkTopChannels",
+                      badge: "etc",
+                      label: "치지직 인기 채널 통합",
+                      checked: s.isChzzkTopChannelsEnabled,
+                      onChange: (v2) => s.setSetting("isChzzkTopChannelsEnabled", v2)
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchThemeLock",
+                    badge: "etc",
+                    label: "테마 쿠키 무기한 유지",
+                    checked: s.isThemeLockEnabled,
+                    onChange: (v2) => s.setSetting("isThemeLockEnabled", v2)
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("footer", { className: "modal-footer_v8xK4z", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { id: "management-title", className: "section-title_v8xK4z", children: "차단 관리 및 부가 설명" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "description_v8xK4z", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-ban" }),
+                  " 채널 차단: 본문 방송 목록 -> ⋮ 버튼 -> [이 브라우저에서 ... 숨기기]"
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "description_v8xK4z", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-check-circle" }),
+                  " 카테고리 탭 추가: 본문 방송 목록 -> ⋮ 버튼 -> [이 카테고리를 탭에 추가]"
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "description_v8xK4z", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-check-circle" }),
+                  " 카테고리 탭 해제: Tampermonkey 아이콘을 눌러서 가능합니다."
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "divider_v8xK4z" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "description_v8xK4z", children: [
+                  "1) MY 페이지에서 스트리머 고정 버튼(",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-thumb-tack" }),
+                  ")을 누르면 사이드바에 고정이 됩니다."
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "description_v8xK4z", children: "3) 즐겨찾기 채널 중에서만 이동. 커스텀은 고정->알림->일반 순. 열린 탭 체크 후 이동." }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "description_v8xK4z", children: "4) 치지직 로그인이 되어있지 않으면 응답지연이 생겨서 느려집니다" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "description_v8xK4z", children: "5) 'SOOP (숲) - 현재 방송을 보고 있는 스트리머' 실행 필요. 없을 시 0명으로 나옵니다" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "divider_v8xK4z" })
             ] })
           ] })
         ] })
@@ -13653,75 +14581,13 @@
     ) : null;
     return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
       ReactDOM.createPortal(modal, document.body),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("li", { id: "openModalBtn", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
-        {
-          className: "btn-settings-ui",
-          onClick: openModal,
-          title: "사이드바 설정",
-          style: {
-            width: "100%",
-            height: "100%",
-            background: "none",
-            border: "none",
-            cursor: "pointer"
-          }
-        }
-      ) })
+      triggerContainer && ReactDOM.createPortal(
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn-settings-ui", onClick: openModal, title: "사이드바 설정" }),
+        triggerContainer
+      )
     ] });
   });
-  const BUTTON_DATA = [
-    { id: "nav-live", label: "LIVE", href: "https://www.sooplive.com/live" },
-    { id: "nav-my", label: "MY", href: "https://www.sooplive.com/myplus" },
-    {
-      id: "nav-search",
-      label: "탐색",
-      href: "https://www.sooplive.com/search"
-    },
-    {
-      id: "nav-catch",
-      label: "캐치",
-      href: "https://www.sooplive.com/catch"
-    }
-  ];
-  const NavButtons = observer(() => {
-    const settings = useSettingsStore();
-    return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      BUTTON_DATA.map((btn) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { id: btn.id, className: "nav_v8xK4z-item", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "a",
-        {
-          href: btn.href,
-          className: "nav_v8xK4z-btn",
-          target: settings.isOpenNewtabEnabled ? "_blank" : "_self",
-          rel: "noreferrer",
-          children: btn.label
-        }
-      ) }, btn.id)),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(SettingModal, {})
-    ] });
-  });
-  const NavBar = observer(() => {
-    const [container, setContainer] = reactExports.useState(null);
-    reactExports.useEffect(() => {
-      let navbar = document.querySelector(".left_navbar") ?? document.querySelector('[class*="left_navbar"]');
-      if (!navbar) {
-        const div = document.createElement("ul");
-        div.className = "left_navbar";
-        document.body.appendChild(div);
-        navbar = div;
-      }
-      setContainer(navbar);
-    }, []);
-    if (!container) return null;
-    return ReactDOM.createPortal(/* @__PURE__ */ jsxRuntimeExports.jsx(NavButtons, {}), container);
-  });
-  const PreviewModalContent = ({
-    broadNo,
-    userId,
-    userNick,
-    broadTitle,
-    onClose
-  }) => {
+  const PreviewModalContent = ({ broadNo, userId, userNick, broadTitle, onClose }) => {
     const thumbnailUrl = `https://liveimg.sooplive.com/m/${broadNo}.jpg`;
     reactExports.useEffect(() => {
       const handler = (e) => {
@@ -13769,93 +14635,96 @@
       };
     }, []);
     if (!modalProps) return null;
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      PreviewModalContent,
-      {
-        ...modalProps,
-        onClose: () => setModalProps(null)
-      }
-    );
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(PreviewModalContent, { ...modalProps, onClose: () => setModalProps(null) });
   };
   const MainPage = observer(() => {
     const settings = useSettingsStore();
-    useSidebarStore();
     reactExports.useEffect(() => {
-      document.body.classList.add("customSidebar");
-    }, []);
-    reactExports.useEffect(() => {
-      if (settings.isThemeLockEnabled) {
-        document.documentElement.setAttribute("dark", "");
+      if (settings.isCustomSidebarEnabled) {
+        document.body.classList.add("customSidebar");
+      } else {
+        document.body.classList.remove("customSidebar");
       }
+      return () => document.body.classList.remove("customSidebar");
+    }, [settings.isCustomSidebarEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isThemeLockEnabled) return;
+      const refreshThemeCookie = () => {
+        const entry = document.cookie.split(";").map((c) => c.trim()).find((c) => c.startsWith("theme="));
+        const value = entry ? entry.split("=")[1] : null;
+        if (value) {
+          document.cookie = `theme=${value}; max-age=${10 * 365 * 24 * 60 * 60}; path=/; domain=.sooplive.com`;
+        }
+      };
+      refreshThemeCookie();
+      const obs = new MutationObserver(refreshThemeCookie);
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ["dark"] });
+      return () => obs.disconnect();
     }, [settings.isThemeLockEnabled]);
     reactExports.useEffect(() => {
       if (!settings.isRemoveRedistributionTagEnabled) return;
-      const tags = document.querySelectorAll(
-        ".redistribution_tag, .badge-rebroadcast"
-      );
-      tags.forEach((t2) => t2.remove());
+      const style = document.createElement("style");
+      style.textContent = `[data-type=cBox] .thumbs-box .allow { display: none !important; }`;
+      document.head.appendChild(style);
+      return () => style.remove();
     }, [settings.isRemoveRedistributionTagEnabled]);
     reactExports.useEffect(() => {
       if (!settings.isRemoveWatchLaterButtonEnabled) return;
       const style = document.createElement("style");
-      style.textContent = `.btn-watch-later, .add-wish-list { display: none !important; }`;
+      style.textContent = `[data-type=cBox] .thumbs-box .later { display: none !important; }`;
       document.head.appendChild(style);
       return () => style.remove();
     }, [settings.isRemoveWatchLaterButtonEnabled]);
     reactExports.useEffect(() => {
       if (!settings.isRemoveBroadStartTimeTagEnabled) return;
       const style = document.createElement("style");
-      style.textContent = `.broad-start-time, [class*="broad-start-time"] { display: none !important; }`;
+      style.textContent = `[data-type=cBox] .thumbs-box .time { display: none !important; }`;
       document.head.appendChild(style);
       return () => style.remove();
     }, [settings.isRemoveBroadStartTimeTagEnabled]);
     reactExports.useEffect(() => {
       if (!settings.isRemoveCarouselEnabled) return;
       const style = document.createElement("style");
-      style.textContent = `.carousel-wrapper, [class*="carousel"] { display: none !important; }`;
+      style.textContent = `div[class^="player_player_wrap"] { display: none !important; }`;
       document.head.appendChild(style);
       return () => style.remove();
     }, [settings.isRemoveCarouselEnabled]);
     reactExports.useEffect(() => {
-      if (!settings.isThumbnailTooltipEnabled) return;
-      const handleMouseOver = (e) => {
-        const target = e.target;
-        const item = target.closest("[data-broadcast-no]");
-        if (!item) return;
-        const broadNo = item.dataset.broadcastNo;
-        const userId = item.dataset.userId ?? "";
-        const userNick = item.dataset.userNick ?? "";
-        const broadTitle = item.dataset.broadTitle ?? "";
-        if (!broadNo) return;
-        showTooltip(
-          {
-            userId,
-            userNick,
-            broadTitle,
-            broadNo,
-            type: "live"
-          },
-          e.clientX,
-          e.clientY
-        );
-      };
-      const handleMouseOut = () => hideTooltip();
-      document.addEventListener("mouseover", handleMouseOver);
-      document.addEventListener("mouseout", handleMouseOut);
-      return () => {
-        document.removeEventListener("mouseover", handleMouseOver);
-        document.removeEventListener("mouseout", handleMouseOut);
-      };
-    }, [settings.isThumbnailTooltipEnabled]);
-    const [sidebarTarget, setSidebarTarget] = React$1.useState(null);
+      if (!settings.isBroadTitleTextEllipsisEnabled) return;
+      const style = document.createElement("style");
+      style.textContent = `[data-type=cBox] .cBox-info .title a { white-space: nowrap; text-overflow: ellipsis; display: inline-block; overflow: hidden; max-width: 100%; }`;
+      document.head.appendChild(style);
+      return () => style.remove();
+    }, [settings.isBroadTitleTextEllipsisEnabled]);
     reactExports.useEffect(() => {
-      awaitElement("#sidebar").then((el2) => {
-        if (el2) setSidebarTarget(el2);
+      if (!settings.isSendLoadBroadEnabled) return;
+      const handleClick = (e) => {
+        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+        const inCBox = e.target.closest('[data-type="cBox"]');
+        if (!inCBox) return;
+        const anchor = e.target.closest('a[href*="play.sooplive.com/"]');
+        if (!anchor) return;
+        e.preventDefault();
+        e.stopPropagation();
+        window.location.href = anchor.href;
+      };
+      document.addEventListener("click", handleClick, true);
+      return () => document.removeEventListener("click", handleClick, true);
+    }, [settings.isSendLoadBroadEnabled]);
+    const [sidebarContainer, setSidebarContainer] = React$1.useState(null);
+    reactExports.useEffect(() => {
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      setSidebarContainer(container);
+      waitForElementAsync("#soop-gnb", 3e3).then((gnb) => {
+        if (gnb) gnb.insertAdjacentElement("afterend", container);
       });
+      return () => container.remove();
     }, []);
     return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(NavBar, {}),
-      sidebarTarget && ReactDOM.createPortal(/* @__PURE__ */ jsxRuntimeExports.jsx(SidebarView, {}), sidebarTarget),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(SettingModal, {}),
+      settings.isCustomSidebarEnabled && sidebarContainer && ReactDOM.createPortal(/* @__PURE__ */ jsxRuntimeExports.jsx(SidebarView, {}), sidebarContainer),
       /* @__PURE__ */ jsxRuntimeExports.jsx(PreviewModal, {})
     ] });
   });
@@ -13934,47 +14803,149 @@
       container
     );
   });
+  const _uw = (() => {
+    try {
+      return unsafeWindow;
+    } catch {
+      return window;
+    }
+  })();
+  const QUALITY_MAP = {
+    sd: "LOW",
+    hd: "NORMAL",
+    hd4k: "HIGH_4000",
+    hd8k: "HIGH_8000",
+    original: "ORIGINAL",
+    auto: "AUTO"
+  };
+  function waitForLivePlayer(timeout = 1e4) {
+    return new Promise((resolve, reject) => {
+      const interval = 1500;
+      let elapsed = 0;
+      const check = () => {
+        const lp = (_uw == null ? void 0 : _uw.livePlayer) ?? window.livePlayer;
+        if (lp) {
+          resolve(lp);
+        } else {
+          elapsed += interval;
+          if (elapsed >= timeout) {
+            reject(new Error("livePlayer 객체를 찾지 못했습니다."));
+          } else {
+            setTimeout(check, interval);
+          }
+        }
+      };
+      check();
+    });
+  }
+  function addStyle(css) {
+    if (typeof GM_addStyle !== "undefined") {
+      GM_addStyle(css);
+    } else {
+      const style = document.createElement("style");
+      style.textContent = css;
+      document.head.appendChild(style);
+    }
+  }
+  function getPrioritizedLiveBroadcasts(favoriteData) {
+    var _a2;
+    if (!((_a2 = favoriteData == null ? void 0 : favoriteData.data) == null ? void 0 : _a2.length)) return [];
+    const pinned = [];
+    const notified = [];
+    const normal = [];
+    favoriteData.data.forEach((item) => {
+      var _a3;
+      if (item.is_live !== true) return;
+      const broadInfo = (_a3 = item.broad_info) == null ? void 0 : _a3[0];
+      if (!broadInfo) return;
+      if (item.is_pin === true) pinned.push(broadInfo);
+      else if (item.is_mobile_push === "Y") notified.push(broadInfo);
+      else normal.push(broadInfo);
+    });
+    const cmp = (a, b) => (b.total_view_cnt ?? 0) - (a.total_view_cnt ?? 0);
+    return [...pinned.sort(cmp), ...notified.sort(cmp), ...normal.sort(cmp)];
+  }
   const PlayerPage = observer(() => {
     const settings = useSettingsStore();
-    const sidebarStore = useSidebarStore();
+    reactExports.useRef(0);
+    reactExports.useRef("");
+    const latestBufferTimeRef = reactExports.useRef("");
+    const latestViewerSuffixRef = reactExports.useRef("");
+    const qualityChangeTimerRef = reactExports.useRef(null);
+    const prevQualityRef = reactExports.useRef(null);
+    const updateTitleRef = reactExports.useRef(null);
+    const prevIsAutoModeRef = reactExports.useRef(null);
+    const didChangedToLowestRef = reactExports.useRef(false);
     reactExports.useEffect(() => {
-      if (settings.isThemeLockEnabled) {
-        document.documentElement.setAttribute("dark", "");
-      }
+      if (!settings.isThemeLockEnabled) return;
+      const refreshThemeCookie = () => {
+        const entry = document.cookie.split(";").map((c) => c.trim()).find((c) => c.startsWith("theme="));
+        const value = entry ? entry.split("=")[1] : null;
+        if (value) {
+          document.cookie = `theme=${value}; max-age=${10 * 365 * 24 * 60 * 60}; path=/; domain=.sooplive.com`;
+        }
+      };
+      refreshThemeCookie();
+      const obs = new MutationObserver(refreshThemeCookie);
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ["dark"] });
+      return () => obs.disconnect();
     }, [settings.isThemeLockEnabled]);
     reactExports.useEffect(() => {
       const cssRules = [];
-      if (settings.isHideSupporterBadgeEnabled)
-        cssRules.push(`.badge-supporter { display: none !important; }`);
-      if (settings.isHideFanBadgeEnabled)
-        cssRules.push(`.badge-fan { display: none !important; }`);
-      if (settings.isHideSubBadgeEnabled)
-        cssRules.push(`.badge-subscriber { display: none !important; }`);
-      if (settings.isHideVIPBadgeEnabled)
-        cssRules.push(`.badge-vip { display: none !important; }`);
-      if (settings.isHideMngrBadgeEnabled)
-        cssRules.push(`.badge-manager { display: none !important; }`);
-      if (settings.isHideStreamerBadgeEnabled)
-        cssRules.push(`.badge-streamer { display: none !important; }`);
-      if (settings.isHideButtonsAboveChatInputEnabled)
-        cssRules.push(`.chat-input-area-btn { display: none !important; }`);
-      if (cssRules.length === 0) return;
-      if (typeof GM_addStyle !== "undefined") {
-        GM_addStyle(cssRules.join("\n"));
-      } else {
-        const style = document.createElement("style");
-        style.textContent = cssRules.join("\n");
-        document.head.appendChild(style);
-      }
+      if (settings.isHideSupporterBadgeEnabled) cssRules.push(`.badge-supporter { display: none !important; }`);
+      if (settings.isHideFanBadgeEnabled) cssRules.push(`.badge-fan { display: none !important; }`);
+      if (settings.isHideSubBadgeEnabled) cssRules.push(`.badge-subscriber { display: none !important; }`);
+      if (settings.isHideVIPBadgeEnabled) cssRules.push(`.badge-vip { display: none !important; }`);
+      if (settings.isHideMngrBadgeEnabled) cssRules.push(`.badge-manager { display: none !important; }`);
+      if (settings.isHideStreamerBadgeEnabled) cssRules.push(`.badge-streamer { display: none !important; }`);
+      if (cssRules.length > 0) addStyle(cssRules.join("\n"));
     }, [
       settings.isHideSupporterBadgeEnabled,
       settings.isHideFanBadgeEnabled,
       settings.isHideSubBadgeEnabled,
       settings.isHideVIPBadgeEnabled,
       settings.isHideMngrBadgeEnabled,
-      settings.isHideStreamerBadgeEnabled,
-      settings.isHideButtonsAboveChatInputEnabled
+      settings.isHideStreamerBadgeEnabled
     ]);
+    reactExports.useEffect(() => {
+      if (!settings.isHideButtonsAboveChatInputEnabled) return;
+      addStyle(`
+            .chatbox .actionbox .chat_item_list { display: none !important; }
+            .chatbox .actionbox { height: auto !important; }
+        `);
+    }, [settings.isHideButtonsAboveChatInputEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isHideChatItemsEnabled) return;
+      const style = document.createElement("style");
+      style.textContent = `
+            .chatbox .actionbox .chat_item_list { display: none !important; }
+            .chatbox .actionbox { height: auto !important; }
+        `;
+      document.head.appendChild(style);
+      return () => style.remove();
+    }, [settings.isHideChatItemsEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isHideEsportsInfoEnabled) return;
+      addStyle(`
+            body:not(.screen_mode,.fullScreen_mode,.embeded_mode)
+            #webplayer #webplayer_contents #player_area
+            .broadcast_information.detail_open .esports_info {
+                display: none !important;
+            }
+            .broadcast_information .esports_info {
+                display: none !important;
+            }
+        `);
+    }, [settings.isHideEsportsInfoEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isAlignNicknameRightEnabled) return;
+      addStyle(`
+            .starting-line .chatting-list-item .message-container .username > button {
+                float: right !important;
+                white-space: nowrap;
+            }
+        `);
+    }, [settings.isAlignNicknameRightEnabled]);
     reactExports.useEffect(() => {
       if (!settings.isChatPositionEnabled) return;
       document.body.classList.add("chat-position-changed");
@@ -13982,70 +14953,751 @@
     }, [settings.isChatPositionEnabled]);
     reactExports.useEffect(() => {
       if (!settings.isMutedInactiveTabsEnabled) return;
-      const handler = () => {
-        const video = document.querySelector("video");
-        if (!video) return;
-        video.muted = document.hidden;
+      const isInPiP = () => {
+        const v2 = document.querySelector("video");
+        return v2 ? document.pictureInPictureElement === v2 : false;
       };
-      document.addEventListener("visibilitychange", handler);
-      return () => document.removeEventListener("visibilitychange", handler);
+      const handler = () => {
+        if (isInPiP()) return;
+        const btn = document.querySelector("#btn_sound");
+        if (!btn) return;
+        if (document.hidden) {
+          if (!btn.classList.contains("mute")) btn.click();
+        } else {
+          if (btn.classList.contains("mute")) btn.click();
+        }
+      };
+      document.addEventListener("visibilitychange", handler, true);
+      return () => document.removeEventListener("visibilitychange", handler, true);
     }, [settings.isMutedInactiveTabsEnabled]);
     reactExports.useEffect(() => {
-      const handler = (e) => {
-        var _a2, _b2, _c;
-        if (isUserTyping()) return;
-        if (e.altKey && e.key === "s" && settings.isSharpmodeShortcutEnabled) {
-          e.preventDefault();
-          (_a2 = document.querySelector('[class*="quality-btn"]')) == null ? void 0 : _a2.click();
-        }
-        if (e.altKey && e.key === "l" && settings.isLLShortcutEnabled) {
-          e.preventDefault();
-          (_b2 = document.querySelector('[class*="lowlatency-btn"]')) == null ? void 0 : _b2.click();
-        }
-        if (e.altKey && e.key === "q" && settings.isQualityChangeShortcutEnabled) {
-          e.preventDefault();
-          (_c = document.querySelector('[class*="quality-select"]')) == null ? void 0 : _c.click();
+      if (!settings.isAutoChangeQualityEnabled) return;
+      const isInPiP = () => {
+        const v2 = document.querySelector("video");
+        return v2 ? document.pictureInPictureElement === v2 : false;
+      };
+      const getCurrentQuality = () => {
+        var _a2, _b2;
+        try {
+          return ((_b2 = (_a2 = _uw.LivePlayer) == null ? void 0 : _a2.getPlayerInfo()) == null ? void 0 : _b2.quality) ?? null;
+        } catch {
+          return null;
         }
       };
-      document.addEventListener("keydown", handler);
-      return () => document.removeEventListener("keydown", handler);
-    }, [
-      settings.isSharpmodeShortcutEnabled,
-      settings.isLLShortcutEnabled,
-      settings.isQualityChangeShortcutEnabled
-    ]);
-    reactExports.useEffect(() => {
-      if (!settings.isDocumentTitleUpdateEnabled) return;
-      const updateTitle = () => {
-        var _a2, _b2;
-        const nick = ((_a2 = document.querySelector(".nick")) == null ? void 0 : _a2.textContent) ?? ((_b2 = document.querySelector('[class*="streamer-nick"]')) == null ? void 0 : _b2.textContent) ?? "";
-        if (nick) {
-          document.title = `${nick} - SOOP`;
+      const getIsAutoMode = () => {
+        var _a2, _b2, _c;
+        try {
+          return !!((_c = (_b2 = (_a2 = _uw.LivePlayer) == null ? void 0 : _a2.getPlayerInfo()) == null ? void 0 : _b2.qualityInfo) == null ? void 0 : _c.isAuto);
+        } catch {
+          return false;
         }
+      };
+      const changeQuality = (name) => {
+        var _a2;
+        try {
+          (_a2 = _uw.livePlayer) == null ? void 0 : _a2.changeQuality(name);
+        } catch {
+        }
+      };
+      const handler = () => {
+        if (isInPiP()) return;
+        if (document.hidden) {
+          prevQualityRef.current = getCurrentQuality();
+          prevIsAutoModeRef.current = getIsAutoMode();
+          qualityChangeTimerRef.current = setTimeout(() => {
+            changeQuality("LOW");
+            didChangedToLowestRef.current = true;
+            customLog.log("[탭 숨김] 최저화질로 전환됨");
+          }, 6500);
+        } else {
+          if (qualityChangeTimerRef.current) {
+            clearTimeout(qualityChangeTimerRef.current);
+            qualityChangeTimerRef.current = null;
+          }
+          if (didChangedToLowestRef.current && prevQualityRef.current) {
+            if (prevIsAutoModeRef.current) {
+              changeQuality("AUTO");
+            } else {
+              changeQuality(prevQualityRef.current);
+            }
+          }
+          didChangedToLowestRef.current = false;
+          prevQualityRef.current = null;
+          prevIsAutoModeRef.current = null;
+        }
+      };
+      document.addEventListener("visibilitychange", handler, true);
+      return () => {
+        document.removeEventListener("visibilitychange", handler, true);
+        if (qualityChangeTimerRef.current) clearTimeout(qualityChangeTimerRef.current);
+      };
+    }, [settings.isAutoChangeQualityEnabled]);
+    reactExports.useEffect(() => {
+      const showPlayerBar = (target) => {
+        const player = document.getElementById("player");
+        if (!player) return;
+        player.classList.add("mouseover");
+        const btn = player.querySelector(
+          target === "quality_box" ? "button.btn_quality_mode" : "button.btn_setting"
+        );
+        const boxOn = player.querySelector(target === "quality_box" ? ".quality_box.on" : ".setting_box.on");
+        if (btn && !boxOn) btn.click();
+        setTimeout(() => {
+          const openBox = player.querySelector(".quality_box.on, .setting_box.on");
+          if (openBox) openBox.classList.remove("on");
+          player.classList.remove("mouseover");
+        }, 1500);
+      };
+      const handler = (e) => {
+        if (isUserTyping()) return;
+        if (e.code === "KeyE" && settings.isSharpmodeShortcutEnabled) {
+          e.stopPropagation();
+          const el2 = document.getElementById("clear_screen");
+          if (el2) {
+            el2.click();
+            showPlayerBar("quality_box");
+          }
+        }
+        if (e.code === "KeyD" && settings.isLLShortcutEnabled) {
+          e.stopPropagation();
+          const el2 = document.getElementById("delay_check");
+          if (el2) {
+            el2.click();
+            showPlayerBar("setting_box");
+          }
+        }
+      };
+      document.addEventListener("keydown", handler, true);
+      return () => document.removeEventListener("keydown", handler, true);
+    }, [settings.isSharpmodeShortcutEnabled, settings.isLLShortcutEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isQualityChangeShortcutEnabled) return;
+      let shortcutMap = /* @__PURE__ */ new Map();
+      const setupShortcuts = async () => {
+        var _a2;
+        try {
+          const livePlayer = await waitForLivePlayer();
+          const info = await livePlayer.getLiveInfo();
+          const presets = ((_a2 = info == null ? void 0 : info.CHANNEL) == null ? void 0 : _a2.VIEWPRESET) ?? [];
+          if (!presets.length) return;
+          presets.sort((a, b) => {
+            if (a.name === "auto") return -1;
+            if (b.name === "auto") return 1;
+            return parseInt(b.label_resolution ?? 0) - parseInt(a.label_resolution ?? 0);
+          });
+          const keys = ["`", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+          const newMap = /* @__PURE__ */ new Map();
+          presets.forEach((preset, i) => {
+            if (i >= keys.length) return;
+            const internalType = QUALITY_MAP[preset.name];
+            if (internalType) newMap.set(keys[i], internalType);
+          });
+          shortcutMap = newMap;
+          customLog.log("[화질 단축키] 설정 완료:", [...newMap.entries()]);
+        } catch (e) {
+          customLog.error("화질 단축키 설정 실패:", e);
+        }
+      };
+      const keyHandler = (e) => {
+        var _a2;
+        if (isUserTyping()) return;
+        const key = e.key === "~" ? "`" : e.key;
+        if (shortcutMap.has(key)) {
+          e.preventDefault();
+          try {
+            (_a2 = _uw.livePlayer) == null ? void 0 : _a2.changeQuality(shortcutMap.get(key));
+          } catch {
+          }
+        }
+      };
+      setupShortcuts();
+      document.addEventListener("keydown", keyHandler, true);
+      return () => document.removeEventListener("keydown", keyHandler, true);
+    }, [settings.isQualityChangeShortcutEnabled]);
+    reactExports.useEffect(() => {
+      const enabled = settings.isDocumentTitleUpdateEnabled || settings.isShowBufferTimeTitleEnabled;
+      if (!enabled) {
+        document.title = document.title.split(" ")[0];
+        return;
+      }
+      const updateTitle = () => {
+        const baseTitle = document.title.split(" ")[0];
+        if (settings.isDocumentTitleUpdateEnabled) {
+          const viewersEl = document.querySelector("#nAllViewer");
+          const rawViewers = viewersEl ? parseInt(viewersEl.innerText.replace(/,/g, "").trim(), 10) || 0 : 0;
+          if (rawViewers) {
+            latestViewerSuffixRef.current = ` • ${rawViewers.toLocaleString()}`;
+          }
+        }
+        let title = baseTitle;
+        if (settings.isDocumentTitleUpdateEnabled) title += latestViewerSuffixRef.current;
+        if (settings.isShowBufferTimeTitleEnabled && latestBufferTimeRef.current) {
+          title += ` • ${latestBufferTimeRef.current}s`;
+        }
+        document.title = title;
       };
       updateTitle();
-      const timer = setInterval(updateTitle, 5e3);
-      return () => clearInterval(timer);
-    }, [settings.isDocumentTitleUpdateEnabled]);
-    const [sidebarTarget, setSidebarTarget] = React$1.useState(null);
+      updateTitleRef.current = updateTitle;
+      const t2 = setInterval(updateTitle, 6e4);
+      return () => {
+        clearInterval(t2);
+        updateTitleRef.current = null;
+        document.title = document.title.split(" ")[0];
+      };
+    }, [settings.isDocumentTitleUpdateEnabled, settings.isShowBufferTimeTitleEnabled]);
     reactExports.useEffect(() => {
-      awaitElement("#sidebar").then((el2) => {
-        if (el2) setSidebarTarget(el2);
+      if (!settings.isShowBufferTimeTitleEnabled && !settings.isShowBufferTimeChatEnabled) return;
+      let videoEl = null;
+      waitForElementAsync("#livePlayer").then((el2) => {
+        if (!el2) return;
+        videoEl = el2;
+        videoEl.onprogress = () => {
+          var _a2;
+          const { buffered, currentTime } = videoEl;
+          let remaining = "";
+          if (buffered.length > 0) {
+            const diff = buffered.end(buffered.length - 1) - currentTime;
+            if (diff >= 0) remaining = diff.toFixed(diff % 1 === 0 ? 0 : 1);
+          }
+          latestBufferTimeRef.current = remaining;
+          if (settings.isShowBufferTimeTitleEnabled) {
+            (_a2 = updateTitleRef.current) == null ? void 0 : _a2.call(updateTitleRef);
+          }
+          if (settings.isShowBufferTimeChatEnabled) {
+            const emptyChat = document.querySelector("#empty_chat");
+            if (emptyChat && remaining) emptyChat.innerText = `${remaining}s 지연됨`;
+            document.querySelectorAll("[id='broadState']").forEach((el22) => {
+              const timeLi = el22.closest("li");
+              if (!timeLi) return;
+              let bufLi = timeLi.nextElementSibling;
+              if (!(bufLi == null ? void 0 : bufLi.classList.contains("broadStateBuffer"))) {
+                bufLi = document.createElement("li");
+                bufLi.classList.add("broadStateBuffer");
+                timeLi.insertAdjacentElement("afterend", bufLi);
+              }
+              bufLi.textContent = remaining ? `${remaining}s` : "";
+            });
+          }
+        };
       });
-      sidebarStore.startPolling(30);
-      return () => sidebarStore.stopPolling();
+      return () => {
+        if (videoEl) videoEl.onprogress = null;
+        const emptyChat = document.querySelector("#empty_chat");
+        if (emptyChat) emptyChat.innerText = "";
+        document.querySelectorAll(".broadStateBuffer").forEach((el2) => el2.remove());
+      };
+    }, [settings.isShowBufferTimeTitleEnabled, settings.isShowBufferTimeChatEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.preferredQuality || settings.preferredQuality === "off") return;
+      const selectQuality = async () => {
+        var _a2;
+        try {
+          const livePlayer = await waitForLivePlayer();
+          const info = await livePlayer.getLiveInfo();
+          const presets = (((_a2 = info == null ? void 0 : info.CHANNEL) == null ? void 0 : _a2.VIEWPRESET) ?? []).filter((p2) => p2.name !== "auto" && p2.bps);
+          if (!presets.length) {
+            customLog.warn("화질 정보를 찾을 수 없습니다.");
+            return;
+          }
+          presets.sort((a, b) => parseInt(b.label_resolution ?? 0) - parseInt(a.label_resolution ?? 0));
+          let target;
+          if (settings.preferredQuality === "max") {
+            target = presets[0];
+          } else {
+            const targetRes = parseInt(settings.preferredQuality);
+            target = presets.find((p2) => parseInt(p2.label_resolution ?? 0) === targetRes);
+            if (!target) {
+              const lower = presets.filter((p2) => parseInt(p2.label_resolution ?? 0) <= targetRes);
+              target = lower.length > 0 ? lower[0] : presets[presets.length - 1];
+            }
+          }
+          const internalType = QUALITY_MAP[target.name];
+          if (!internalType) return;
+          customLog.log(`[선호 화질] ${target.label}(${internalType})로 변경`);
+          livePlayer.changeQuality(internalType);
+        } catch (e) {
+          customLog.error("선호 화질 설정 실패:", e.message);
+        }
+      };
+      selectQuality();
+      const unsub = observeUrlChanges(() => setTimeout(selectQuality, 4e3));
+      return unsub;
+    }, [settings.preferredQuality]);
+    reactExports.useEffect(() => {
+      if (!settings.isClickPlayerEventMapperEnabled) return;
+      const userClickConfig = {
+        click: settings.selectLeftClick,
+        contextmenu: settings.selectRightClick
+      };
+      const displayCenterVolume = (isMuted, volume) => {
+        const textEl = document.querySelector(".volume_text");
+        const centerBtn = document.querySelector(".center_btn");
+        const iconEl = document.querySelector(".volume_icon");
+        if (!textEl || !centerBtn || !iconEl) return;
+        const v2 = isMuted ? 0 : volume;
+        const cls = isMuted ? "mute" : volume < 0.5 ? "low" : "";
+        textEl.textContent = `${Math.round(100 * v2)}%`;
+        textEl.classList.remove("hide_text");
+        centerBtn.classList.remove("fadeOut");
+        centerBtn.querySelectorAll("div, button").forEach((el2) => {
+          if (!el2.classList.contains("volume_icon")) el2.style.display = "none";
+        });
+        iconEl.classList.remove("low", "mute");
+        if (cls) iconEl.classList.add(cls);
+        iconEl.style.display = "block";
+        setTimeout(() => {
+          centerBtn.classList.add("fadeOut");
+          textEl.classList.add("hide_text");
+          iconEl.style.display = "none";
+        }, 400);
+      };
+      const initMapper = async () => {
+        const player = await waitForElementAsync("#player");
+        const video = await waitForElementAsync("#livePlayer");
+        if (!player || !video) return;
+        const pauseSelector = document.querySelector("#closeStream") ? "#closeStream" : "#time_shift_play";
+        const selectors = {
+          mute: "#btn_sound",
+          pause: pauseSelector,
+          stop: "#play",
+          screenMode: ".btn_screen_mode",
+          fullscreen: ".btn_fullScreen_mode"
+        };
+        const buttons = {};
+        await Promise.all(
+          Object.entries(selectors).map(async ([k2, sel]) => {
+            buttons[k2] = await waitForElementAsync(sel);
+          })
+        );
+        const vid = video;
+        const actions = {
+          none: () => {
+          },
+          toggleMute: () => {
+            var _a2;
+            (_a2 = buttons.mute) == null ? void 0 : _a2.click();
+            setTimeout(() => displayCenterVolume(vid.muted, vid.volume), 50);
+          },
+          togglePause: () => {
+            if (!buttons.pause) return;
+            if (window.getComputedStyle(buttons.pause).display === "none") return;
+            buttons.pause.click();
+          },
+          toggleStop: () => {
+            var _a2;
+            return (_a2 = buttons.stop) == null ? void 0 : _a2.click();
+          },
+          toggleScreenMode: () => {
+            var _a2;
+            return (_a2 = buttons.screenMode) == null ? void 0 : _a2.click();
+          },
+          toggleFullscreen: () => {
+            var _a2;
+            return (_a2 = buttons.fullscreen) == null ? void 0 : _a2.click();
+          }
+        };
+        Object.entries(userClickConfig).forEach(([eventType, actionName]) => {
+          if (!actionName || actionName === "none") return;
+          player.addEventListener(eventType, (e) => {
+            var _a2;
+            if (e.target.closest(".player_ctrlBox")) return;
+            e.preventDefault();
+            (_a2 = actions[actionName]) == null ? void 0 : _a2.call(actions);
+          });
+        });
+        customLog.log("[EventMapper] 초기화 완료");
+      };
+      initMapper();
+    }, [settings.isClickPlayerEventMapperEnabled, settings.selectLeftClick, settings.selectRightClick]);
+    reactExports.useEffect(() => {
+      if (!settings.isMouseOverSideBarEnabled || !settings.isCustomSidebarEnabled) return;
+      const webplayer = document.getElementById("webplayer");
+      if (webplayer) {
+        webplayer.style.left = "0px";
+        webplayer.style.width = "100vw";
+      }
+      const mouseMoveHandler = (e) => {
+        const body = document.body;
+        const sidebar = document.getElementById("sidebar");
+        const wp = document.getElementById("webplayer");
+        const videoLayer = document.getElementById("player");
+        if (!sidebar || !wp) return;
+        const { clientX: mouseX, clientY: mouseY } = e;
+        if (!body.classList.contains("showSidebar")) {
+          const triggerHeight = Math.min(
+            ((videoLayer == null ? void 0 : videoLayer.clientHeight) ?? window.innerHeight) / 2,
+            window.innerHeight / 4
+          );
+          if (mouseX < 52 && mouseY > 100 && mouseY < triggerHeight && body.classList.contains("screen_mode")) {
+            body.classList.add("showSidebar");
+            wp.style.left = `${sidebar.offsetWidth}px`;
+            wp.style.width = `calc(100vw - ${sidebar.offsetWidth}px)`;
+          }
+        } else if (body.classList.contains("screen_mode")) {
+          if (mouseX >= sidebar.clientWidth || mouseY >= sidebar.clientHeight) {
+            body.classList.remove("showSidebar");
+            wp.style.left = "0px";
+            wp.style.width = "100vw";
+          }
+        }
+      };
+      const mouseOutHandler = (e) => {
+        if (!e.relatedTarget && !e.toElement) {
+          const body = document.body;
+          const wp = document.getElementById("webplayer");
+          if (body.classList.contains("screen_mode") && body.classList.contains("showSidebar")) {
+            body.classList.remove("showSidebar");
+            if (wp) {
+              wp.style.left = "0px";
+              wp.style.width = "100vw";
+            }
+          }
+        }
+      };
+      document.addEventListener("mousemove", mouseMoveHandler);
+      window.addEventListener("mouseout", mouseOutHandler);
+      return () => {
+        document.removeEventListener("mousemove", mouseMoveHandler);
+        window.removeEventListener("mouseout", mouseOutHandler);
+      };
+    }, [settings.isMouseOverSideBarEnabled, settings.isCustomSidebarEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isShowSidebarOnScreenModeAlwaysEnabled || !settings.isCustomSidebarEnabled) return;
+      const handleClassChange = () => {
+        const body = document.body;
+        const sidebar = document.getElementById("sidebar");
+        const wp = document.getElementById("webplayer");
+        if (!wp) return;
+        const isScreen = body.classList.contains("screen_mode");
+        const isShow = body.classList.contains("showSidebar");
+        if (isScreen && !isShow && sidebar) {
+          body.classList.add("showSidebar");
+          wp.style.left = `${sidebar.offsetWidth}px`;
+          wp.style.width = `calc(100vw - ${sidebar.offsetWidth}px)`;
+        }
+        if (!isScreen && isShow) {
+          body.classList.remove("showSidebar");
+          wp.style.removeProperty("width");
+          wp.style.removeProperty("left");
+        }
+      };
+      const observer2 = new MutationObserver(handleClassChange);
+      observer2.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+      document.addEventListener("visibilitychange", handleClassChange);
+      handleClassChange();
+      return () => {
+        observer2.disconnect();
+        document.removeEventListener("visibilitychange", handleClassChange);
+      };
+    }, [settings.isShowSidebarOnScreenModeAlwaysEnabled, settings.isCustomSidebarEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isAutoScreenModeEnabled) return;
+      waitForElementAsync("#livePlayer").then(() => {
+        var _a2;
+        if (!document.body.classList.contains("screen_mode")) {
+          (_a2 = document.querySelector("#player .btn_screen_mode")) == null ? void 0 : _a2.click();
+        }
+      });
+    }, [settings.isAutoScreenModeEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isUnlockCopyPasteEnabled) return;
+      let writeArea = null;
+      const handleCopy = (e) => {
+        var _a2, _b2;
+        e.preventDefault();
+        const text = (_a2 = window.getSelection()) == null ? void 0 : _a2.toString();
+        if (text) (_b2 = e.clipboardData) == null ? void 0 : _b2.setData("text/plain", text);
+      };
+      const handleCut = (e) => {
+        var _a2, _b2;
+        e.preventDefault();
+        const text = (_a2 = window.getSelection()) == null ? void 0 : _a2.toString();
+        if (text) {
+          (_b2 = e.clipboardData) == null ? void 0 : _b2.setData("text/plain", text);
+          document.execCommand("delete");
+        }
+      };
+      const handlePaste = (e) => {
+        var _a2;
+        e.preventDefault();
+        const text = ((_a2 = e.clipboardData ?? window.clipboardData) == null ? void 0 : _a2.getData("text")) ?? "";
+        document.execCommand("insertText", false, text);
+      };
+      waitForElementAsync("#write_area").then((el2) => {
+        if (!el2) return;
+        writeArea = el2;
+        el2.addEventListener("copy", handleCopy);
+        el2.addEventListener("cut", handleCut);
+        el2.addEventListener("paste", handlePaste);
+      });
+      return () => {
+        if (writeArea) {
+          writeArea.removeEventListener("copy", handleCopy);
+          writeArea.removeEventListener("cut", handleCut);
+          writeArea.removeEventListener("paste", handlePaste);
+        }
+      };
+    }, [settings.isUnlockCopyPasteEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isAutoReloadAfterBroadcastEndEnabled) return;
+      const intl = new Intl.DateTimeFormat("ko-KR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      });
+      const pollForRestart = async (signal) => {
+        var _a2;
+        const bjid = location.pathname.split("/")[1];
+        if (!bjid || signal.aborted) return;
+        const titleEl = await new Promise((resolve) => {
+          const existing = document.querySelector(".notBroadingInfoTitle");
+          if (existing) {
+            resolve(existing);
+            return;
+          }
+          const observer2 = new MutationObserver(() => {
+            const target = document.querySelector(".notBroadingInfoTitle");
+            if (target) {
+              observer2.disconnect();
+              signal.removeEventListener("abort", onAbort);
+              resolve(target);
+            }
+          });
+          const onAbort = () => {
+            observer2.disconnect();
+            resolve(null);
+          };
+          signal.addEventListener("abort", onAbort, { once: true });
+          observer2.observe(document.body, { childList: true, subtree: true });
+        });
+        if (!titleEl || signal.aborted) return;
+        let bno;
+        do {
+          if (signal.aborted) return;
+          await sleep(1e3);
+          if (signal.aborted) return;
+          try {
+            const res = await fetch("https://live.sooplive.com/afreeca/player_live_api.php", {
+              headers: { "content-type": "application/x-www-form-urlencoded" },
+              body: `bid=${bjid}&bno=null&type=live&pwd=&player_type=html5&stream_type=common&quality=HD&mode=landing&from_api=0&is_revive=false`,
+              method: "POST",
+              mode: "cors",
+              credentials: "include",
+              signal
+            });
+            const data = await res.json();
+            bno = (_a2 = data == null ? void 0 : data.CHANNEL) == null ? void 0 : _a2.BNO;
+          } catch {
+            if (signal.aborted) return;
+          }
+          const el2 = document.querySelector(".notBroadingInfoTitle");
+          if (el2) el2.textContent = `방송 시작을 기다리는 중이에요 (${intl.format(/* @__PURE__ */ new Date())})`;
+        } while (!bno || bno <= 0);
+        if (signal.aborted) return;
+        const parts = location.pathname.split("/");
+        const currentBno = parts[parts.length - 1];
+        if (String(bno) !== currentBno) {
+          location.pathname = `/${bjid}/${bno}`;
+        }
+      };
+      let ac2 = new AbortController();
+      pollForRestart(ac2.signal);
+      const stopUrlObserver = observeUrlChanges(() => {
+        ac2.abort();
+        ac2 = new AbortController();
+        pollForRestart(ac2.signal);
+      });
+      return () => {
+        ac2.abort();
+        stopUrlObserver();
+      };
+    }, [settings.isAutoReloadAfterBroadcastEndEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isNoAutoVODEnabled) return;
+      let retryTimer = null;
+      const redirectLiveWithTabCheck = async (retryCount = 0) => {
+        var _a2;
+        const MAX_RETRIES = 100;
+        const RETRY_DELAY_MS = 1e4;
+        const LOCK_KEY = "auto_redirect_lock";
+        const LOCK_TIMEOUT_MS = 1e4;
+        if (retryCount >= MAX_RETRIES) return;
+        try {
+          const now = Date.now();
+          const lockTs = localStorage.getItem(LOCK_KEY);
+          if (lockTs && now - parseInt(lockTs, 10) < LOCK_TIMEOUT_MS) {
+            retryTimer = setTimeout(() => redirectLiveWithTabCheck(retryCount + 1), RETRY_DELAY_MS);
+            return;
+          }
+          localStorage.setItem(LOCK_KEY, now.toString());
+          const favoriteData = await fetchBroadList("https://myapi.sooplive.com/api/favorite", 50);
+          const targets = getPrioritizedLiveBroadcasts(favoriteData);
+          if (!targets.length) {
+            localStorage.removeItem(LOCK_KEY);
+            return;
+          }
+          switch (settings.redirectLiveSortOption) {
+            case "mostViewers":
+              targets.sort((a, b) => (b.total_view_cnt ?? 0) - (a.total_view_cnt ?? 0));
+              break;
+            case "leastViewers":
+              targets.sort((a, b) => (a.total_view_cnt ?? 0) - (b.total_view_cnt ?? 0));
+              break;
+            case "random":
+              for (let i = targets.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [targets[i], targets[j]] = [targets[j], targets[i]];
+              }
+              break;
+          }
+          for (const target of targets) {
+            const { user_id, broad_no } = target;
+            if (!user_id || !broad_no) continue;
+            const lv = _uw.liveView ?? window.liveView;
+            (_a2 = lv == null ? void 0 : lv.playerController) == null ? void 0 : _a2.sendLoadBroad(user_id, broad_no);
+            return;
+          }
+          localStorage.removeItem(LOCK_KEY);
+        } catch (err) {
+          customLog.error("자동 전환 실패:", err);
+          localStorage.removeItem(LOCK_KEY);
+        }
+      };
+      const disableAutoVOD = () => {
+        var _a2;
+        const lv = _uw.liveView ?? window.liveView;
+        const container = (_a2 = lv == null ? void 0 : lv.aContainer) == null ? void 0 : _a2[1];
+        if (!(container == null ? void 0 : container.autoPlayVodBanner)) {
+          setTimeout(disableAutoVOD, 3e3);
+          return;
+        }
+        if (settings.isRedirectLiveEnabled) {
+          container.autoPlayVodBanner.show = () => redirectLiveWithTabCheck();
+          customLog.log("[VOD 방지] 자동 LIVE 전환 활성화");
+        } else {
+          container.autoPlayVodBanner.show = () => {
+          };
+        }
+      };
+      disableAutoVOD();
+      return () => {
+        if (retryTimer) clearTimeout(retryTimer);
+      };
+    }, [settings.isNoAutoVODEnabled, settings.isRedirectLiveEnabled, settings.redirectLiveSortOption]);
+    reactExports.useEffect(() => {
+      if (!settings.isSendLoadBroadEnabled) return;
+      const handleClick = (e) => {
+        var _a2;
+        if (e.ctrlKey || e.metaKey) return;
+        const inCBox = e.target.closest('[data-type="cBox"]');
+        if (!inCBox) return;
+        const anchor = e.target.closest('a[href*="play.sooplive.com/"]');
+        if (!anchor) return;
+        const match = anchor.href.match(/play\.sooplive\.com\/([^/?#]+)\/(\d+)/);
+        if (!match) return;
+        const [, user_id, broad_no] = match;
+        const lv = _uw.liveView ?? window.liveView;
+        if (!((_a2 = lv == null ? void 0 : lv.playerController) == null ? void 0 : _a2.sendLoadBroad)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        lv.playerController.sendLoadBroad(user_id, broad_no);
+      };
+      document.addEventListener("click", handleClick, true);
+      return () => document.removeEventListener("click", handleClick, true);
+    }, [settings.isSendLoadBroadEnabled]);
+    const [sidebarTarget, setSidebarTarget] = React$1.useState(null);
+    const [screenChatVisible, setScreenChatVisible] = React$1.useState(false);
+    const [screenChatUrl, setScreenChatUrl] = React$1.useState(null);
+    const screenChatVisibleRef = reactExports.useRef(false);
+    reactExports.useEffect(() => {
+      addStyle(`
+            #screen-chat-panel {
+                position: fixed;
+                right: 0;
+                top: 0;
+                height: 100vh;
+                width: 360px;
+                z-index: 1402;
+                background: #0e0e10;
+                border-left: 1px solid #333;
+                box-shadow: -4px 0 16px rgba(0,0,0,0.6);
+            }
+            #screen-chat-panel iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+                display: block;
+            }
+        `);
     }, []);
+    reactExports.useEffect(() => {
+      if (!settings.isCustomSidebarEnabled) return;
+      const CHAT_WIDTH = 360;
+      const TRIGGER = 52;
+      const handleMouseMove = (e) => {
+        const body = document.body;
+        if (!body.classList.contains("screen_mode")) {
+          if (screenChatVisibleRef.current) {
+            screenChatVisibleRef.current = false;
+            setScreenChatVisible(false);
+          }
+          return;
+        }
+        const mouseX = e.clientX;
+        const vw = window.innerWidth;
+        if (!screenChatVisibleRef.current) {
+          if (mouseX > vw - TRIGGER) {
+            const parts = window.location.pathname.replace(/^\//, "").split("/").filter(Boolean);
+            if (parts.length >= 2) {
+              screenChatVisibleRef.current = true;
+              setScreenChatUrl(`https://play.sooplive.com/${parts[0]}/${parts[1]}?vtype=chat`);
+              setScreenChatVisible(true);
+            }
+          }
+        } else {
+          if (mouseX < vw - CHAT_WIDTH - 20) {
+            screenChatVisibleRef.current = false;
+            setScreenChatVisible(false);
+          }
+        }
+      };
+      document.addEventListener("mousemove", handleMouseMove);
+      return () => document.removeEventListener("mousemove", handleMouseMove);
+    }, [settings.isCustomSidebarEnabled]);
+    reactExports.useEffect(() => {
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      setSidebarTarget(container);
+      return () => {
+        container.remove();
+      };
+    }, []);
+    reactExports.useEffect(() => {
+      if (settings.isCustomSidebarEnabled) {
+        document.body.classList.add("customSidebar");
+      } else {
+        document.body.classList.remove("customSidebar");
+      }
+      return () => document.body.classList.remove("customSidebar");
+    }, [settings.isCustomSidebarEnabled]);
     return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      sidebarTarget && ReactDOM.createPortal(/* @__PURE__ */ jsxRuntimeExports.jsx(SidebarView, {}), sidebarTarget),
+      settings.isCustomSidebarEnabled && sidebarTarget && ReactDOM.createPortal(/* @__PURE__ */ jsxRuntimeExports.jsx(SidebarView, {}), sidebarTarget),
+      settings.isCustomSidebarEnabled && screenChatVisible && screenChatUrl && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "screen-chat-panel", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "iframe",
+        {
+          src: screenChatUrl,
+          title: "채팅 미리보기",
+          sandbox: "allow-scripts allow-same-origin allow-forms"
+        }
+      ) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(NavBar, {}),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(SettingModal, {}),
       /* @__PURE__ */ jsxRuntimeExports.jsx(PlayerControls, {}),
       /* @__PURE__ */ jsxRuntimeExports.jsx(PreviewModal, {})
     ] });
   });
-  const DraggableResizableModal = ({
-    items,
-    onSeek,
-    onClose
-  }) => {
+  const DraggableResizableModal = ({ items, onSeek, onClose }) => {
     const [pos, setPos] = reactExports.useState({ x: 80, y: 80 });
     const [size, setSize] = reactExports.useState({ w: 280, h: 320 });
     const dragging = reactExports.useRef(false);
@@ -14122,18 +15774,10 @@
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "VOD 하이라이트" }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: onClose, className: "draggable-modal-close_v8xK4z", children: "×" })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "draggable-modal-body_v8xK4z", style: { overflow: "auto", height: "calc(100% - 36px)" }, children: items.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "no-highlights_v8xK4z", children: "하이라이트 없음" }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "highlight-list_v8xK4z", children: items.map((item, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "li",
-            {
-              className: "highlight-item_v8xK4z",
-              onClick: () => onSeek(item.time),
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "highlight-time_v8xK4z", children: formatTime(item.time) }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "highlight-title_v8xK4z", children: item.title })
-              ]
-            },
-            i
-          )) }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "draggable-modal-body_v8xK4z", style: { overflow: "auto", height: "calc(100% - 36px)" }, children: items.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "no-highlights_v8xK4z", children: "하이라이트 없음" }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "highlight-list_v8xK4z", children: items.map((item, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "highlight-item_v8xK4z", onClick: () => onSeek(item.time), children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "highlight-time_v8xK4z", children: formatTime(item.time) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "highlight-title_v8xK4z", children: item.title })
+          ] }, i)) }) }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             "div",
             {
@@ -14157,9 +15801,7 @@
     const [items, setItems] = reactExports.useState([]);
     reactExports.useEffect(() => {
       const scan = () => {
-        const els = document.querySelectorAll(
-          ".vod-highlight, [data-highlight-time]"
-        );
+        const els = document.querySelectorAll(".vod-highlight, [data-highlight-time]");
         if (els.length === 0) return;
         const entries = Array.from(els).map((el2) => {
           var _a2;
@@ -14178,6 +15820,20 @@
   }
   const VodPage = observer(() => {
     const settings = useSettingsStore();
+    const { pathname } = window.location;
+    const isCatchPage = pathname === "/player/catch" || pathname.startsWith("/player/catch/") || /\/player\/\d+\/catch/.test(pathname);
+    const [sidebarTarget, setSidebarTarget] = reactExports.useState(null);
+    reactExports.useEffect(() => {
+      if (!isCatchPage || !settings.isCustomSidebarEnabled) return;
+      document.body.classList.add("customSidebar");
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      setSidebarTarget(container);
+      return () => {
+        container.remove();
+        document.body.classList.remove("customSidebar");
+      };
+    }, [isCatchPage, settings.isCustomSidebarEnabled]);
     const highlightItems = useHighlightScanner();
     const [showHighlights, setShowHighlights] = reactExports.useState(false);
     reactExports.useEffect(() => {
@@ -14221,14 +15877,17 @@
       const video = document.querySelector("video");
       if (video) video.currentTime = time;
     }, []);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: settings.isVODHighlightEnabled && showHighlights && /* @__PURE__ */ jsxRuntimeExports.jsx(
-      DraggableResizableModal,
-      {
-        items: highlightItems,
-        onSeek: handleSeek,
-        onClose: () => setShowHighlights(false)
-      }
-    ) });
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      isCatchPage && sidebarTarget && ReactDOM.createPortal(/* @__PURE__ */ jsxRuntimeExports.jsx(SidebarView, {}), sidebarTarget),
+      !isCatchPage && settings.isVODHighlightEnabled && showHighlights && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        DraggableResizableModal,
+        {
+          items: highlightItems,
+          onSeek: handleSeek,
+          onClose: () => setShowHighlights(false)
+        }
+      )
+    ] });
   });
   function detectPage() {
     const { hostname, pathname } = window.location;
@@ -14236,6 +15895,9 @@
       return "vod";
     }
     if (hostname === "play.sooplive.com") {
+      const url = window.location.href;
+      const embedPattern = /^https:\/\/play\.sooplive\.com\/.*\/.*\/embed(\?.*)?$/;
+      if (embedPattern.test(url) || url.includes("vtype=chat")) return null;
       return "player";
     }
     if (hostname === "www.sooplive.com") {
@@ -14250,6 +15912,38 @@
     if (page === "vod") return /* @__PURE__ */ jsxRuntimeExports.jsx(VodPage, {});
     return null;
   };
+  if (typeof GM_getValue === "undefined") {
+    const _store = new Map(
+      Object.entries(localStorage).filter(([k2]) => k2.startsWith("GM_")).map(([k2, v2]) => {
+        try {
+          return [k2.slice(3), JSON.parse(v2)];
+        } catch {
+          return [k2.slice(3), v2];
+        }
+      })
+    );
+    window.GM_getValue = (key, def) => _store.has(key) ? _store.get(key) : def;
+    window.GM_setValue = (key, val) => {
+      _store.set(key, val);
+      localStorage.setItem(`GM_${key}`, JSON.stringify(val));
+    };
+    window.GM_listValues = () => [..._store.keys()];
+    window.GM_addStyle = (css) => {
+      const s = document.createElement("style");
+      s.textContent = css;
+      document.head.appendChild(s);
+    };
+    window.GM_registerMenuCommand = () => {
+    };
+    window.GM_unregisterMenuCommand = () => {
+    };
+    window.GM_xmlhttpRequest = () => {
+    };
+  }
+  const _faLink = document.createElement("link");
+  _faLink.rel = "stylesheet";
+  _faLink.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css";
+  document.head.appendChild(_faLink);
   function mount() {
     let container = document.getElementById("__soop_ext_root__");
     if (!container) {

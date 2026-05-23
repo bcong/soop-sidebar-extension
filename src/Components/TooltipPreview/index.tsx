@@ -1,121 +1,138 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useSettingsStore } from "@Stores/index";
 import { addNumberSeparator } from "@Utils/format";
 import { getElapsedTime } from "@Utils/format";
+import { fetchBroadList } from "@Utils/api";
+import "./style.module.less";
 
 interface TooltipData {
-  userId: string;
-  userNick: string;
-  broadTitle: string;
-  broadNo?: string | number;
-  broadStart?: string;
-  totalViewCnt?: number;
-  broadCateNo?: string;
-  thumbnailUrl?: string;
-  type: "live" | "vod" | "feed" | "offline";
+    userId: string;
+    userNick: string;
+    broadTitle: string;
+    broadNo?: string | number;
+    broadStart?: string;
+    totalViewCnt?: number;
+    broadCateNo?: string;
+    thumbnailUrl?: string;
+    type: "live" | "vod" | "feed" | "offline";
+    platform?: "chzzk";
 }
 
 let globalShowFn: ((data: TooltipData, x: number, y: number) => void) | null = null;
 let globalHideFn: (() => void) | null = null;
 
-export const showTooltip = (
-  data: TooltipData,
-  x: number,
-  y: number
-): void => {
-  globalShowFn?.(data, x, y);
+export const showTooltip = (data: TooltipData, x: number, y: number): void => {
+    globalShowFn?.(data, x, y);
 };
 
 export const hideTooltip = (): void => {
-  globalHideFn?.();
+    globalHideFn?.();
 };
 
 const TooltipPreview: React.FC = observer(() => {
-  const settings = useSettingsStore();
-  const [visible, setVisible] = useState(false);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  const [data, setData] = useState<TooltipData | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
+    const settings = useSettingsStore();
+    const [visible, setVisible] = useState(false);
+    const [pos, setPos] = useState({ x: 0, y: 0 });
+    const [data, setData] = useState<TooltipData | null>(null);
+    const [resolvedThumbnail, setResolvedThumbnail] = useState<string | null>(null);
+    const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    globalShowFn = (tooltipData, x, y) => {
-      if (!settings.isThumbnailTooltipEnabled) return;
-      setData(tooltipData);
-      setPos({ x, y });
-      setVisible(true);
-    };
-    globalHideFn = () => setVisible(false);
+    // Chzzk 썸네일 fallback: liveImageUrl이 없으면 채널 데이터 API에서 가져옴
+    useEffect(() => {
+        if (!data) {
+            setResolvedThumbnail(null);
+            return;
+        }
+        const direct =
+            data.thumbnailUrl || (data.broadNo ? `https://liveimg.sooplive.com/m/${data.broadNo}.jpg` : null);
+        if (direct) {
+            setResolvedThumbnail(direct);
+            return;
+        }
+        if (data.platform === "chzzk" && data.userId) {
+            setResolvedThumbnail(null);
+            fetchBroadList(
+                `https://api.chzzk.naver.com/service/v1/channels/${data.userId}/data?fields=topExposedVideos`,
+                100,
+            )
+                .then((res: any) => {
+                    const liveImageUrl = res?.content?.topExposedVideos?.openLive?.liveImageUrl;
+                    if (liveImageUrl) {
+                        setResolvedThumbnail(liveImageUrl.replace("{type}", "360"));
+                    }
+                })
+                .catch(() => {});
+        } else {
+            setResolvedThumbnail(null);
+        }
+    }, [data]);
 
-    return () => {
-      globalShowFn = null;
-      globalHideFn = null;
-    };
-  }, [settings.isThumbnailTooltipEnabled]);
+    useEffect(() => {
+        globalShowFn = (tooltipData, x, y) => {
+            if (!settings.isThumbnailTooltipEnabled) return;
+            setData(tooltipData);
+            setPos({ x, y });
+            setVisible(true);
+        };
+        globalHideFn = () => setVisible(false);
 
-  // 화면 밖으로 나가지 않도록 위치 조정
-  useEffect(() => {
-    if (!visible || !ref.current) return;
-    const el = ref.current;
-    const rect = el.getBoundingClientRect();
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+        return () => {
+            globalShowFn = null;
+            globalHideFn = null;
+        };
+    }, [settings.isThumbnailTooltipEnabled]);
 
-    let x = pos.x + 15;
-    let y = pos.y + 15;
+    // 화면 밖으로 나가지 않도록 위치 조정
+    useEffect(() => {
+        if (!visible || !ref.current) return;
+        const el = ref.current;
+        const rect = el.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
 
-    if (x + rect.width > vw) x = pos.x - rect.width - 10;
-    if (y + rect.height > vh) y = vh - rect.height - 10;
+        let x = pos.x + 15;
+        let y = pos.y + 15;
 
-    el.style.left = `${x}px`;
-    el.style.top = `${y}px`;
-  }, [visible, pos]);
+        if (x + rect.width > vw) x = pos.x - rect.width - 10;
+        if (y + rect.height > vh) y = vh - rect.height - 10;
 
-  if (!settings.isThumbnailTooltipEnabled || !visible || !data) return null;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+    }, [visible, pos]);
 
-  const thumbnailSrc =
-    data.thumbnailUrl ||
-    (data.broadNo
-      ? `https://liveimg.sooplive.com/m/${data.broadNo}.jpg`
-      : null);
+    if (!settings.isThumbnailTooltipEnabled || !visible || !data) return null;
 
-  const elapsed =
-    data.broadStart && data.type === "live"
-      ? getElapsedTime(data.broadStart, "HH:MM")
-      : null;
+    const cacheBuster = `?${Math.floor(Date.now() / 10000)}`;
+    const thumbnailSrc = resolvedThumbnail
+        ? resolvedThumbnail +
+          (resolvedThumbnail.startsWith("http") && !resolvedThumbnail.startsWith("https://stimg.") ? cacheBuster : "")
+        : null;
 
-  return (
-    <div
-      ref={ref}
-      className={`tooltip-container${visible ? " visible" : ""}`}
-      style={{ position: "fixed" }}
-    >
-      {thumbnailSrc && (
-        <div className="thumbs-box">
-          <img src={thumbnailSrc} alt={data.broadTitle} />
-          {data.totalViewCnt !== undefined && (
-            <div className="thumb-overlay-bottom">
-              <div className="views">
-                {addNumberSeparator(data.totalViewCnt)}명
-              </div>
-              {elapsed && (
-                <div className="duration-overlay">{elapsed}</div>
-              )}
+    const elapsed = data.broadStart && data.type === "live" ? getElapsedTime(data.broadStart, "HH:MM") : null;
+
+    return (
+        <div ref={ref} className={`tooltip-container${visible ? " visible" : ""}`} style={{ position: "fixed" }}>
+            {thumbnailSrc && (
+                <div className="thumbs-box">
+                    <img src={thumbnailSrc} alt={data.broadTitle} />
+                    {data.totalViewCnt !== undefined && (
+                        <div className="thumb-overlay-bottom">
+                            <div className="views">{addNumberSeparator(data.totalViewCnt)}명</div>
+                            {elapsed && <div className="duration-overlay">{elapsed}</div>}
+                        </div>
+                    )}
+                </div>
+            )}
+            <div className="tooltiptext">
+                <div className="tooltip-header">
+                    <span className="tooltip-username">{data.userNick}</span>
+                    {elapsed && <span className="tooltip-time">{elapsed}</span>}
+                </div>
+                <span className="tooltip-description">{data.broadTitle}</span>
             </div>
-          )}
         </div>
-      )}
-      <div className="tooltiptext">
-        <div className="tooltip-header">
-          <span className="tooltip-username">{data.userNick}</span>
-          {elapsed && (
-            <span className="tooltip-time">{elapsed}</span>
-          )}
-        </div>
-        <span className="tooltip-description">{data.broadTitle}</span>
-      </div>
-    </div>
-  );
+    );
 });
 
 export default TooltipPreview;
