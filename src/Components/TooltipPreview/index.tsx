@@ -203,7 +203,12 @@ const TooltipPreview: React.FC = observer(() => {
 
         (async () => {
             const frame = await loadAdultFrame(userId, broadNoStr);
-            if (cancelled || !frame) return;
+            if (cancelled) {
+                // hover 이탈로 취소된 경우 쿨다운 제거 → 다음 hover 시 즉시 재시도
+                if (!adultFrameCache.has(broadNoStr)) adultFrameTimestamps.delete(broadNoStr);
+                return;
+            }
+            if (!frame) return;
             adultFrameCache.set(broadNoStr, frame);
             setCapturedFrame(frame);
         })();

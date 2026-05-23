@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260524005318
+// @version      20260524010528
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -13168,7 +13168,11 @@
       adultFrameTimestamps.set(broadNoStr, Date.now());
       (async () => {
         const frame = await loadAdultFrame(userId, broadNoStr);
-        if (cancelled || !frame) return;
+        if (cancelled) {
+          if (!adultFrameCache.has(broadNoStr)) adultFrameTimestamps.delete(broadNoStr);
+          return;
+        }
+        if (!frame) return;
         adultFrameCache.set(broadNoStr, frame);
         setCapturedFrame(frame);
       })();
@@ -13701,7 +13705,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260524005318";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260524010528";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -15818,6 +15822,174 @@
       document.addEventListener("click", handleClick, true);
       return () => document.removeEventListener("click", handleClick, true);
     }, [settings.isSendLoadBroadEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isReplaceEmptyThumbnailEnabled) return;
+      if (!document.querySelector("script[data-hls-loader]")) {
+        const hlsScript = document.createElement("script");
+        hlsScript.src = "https://cdn.jsdelivr.net/npm/hls.js@latest";
+        hlsScript.dataset.hlsLoader = "1";
+        document.head.appendChild(hlsScript);
+      }
+      const ensureHls = () => {
+        if (_uw.Hls) return Promise.resolve();
+        return new Promise((resolve) => {
+          const check = setInterval(() => {
+            if (_uw.Hls) {
+              clearInterval(check);
+              resolve();
+            }
+          }, 100);
+        });
+      };
+      const getBroadM3u8Domain2 = async (broadNumber) => {
+        const params = new URLSearchParams({
+          return_type: "gs_cdn_pc_web",
+          use_cors: "true",
+          cors_origin_url: "play.sooplive.com",
+          broad_key: `${broadNumber}-common-master-hls`,
+          player_mode: "landing",
+          time: "0"
+        });
+        try {
+          const res = await fetch(`https://livestream-manager.sooplive.com/broad_stream_assign.html?${params}`, {
+            credentials: "include",
+            cache: "no-store"
+          });
+          if (!res.ok) return null;
+          const data = await res.json();
+          return data.result === "1" && data.view_url ? data.view_url : null;
+        } catch {
+          return null;
+        }
+      };
+      const getBroadAid2 = async (id2, broadNumber) => {
+        var _a2;
+        const payload = new URLSearchParams({
+          bid: id2,
+          bno: broadNumber,
+          from_api: "0",
+          mode: "landing",
+          player_type: "html5",
+          stream_type: "common",
+          quality: "sd",
+          type: "aid",
+          pwd: ""
+        });
+        try {
+          const res = await fetch("https://live.sooplive.com/afreeca/player_live_api.php", {
+            method: "POST",
+            body: payload,
+            credentials: "include",
+            cache: "no-store"
+          });
+          const data = await res.json();
+          return ((_a2 = data == null ? void 0 : data.CHANNEL) == null ? void 0 : _a2.AID) ?? null;
+        } catch {
+          return null;
+        }
+      };
+      const captureFrame = (video) => new Promise((resolve) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 480;
+        canvas.height = 270;
+        const ctx = canvas.getContext("2d");
+        const vr = video.videoWidth / video.videoHeight;
+        const cr = 480 / 270;
+        let dw = 480, dh2 = 270, ox = 0, oy = 0;
+        if (vr > cr) {
+          dh2 = 480 / vr;
+          oy = (270 - dh2) / 2;
+        } else {
+          dw = 270 * vr;
+          ox = (480 - dw) / 2;
+        }
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, 480, 270);
+        ctx.drawImage(video, ox, oy, dw, dh2);
+        resolve(canvas.toDataURL("image/webp"));
+      });
+      const loadFrame = async (id2, broadNumber) => {
+        await ensureHls();
+        const Hls = _uw.Hls;
+        if (!(Hls == null ? void 0 : Hls.isSupported())) return null;
+        const [aid, baseUrl] = await Promise.all([getBroadAid2(id2, broadNumber), getBroadM3u8Domain2(broadNumber)]);
+        if (!aid || !baseUrl) return null;
+        const m3u8 = `${baseUrl}?aid=${aid}`;
+        const video = document.createElement("video");
+        video.playbackRate = 16;
+        const hls = new Hls();
+        hls.loadSource(m3u8);
+        hls.attachMedia(video);
+        return new Promise((resolve) => {
+          video.addEventListener(
+            "canplay",
+            async () => {
+              const data = await captureFrame(video);
+              video.pause();
+              video.src = "";
+              hls.destroy();
+              resolve(data);
+            },
+            { once: true }
+          );
+          setTimeout(() => {
+            hls.destroy();
+            resolve(null);
+          }, 15e3);
+        });
+      };
+      const bindLink = (link) => {
+        if (link.dataset.adultThumbBound === "true") return;
+        const img = link.querySelector("img");
+        if (!img) return;
+        link.dataset.adultThumbBound = "true";
+        let intervalId = null;
+        const load = async () => {
+          if (link.dataset.loading === "true") return;
+          const m2 = (link.getAttribute("href") ?? "").match(/play\.sooplive\.com\/([^/]+)\/(\d+)/);
+          if (!m2) return;
+          const [, id2, broadNo] = m2;
+          link.dataset.loading = "true";
+          if (!link.dataset.imageLoaded) {
+            img.style.filter = "grayscale(100%)";
+            img.style.transition = "filter 0.5s ease";
+          }
+          const frame = await loadFrame(id2, broadNo);
+          if (frame) {
+            img.src = frame;
+            img.style.objectFit = "cover";
+            img.style.filter = "none";
+            link.dataset.imageLoaded = "true";
+            link.dataset.lastLoadedTime = Date.now().toString();
+          } else {
+            img.style.filter = "none";
+          }
+          link.dataset.loading = "false";
+        };
+        link.addEventListener("mouseenter", () => {
+          const expired = Date.now() - parseInt(link.dataset.lastLoadedTime ?? "0", 10) > 3e4;
+          if (!link.dataset.imageLoaded || expired) load();
+          intervalId = setInterval(load, 3e4);
+        });
+        link.addEventListener("mouseleave", () => {
+          if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+          }
+        });
+      };
+      const scanAndBind = () => {
+        document.querySelectorAll("[data-type=cBox] .thumbs-box .status.adult").forEach((el2) => {
+          var _a2;
+          const link = (_a2 = el2.closest(".thumbs-box")) == null ? void 0 : _a2.querySelector("a[href]");
+          if (link && !link.href.startsWith("https://vod.sooplive.com")) bindLink(link);
+        });
+      };
+      scanAndBind();
+      const obs = new MutationObserver(scanAndBind);
+      obs.observe(document.body, { childList: true, subtree: true });
+      return () => obs.disconnect();
+    }, [settings.isReplaceEmptyThumbnailEnabled]);
     const [sidebarTarget, setSidebarTarget] = React$1.useState(null);
     const [screenChatVisible, setScreenChatVisible] = React$1.useState(false);
     const [screenChatUrl, setScreenChatUrl] = React$1.useState(null);
