@@ -3,7 +3,9 @@ import react from "@vitejs/plugin-react-swc";
 import monkey from "vite-plugin-monkey";
 import path from "path";
 
-const buildVersion = new Date().toISOString().replace(/[-T:]/g, "").slice(0, 14);
+const now = new Date();
+const pad = (n: number) => String(n).padStart(2, "0");
+const buildVersion = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 
 export default defineConfig({
     resolve: {
