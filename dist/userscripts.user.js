@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260523225631
+// @version      20260523231156
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -13464,6 +13464,7 @@
   const SettingModal = observer(() => {
     var _a2;
     const s = useSettingsStore();
+    const sb2 = useSidebarStore();
     const [open, setOpen] = reactExports.useState(false);
     const [activeSection, setActiveSection] = reactExports.useState(SECTIONS[0].id);
     const [searchText, setSearchText] = reactExports.useState("");
@@ -13533,12 +13534,16 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260523225631";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260523231156";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
         data[key] = s[key];
       }
+      data["pinnedChzzkUsers"] = sb2.pinnedChzzkUsers;
+      data["pinnedCategories"] = sb2.pinnedCategories;
+      data["blockedUsers"] = sb2.blockedUsers;
+      data["blockedCategories"] = sb2.blockedCategories;
       try {
         const compressed = await compressSettings(data);
         await navigator.clipboard.writeText(compressed);
@@ -13560,9 +13565,15 @@
           data = JSON.parse(text);
         }
         if (typeof data !== "object" || data === null) throw new Error("invalid");
+        const SIDEBAR_KEYS = ["pinnedChzzkUsers", "pinnedCategories", "blockedUsers", "blockedCategories"];
         for (const [key, value] of Object.entries(data)) {
           if (EXPORT_KEYS.includes(key)) {
             s.setSetting(key, value);
+          } else if (SIDEBAR_KEYS.includes(key)) {
+            if (key === "pinnedChzzkUsers") sb2.setPinnedChzzkUsers(value);
+            else if (key === "pinnedCategories") sb2.setPinnedCategories(value);
+            else if (key === "blockedUsers") sb2.setBlockedUsers(value);
+            else if (key === "blockedCategories") sb2.setBlockedCategories(value);
           }
         }
         setImportMsg("적용 완료");
@@ -14111,44 +14122,58 @@
                     "클릭/우클릭 기능 매핑"
                   ] }),
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 8 }, children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mapper-setting_v8xK4z", style: { marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }, children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "selectLeftClick", children: "좌" }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                        "select",
-                        {
-                          id: "selectLeftClick",
-                          value: s.selectLeftClick,
-                          onChange: (e) => s.setSetting("selectLeftClick", e.target.value),
-                          children: [
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "none", children: "없음" }),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleMute", children: "음소거" }),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "togglePause", children: "일시정지" }),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleStop", children: "정지" }),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleScreenMode", children: "스크린모드" }),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleFullscreen", children: "전체화면" })
-                          ]
-                        }
-                      )
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mapper-setting_v8xK4z", style: { marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }, children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "selectRightClick", children: "우" }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                        "select",
-                        {
-                          id: "selectRightClick",
-                          value: s.selectRightClick,
-                          onChange: (e) => s.setSetting("selectRightClick", e.target.value),
-                          children: [
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "none", children: "없음" }),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleMute", children: "음소거" }),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "togglePause", children: "일시정지" }),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleStop", children: "정지" }),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleScreenMode", children: "스크린 모드" }),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleFullscreen", children: "전체화면" })
-                          ]
-                        }
-                      )
-                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                      "div",
+                      {
+                        className: "mapper-setting_v8xK4z",
+                        style: { marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 },
+                        children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "selectLeftClick", children: "좌" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                            "select",
+                            {
+                              id: "selectLeftClick",
+                              value: s.selectLeftClick,
+                              onChange: (e) => s.setSetting("selectLeftClick", e.target.value),
+                              children: [
+                                /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "none", children: "없음" }),
+                                /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleMute", children: "음소거" }),
+                                /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "togglePause", children: "일시정지" }),
+                                /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleStop", children: "정지" }),
+                                /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleScreenMode", children: "스크린모드" }),
+                                /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleFullscreen", children: "전체화면" })
+                              ]
+                            }
+                          )
+                        ]
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                      "div",
+                      {
+                        className: "mapper-setting_v8xK4z",
+                        style: { marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 },
+                        children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("label", { htmlFor: "selectRightClick", children: "우" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                            "select",
+                            {
+                              id: "selectRightClick",
+                              value: s.selectRightClick,
+                              onChange: (e) => s.setSetting("selectRightClick", e.target.value),
+                              children: [
+                                /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "none", children: "없음" }),
+                                /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleMute", children: "음소거" }),
+                                /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "togglePause", children: "일시정지" }),
+                                /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleStop", children: "정지" }),
+                                /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleScreenMode", children: "스크린 모드" }),
+                                /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "toggleFullscreen", children: "전체화면" })
+                              ]
+                            }
+                          )
+                        ]
+                      }
+                    ),
                     /* @__PURE__ */ jsxRuntimeExports.jsx(
                       Toggle,
                       {

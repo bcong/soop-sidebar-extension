@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import { observer } from "mobx-react-lite";
-import { useSettingsStore } from "@Stores/index";
+import { useSettingsStore, useSidebarStore } from "@Stores/index";
 import "./style.less";
 
 // ============================================================
@@ -244,6 +244,7 @@ const Opt: React.FC<{
 
 const SettingModal: React.FC = observer(() => {
     const s = useSettingsStore();
+    const sb = useSidebarStore();
     const [open, setOpen] = useState(false);
     const [activeSection, setActiveSection] = useState(SECTIONS[0].id);
     const [searchText, setSearchText] = useState("");
@@ -330,6 +331,11 @@ const SettingModal: React.FC = observer(() => {
         for (const key of EXPORT_KEYS) {
             data[key] = (s as unknown as Record<string, unknown>)[key];
         }
+        // SidebarStore 핀/차단 목록
+        data["pinnedChzzkUsers"] = sb.pinnedChzzkUsers;
+        data["pinnedCategories"] = sb.pinnedCategories;
+        data["blockedUsers"] = sb.blockedUsers;
+        data["blockedCategories"] = sb.blockedCategories;
         try {
             const compressed = await compressSettings(data);
             await navigator.clipboard.writeText(compressed);
@@ -352,9 +358,15 @@ const SettingModal: React.FC = observer(() => {
                 data = JSON.parse(text);
             }
             if (typeof data !== "object" || data === null) throw new Error("invalid");
+            const SIDEBAR_KEYS = ["pinnedChzzkUsers", "pinnedCategories", "blockedUsers", "blockedCategories"] as const;
             for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
                 if ((EXPORT_KEYS as readonly string[]).includes(key)) {
                     (s as unknown as { setSetting: (k: string, v: unknown) => void }).setSetting(key, value);
+                } else if ((SIDEBAR_KEYS as readonly string[]).includes(key)) {
+                    if (key === "pinnedChzzkUsers") sb.setPinnedChzzkUsers(value as string[]);
+                    else if (key === "pinnedCategories") sb.setPinnedCategories(value as typeof sb.pinnedCategories);
+                    else if (key === "blockedUsers") sb.setBlockedUsers(value as typeof sb.blockedUsers);
+                    else if (key === "blockedCategories") sb.setBlockedCategories(value as typeof sb.blockedCategories);
                 }
             }
             setImportMsg("적용 완료");
@@ -825,7 +837,10 @@ const SettingModal: React.FC = observer(() => {
                                     클릭/우클릭 기능 매핑
                                 </label>
                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                    <div className="mapper-setting_v8xK4z" style={{ marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                                    <div
+                                        className="mapper-setting_v8xK4z"
+                                        style={{ marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }}
+                                    >
                                         <label htmlFor="selectLeftClick">좌</label>
                                         <select
                                             id="selectLeftClick"
@@ -840,7 +855,10 @@ const SettingModal: React.FC = observer(() => {
                                             <option value="toggleFullscreen">전체화면</option>
                                         </select>
                                     </div>
-                                    <div className="mapper-setting_v8xK4z" style={{ marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                                    <div
+                                        className="mapper-setting_v8xK4z"
+                                        style={{ marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }}
+                                    >
                                         <label htmlFor="selectRightClick">우</label>
                                         <select
                                             id="selectRightClick"
