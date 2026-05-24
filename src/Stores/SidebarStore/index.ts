@@ -622,7 +622,11 @@ export class SidebarStore {
         runInAction(() => {
             this.lastFetchTime = Date.now();
         });
-        await Promise.all([this.fetchFollowData(), this.fetchMyplusData(), this.fetchTopData()]);
+        await this.fetchFollowData();
+        await new Promise((r) => setTimeout(r, 200));
+        await this.fetchMyplusData();
+        await new Promise((r) => setTimeout(r, 200));
+        await this.fetchTopData();
         await this._syncPull();
         console.log(`[Sidebar] fetchAllData END ${(performance.now() - _t0).toFixed(1)}ms`);
     }

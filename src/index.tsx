@@ -1,7 +1,13 @@
-import { createRoot } from "react-dom/client";
+import { createRoot, startTransition } from "react-dom/client";
+import { configure } from "mobx";
 import "./global.less";
 import App from "./App";
 import { StoreProvider } from "@Stores/index";
+
+// MobX 반응을 React startTransition으로 스케줄링 → 채널 목록 업데이트가 저우선순위로 처리되어 브라우저 응답성 유지
+configure({
+    reactionScheduler: (f) => startTransition(f),
+});
 
 // ── GM API 폴리필 (Vite dev 환경용 — Tampermonkey 없이 실행 시) ──
 if (typeof GM_getValue === "undefined") {

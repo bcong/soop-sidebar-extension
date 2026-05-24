@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260525062134
+// @version      20260525062842
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -329,6 +329,7 @@
     jsxRuntime.exports = reactJsxRuntime_production_min;
   }
   var jsxRuntimeExports = jsxRuntime.exports;
+  var client = {};
   var reactDom = { exports: {} };
   var reactDom_production_min = {};
   var scheduler = { exports: {} };
@@ -7000,8 +7001,8 @@
   var createRoot;
   var m = reactDomExports;
   {
-    createRoot = m.createRoot;
-    m.hydrateRoot;
+    createRoot = client.createRoot = m.createRoot;
+    client.hydrateRoot = m.hydrateRoot;
   }
   function die(error) {
     for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -12507,7 +12508,11 @@
       runInAction(() => {
         this.lastFetchTime = Date.now();
       });
-      await Promise.all([this.fetchFollowData(), this.fetchMyplusData(), this.fetchTopData()]);
+      await this.fetchFollowData();
+      await new Promise((r2) => setTimeout(r2, 200));
+      await this.fetchMyplusData();
+      await new Promise((r2) => setTimeout(r2, 200));
+      await this.fetchTopData();
       await this._syncPull();
       console.log(`[Sidebar] fetchAllData END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
@@ -13896,7 +13901,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525062134";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525062842";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -16526,6 +16531,9 @@
     if (page === "vod") return /* @__PURE__ */ jsxRuntimeExports.jsx(VodPage, {});
     return null;
   };
+  configure({
+    reactionScheduler: (f2) => client.startTransition(f2)
+  });
   if (typeof GM_getValue === "undefined") {
     const _store = new Map(
       Object.entries(localStorage).filter(([k2]) => k2.startsWith("GM_")).map(([k2, v2]) => {
