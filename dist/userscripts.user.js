@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260525061654
+// @version      20260525062134
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -13252,35 +13252,59 @@
       resolve(canvas.toDataURL("image/webp"));
     });
   }
-  async function loadAdultFrame(userId, broadNo) {
-    await ensureHlsJs();
-    const Hls = _uwTooltip.Hls;
-    if (!(Hls == null ? void 0 : Hls.isSupported())) return null;
-    const [aid, baseUrl] = await Promise.all([getBroadAid(userId, broadNo), getBroadM3u8Domain(broadNo)]);
-    if (!aid || !baseUrl) return null;
-    const m3u8 = `${baseUrl}?aid=${aid}`;
-    const video = document.createElement("video");
-    video.playbackRate = 16;
-    const hls = new Hls();
-    hls.loadSource(m3u8);
-    hls.attachMedia(video);
-    return new Promise((resolve) => {
-      video.addEventListener(
-        "canplay",
-        async () => {
-          const frame = await captureVideoFrame(video);
-          video.pause();
-          video.src = "";
-          hls.destroy();
-          resolve(frame);
-        },
-        { once: true }
-      );
-      setTimeout(() => {
-        hls.destroy();
-        resolve(null);
-      }, 15e3);
-    });
+  function startAdultFrameLoad(userId, broadNo) {
+    let hlsInstance = null;
+    let videoEl = null;
+    let cancelled = false;
+    const promise = (async () => {
+      await ensureHlsJs();
+      if (cancelled) return null;
+      const Hls = _uwTooltip.Hls;
+      if (!(Hls == null ? void 0 : Hls.isSupported())) return null;
+      const [aid, baseUrl] = await Promise.all([getBroadAid(userId, broadNo), getBroadM3u8Domain(broadNo)]);
+      if (cancelled) return null;
+      if (!aid || !baseUrl) return null;
+      const m3u8 = `${baseUrl}?aid=${aid}`;
+      videoEl = document.createElement("video");
+      videoEl.playbackRate = 16;
+      hlsInstance = new Hls();
+      hlsInstance.loadSource(m3u8);
+      hlsInstance.attachMedia(videoEl);
+      return new Promise((resolve) => {
+        videoEl.addEventListener(
+          "canplay",
+          async () => {
+            if (cancelled) {
+              resolve(null);
+              return;
+            }
+            const frame = await captureVideoFrame(videoEl);
+            videoEl.pause();
+            videoEl.src = "";
+            hlsInstance == null ? void 0 : hlsInstance.destroy();
+            resolve(frame);
+          },
+          { once: true }
+        );
+        setTimeout(() => {
+          if (!cancelled) hlsInstance == null ? void 0 : hlsInstance.destroy();
+          resolve(null);
+        }, 15e3);
+      });
+    })();
+    const cancel = () => {
+      cancelled = true;
+      if (hlsInstance) {
+        hlsInstance.destroy();
+        hlsInstance = null;
+      }
+      if (videoEl) {
+        videoEl.pause();
+        videoEl.src = "";
+        videoEl = null;
+      }
+    };
+    return { promise, cancel };
   }
   const adultFrameCache = /* @__PURE__ */ new Map();
   const adultFrameInProgress = /* @__PURE__ */ new Set();
@@ -13305,7 +13329,6 @@
       if (!(data == null ? void 0 : data.userId) || !(data == null ? void 0 : data.broadNo) || data.type !== "live" || data.platform === "chzzk") return;
       const broadNoStr = String(data.broadNo);
       const userId = data.userId;
-      let cancelled = false;
       const cached = adultFrameCache.get(broadNoStr);
       if (cached) {
         setCapturedFrame(cached);
@@ -13313,15 +13336,16 @@
       }
       if (adultFrameInProgress.has(broadNoStr)) return;
       adultFrameInProgress.add(broadNoStr);
-      (async () => {
-        const frame = await loadAdultFrame(userId, broadNoStr);
+      const { promise, cancel } = startAdultFrameLoad(userId, broadNoStr);
+      promise.then((frame) => {
         adultFrameInProgress.delete(broadNoStr);
         if (!frame) return;
         adultFrameCache.set(broadNoStr, frame);
-        if (!cancelled) setCapturedFrame(frame);
-      })();
+        setCapturedFrame(frame);
+      });
       return () => {
-        cancelled = true;
+        cancel();
+        adultFrameInProgress.delete(broadNoStr);
       };
     }, [data == null ? void 0 : data.broadNo, data == null ? void 0 : data.userId, data == null ? void 0 : data.type, data == null ? void 0 : data.platform, settings.isReplaceEmptyThumbnailEnabled]);
     reactExports.useEffect(() => {
@@ -13872,7 +13896,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525061654";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525062134";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {

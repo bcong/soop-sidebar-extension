@@ -109,35 +109,62 @@ function captureVideoFrame(video: HTMLVideoElement): Promise<string> {
     });
 }
 
-async function loadAdultFrame(userId: string, broadNo: string): Promise<string | null> {
-    await ensureHlsJs();
-    const Hls = _uwTooltip.Hls;
-    if (!Hls?.isSupported()) return null;
-    const [aid, baseUrl] = await Promise.all([getBroadAid(userId, broadNo), getBroadM3u8Domain(broadNo)]);
-    if (!aid || !baseUrl) return null;
-    const m3u8 = `${baseUrl}?aid=${aid}`;
-    const video = document.createElement("video");
-    video.playbackRate = 16;
-    const hls = new Hls();
-    hls.loadSource(m3u8);
-    hls.attachMedia(video);
-    return new Promise((resolve) => {
-        video.addEventListener(
-            "canplay",
-            async () => {
-                const frame = await captureVideoFrame(video);
-                video.pause();
-                video.src = "";
-                hls.destroy();
-                resolve(frame);
-            },
-            { once: true },
-        );
-        setTimeout(() => {
-            hls.destroy();
-            resolve(null);
-        }, 15000);
-    });
+function startAdultFrameLoad(userId: string, broadNo: string): { promise: Promise<string | null>; cancel: () => void } {
+    let hlsInstance: any = null;
+    let videoEl: HTMLVideoElement | null = null;
+    let cancelled = false;
+
+    const promise = (async (): Promise<string | null> => {
+        await ensureHlsJs();
+        if (cancelled) return null;
+        const Hls = _uwTooltip.Hls;
+        if (!Hls?.isSupported()) return null;
+        const [aid, baseUrl] = await Promise.all([getBroadAid(userId, broadNo), getBroadM3u8Domain(broadNo)]);
+        if (cancelled) return null;
+        if (!aid || !baseUrl) return null;
+        const m3u8 = `${baseUrl}?aid=${aid}`;
+        videoEl = document.createElement("video");
+        videoEl.playbackRate = 16;
+        hlsInstance = new Hls();
+        hlsInstance.loadSource(m3u8);
+        hlsInstance.attachMedia(videoEl);
+        return new Promise((resolve) => {
+            videoEl!.addEventListener(
+                "canplay",
+                async () => {
+                    if (cancelled) {
+                        resolve(null);
+                        return;
+                    }
+                    const frame = await captureVideoFrame(videoEl!);
+                    videoEl!.pause();
+                    videoEl!.src = "";
+                    hlsInstance?.destroy();
+                    resolve(frame);
+                },
+                { once: true },
+            );
+            setTimeout(() => {
+                if (!cancelled) hlsInstance?.destroy();
+                resolve(null);
+            }, 15000);
+        });
+    })();
+
+    const cancel = () => {
+        cancelled = true;
+        if (hlsInstance) {
+            hlsInstance.destroy();
+            hlsInstance = null;
+        }
+        if (videoEl) {
+            videoEl.pause();
+            videoEl.src = "";
+            videoEl = null;
+        }
+    };
+
+    return { promise, cancel };
 }
 
 // broadNo → base64 캡처 캐시 (탭 수명 동안 유지)
@@ -188,7 +215,6 @@ const TooltipPreview: React.FC = observer(() => {
 
         const broadNoStr = String(data.broadNo);
         const userId = data.userId;
-        let cancelled = false;
 
         // 캐시 확인
         const cached = adultFrameCache.get(broadNoStr);
@@ -201,17 +227,18 @@ const TooltipPreview: React.FC = observer(() => {
         if (adultFrameInProgress.has(broadNoStr)) return;
         adultFrameInProgress.add(broadNoStr);
 
-        (async () => {
-            const frame = await loadAdultFrame(userId, broadNoStr);
+        const { promise, cancel } = startAdultFrameLoad(userId, broadNoStr);
+        promise.then((frame) => {
             adultFrameInProgress.delete(broadNoStr);
             if (!frame) return;
             // 취소 여부와 무관하게 캐시에 저장 → 다음 hover 시 즉시 표시
             adultFrameCache.set(broadNoStr, frame);
-            if (!cancelled) setCapturedFrame(frame);
-        })();
+            setCapturedFrame(frame);
+        });
 
         return () => {
-            cancelled = true;
+            cancel();
+            adultFrameInProgress.delete(broadNoStr);
         };
         // data 객체 참조 대신 primitive 값으로 비교 → 같은 채널 내 mousemove 시 재실행 방지
     }, [data?.broadNo, data?.userId, data?.type, data?.platform, settings.isReplaceEmptyThumbnailEnabled]);
