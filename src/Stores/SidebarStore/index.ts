@@ -53,7 +53,7 @@ export class SidebarStore {
     lastFetchTime = 0;
 
     // 마지막 핀 동기화 시각
-    lastSyncTime: number = GM_getValue("kvdbLastSyncTime", 0) as number;
+    lastSyncTime: number = GM_getValue("lastSyncTime", 0) as number;
 
     // 폴링 타이머
     private _pollTimer: ReturnType<typeof setTimeout> | null = null;
@@ -185,9 +185,8 @@ export class SidebarStore {
     setPinnedChzzkUsers(users: string[]): void {
         this.pinnedChzzkUsers = users;
         GM_setValue("pinnedChzzkUsers", JSON.stringify(users));
-        // kvdb.io 자동 push: 치지직 팔로우 통합 활성화 + KVDB_BUCKET 설정된 경우만
         if (isSyncConfigured() && this._settings.isChzzkPinSyncEnabled) {
-            fetchChzzkUserId().then((uid) => {
+            this._getChzzkUserId().then((uid) => {
                 if (uid) syncPush(uid, users).catch(() => {});
             });
         }
@@ -279,6 +278,13 @@ export class SidebarStore {
                 getHiddenbjList(),
                 getStationFeed(this._settings.isChannelFeedEnabled),
             ]);
+
+            // 치지직 유저 ID 저장값 무효화: 설정 꺼짐 → 삭제, 인증 실패(로그아웃) → 삭제
+            if (!this._settings.isChzzkFollowChannelsEnabled) {
+                GM_setValue("chzzkUserId", "");
+            } else if (groupIdx === 0 && chzzkRes !== null && chzzkRes.code !== 200) {
+                GM_setValue("chzzkUserId", "");
+            }
 
             // soopRes가 [] (배열)이면 타임아웃/API 오류 → 이전 채널 유지
             const hasSoopError = Array.isArray(soopRes);
@@ -564,14 +570,23 @@ export class SidebarStore {
         await this._syncPull();
     }
 
+    /** 치지직 유저 ID를 GM 스토리지에서 읽어 반환. 없으면 1회 fetch 후 GM_setValue로 저장 */
+    private async _getChzzkUserId(): Promise<string | null> {
+        const stored = GM_getValue("chzzkUserId", "") as string;
+        if (stored) return stored;
+        const uid = await fetchChzzkUserId();
+        if (uid) GM_setValue("chzzkUserId", uid);
+        return uid;
+    }
+
     private async _syncPull(): Promise<void> {
         if (!this._settings.isChzzkPinSyncEnabled || !isSyncConfigured()) return;
         try {
-            const uid = await fetchChzzkUserId();
+            const uid = await this._getChzzkUserId();
             if (!uid) return;
             const pins = await syncPull(uid);
             const now = Date.now();
-            GM_setValue("kvdbLastSyncTime", now);
+            GM_setValue("lastSyncTime", now);
             runInAction(() => {
                 this.lastSyncTime = now;
             });

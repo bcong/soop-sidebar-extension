@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260524233117
+// @version      20260525042819
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -12059,7 +12059,7 @@
       // 마지막 fetch 시각 (프로그래스바용)
       __publicField(this, "lastFetchTime", 0);
       // 마지막 핀 동기화 시각
-      __publicField(this, "lastSyncTime", GM_getValue("kvdbLastSyncTime", 0));
+      __publicField(this, "lastSyncTime", GM_getValue("lastSyncTime", 0));
       // 폴링 타이머
       __publicField(this, "_pollTimer", null);
       __publicField(this, "_settings");
@@ -12170,7 +12170,7 @@
       this.pinnedChzzkUsers = users;
       GM_setValue("pinnedChzzkUsers", JSON.stringify(users));
       if (isSyncConfigured() && this._settings.isChzzkPinSyncEnabled) {
-        fetchChzzkUserId().then((uid) => {
+        this._getChzzkUserId().then((uid) => {
           if (uid) syncPush(uid, users).catch(() => {
           });
         });
@@ -12244,6 +12244,11 @@
           getHiddenbjList(),
           getStationFeed(this._settings.isChannelFeedEnabled)
         ]);
+        if (!this._settings.isChzzkFollowChannelsEnabled) {
+          GM_setValue("chzzkUserId", "");
+        } else if (groupIdx === 0 && chzzkRes !== null && chzzkRes.code !== 200) {
+          GM_setValue("chzzkUserId", "");
+        }
         const hasSoopError = Array.isArray(soopRes);
         const soopData = hasSoopError ? [] : (soopRes == null ? void 0 : soopRes.data) ?? [];
         if (hasSoopError && this.followChannels.length > 0) {
@@ -12453,14 +12458,22 @@
       await Promise.all([this.fetchFollowData(), this.fetchMyplusData(), this.fetchTopData()]);
       await this._syncPull();
     }
+    /** 치지직 유저 ID를 GM 스토리지에서 읽어 반환. 없으면 1회 fetch 후 GM_setValue로 저장 */
+    async _getChzzkUserId() {
+      const stored = GM_getValue("chzzkUserId", "");
+      if (stored) return stored;
+      const uid = await fetchChzzkUserId();
+      if (uid) GM_setValue("chzzkUserId", uid);
+      return uid;
+    }
     async _syncPull() {
       if (!this._settings.isChzzkPinSyncEnabled || !isSyncConfigured()) return;
       try {
-        const uid = await fetchChzzkUserId();
+        const uid = await this._getChzzkUserId();
         if (!uid) return;
         const pins = await syncPull(uid);
         const now = Date.now();
-        GM_setValue("kvdbLastSyncTime", now);
+        GM_setValue("lastSyncTime", now);
         runInAction(() => {
           this.lastSyncTime = now;
         });
@@ -13817,7 +13830,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260524233117";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525042819";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
