@@ -1,4 +1,5 @@
-import { createRoot, startTransition } from "react-dom/client";
+import { createRoot } from "react-dom/client";
+import { startTransition } from "react";
 import { configure } from "mobx";
 import "./global.less";
 import App from "./App";

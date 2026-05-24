@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260525062842
+// @version      20260525063106
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -329,7 +329,6 @@
     jsxRuntime.exports = reactJsxRuntime_production_min;
   }
   var jsxRuntimeExports = jsxRuntime.exports;
-  var client = {};
   var reactDom = { exports: {} };
   var reactDom_production_min = {};
   var scheduler = { exports: {} };
@@ -7001,8 +7000,8 @@
   var createRoot;
   var m = reactDomExports;
   {
-    createRoot = client.createRoot = m.createRoot;
-    client.hydrateRoot = m.hydrateRoot;
+    createRoot = m.createRoot;
+    m.hydrateRoot;
   }
   function die(error) {
     for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -13901,7 +13900,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525062842";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525063106";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -16532,7 +16531,7 @@
     return null;
   };
   configure({
-    reactionScheduler: (f2) => client.startTransition(f2)
+    reactionScheduler: (f2) => reactExports.startTransition(f2)
   });
   if (typeof GM_getValue === "undefined") {
     const _store = new Map(
