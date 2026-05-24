@@ -20,10 +20,7 @@ const ChannelItemChzzk: React.FC<ChannelItemChzzkProps> = observer(({ data }) =>
     const category = channel.liveInfo?.liveCategoryValue ?? channel.liveCategoryValue ?? "";
     const viewers = channel.liveInfo?.concurrentUserCount ?? channel.concurrentUserCount ?? 0;
     const rawProfileUrl = channel.channel?.channelImageUrl ?? channel.channelImageUrl;
-    const profileUrl =
-        settings.isProfileForceJpg && rawProfileUrl
-            ? rawProfileUrl.replace(/\.(gif|png|webp)(\?.*)?$/, ".jpg$2")
-            : rawProfileUrl;
+    const profileUrl = rawProfileUrl;
     const liveImageUrl = (channel.liveInfo?.liveImageUrl ?? channel.liveImageUrl ?? "").replace("{type}", "360");
     const openDate = channel.liveInfo?.openDate ?? channel.openDate ?? "";
 

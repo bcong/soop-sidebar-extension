@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260525070333
+// @version      20260525070533
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -11452,7 +11452,6 @@
       __publicField(this, "isSmallUserLayoutEnabled");
       __publicField(this, "isProfileHidden");
       __publicField(this, "isCategoryHidden");
-      __publicField(this, "isProfileForceJpg");
       __publicField(this, "isSendLoadBroadEnabled");
       __publicField(this, "isDuplicateRemovalEnabled");
       __publicField(this, "isTopDuplicateRemovalEnabled");
@@ -11535,7 +11534,6 @@
       this.isSmallUserLayoutEnabled = _GM_getValue("isSmallUserLayoutEnabled", false);
       this.isProfileHidden = _GM_getValue("isProfileHidden", false);
       this.isCategoryHidden = _GM_getValue("isCategoryHidden", false);
-      this.isProfileForceJpg = _GM_getValue("isProfileForceJpg", false);
       this.isSendLoadBroadEnabled = _GM_getValue("isSendLoadBroadEnabled", true);
       this.isDuplicateRemovalEnabled = _GM_getValue("isDuplicateRemovalEnabled", true);
       this.isTopDuplicateRemovalEnabled = _GM_getValue("isTopDuplicateRemovalEnabled", true);
@@ -11613,7 +11611,6 @@
         isSmallUserLayoutEnabled: observable,
         isProfileHidden: observable,
         isCategoryHidden: observable,
-        isProfileForceJpg: observable,
         isSendLoadBroadEnabled: observable,
         isDuplicateRemovalEnabled: observable,
         isTopDuplicateRemovalEnabled: observable,
@@ -12799,7 +12796,7 @@
       }
     };
     const rawProfileUrl = channel.profile_image || `https://stimg.sooplive.com/LOGO/${channel.user_id.slice(0, 2)}/${channel.user_id}/m/${channel.user_id}.webp`;
-    const profileUrl = settings.isProfileForceJpg ? rawProfileUrl.replace(/\.(gif|png|webp)(\?.*)?$/, ".jpg$2") : rawProfileUrl;
+    const profileUrl = rawProfileUrl;
     const isPinned = channel.isPinned;
     const isNotified = channel.is_mobile_push === "Y";
     return /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -12862,7 +12859,7 @@
     const category = ((_d = channel.liveInfo) == null ? void 0 : _d.liveCategoryValue) ?? channel.liveCategoryValue ?? "";
     const viewers = ((_e = channel.liveInfo) == null ? void 0 : _e.concurrentUserCount) ?? channel.concurrentUserCount ?? 0;
     const rawProfileUrl = ((_f = channel.channel) == null ? void 0 : _f.channelImageUrl) ?? channel.channelImageUrl;
-    const profileUrl = settings.isProfileForceJpg && rawProfileUrl ? rawProfileUrl.replace(/\.(gif|png|webp)(\?.*)?$/, ".jpg$2") : rawProfileUrl;
+    const profileUrl = rawProfileUrl;
     const liveImageUrl = (((_g = channel.liveInfo) == null ? void 0 : _g.liveImageUrl) ?? channel.liveImageUrl ?? "").replace("{type}", "360");
     const openDate = ((_h = channel.liveInfo) == null ? void 0 : _h.openDate) ?? channel.openDate ?? "";
     const isPinned = sidebarStore.pinnedChzzkUsers.includes(channelId);
@@ -12931,7 +12928,7 @@
     const userId = channel.user_id ?? channel.station_user_id;
     const userNick = channel.user_nick ?? userId;
     const rawProfileUrl = channel.profile_image || `https://stimg.sooplive.com/LOGO/${userId.slice(0, 2)}/${userId}/m/${userId}.webp`;
-    const profileUrl = settings.isProfileForceJpg ? rawProfileUrl.replace(/\.(gif|png|webp)(\?.*)?$/, ".jpg$2") : rawProfileUrl;
+    const profileUrl = rawProfileUrl;
     const isFeed = data.type === "soop_feed";
     const stationUrl = `https://www.sooplive.com/${userId}`;
     if (isFeed) {
@@ -13667,7 +13664,6 @@
     "isSmallUserLayoutEnabled",
     "isProfileHidden",
     "isCategoryHidden",
-    "isProfileForceJpg",
     "isSendLoadBroadEnabled",
     "isDuplicateRemovalEnabled",
     "isTopDuplicateRemovalEnabled",
@@ -13904,7 +13900,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525070333";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525070533";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -14277,16 +14273,6 @@
                     label: "카테고리 표시 숨기기",
                     checked: s.isCategoryHidden,
                     onChange: (v2) => s.setSetting("isCategoryHidden", v2)
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  Opt,
-                  {
-                    id: "switchProfileForceJpg",
-                    badge: "sidebar",
-                    label: "프로필 이미지 JPG 고정 (GIF 최적화)",
-                    checked: s.isProfileForceJpg,
-                    onChange: (v2) => s.setSetting("isProfileForceJpg", v2)
                   }
                 ),
                 /* @__PURE__ */ jsxRuntimeExports.jsx(

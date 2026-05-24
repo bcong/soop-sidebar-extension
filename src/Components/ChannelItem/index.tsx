@@ -79,9 +79,7 @@ const ChannelItem: React.FC<ChannelItemProps> = observer(({ data }) => {
     const rawProfileUrl =
         channel.profile_image ||
         `https://stimg.sooplive.com/LOGO/${channel.user_id.slice(0, 2)}/${channel.user_id}/m/${channel.user_id}.webp`;
-    const profileUrl = settings.isProfileForceJpg
-        ? rawProfileUrl.replace(/\.(gif|png|webp)(\?.*)?$/, ".jpg$2")
-        : rawProfileUrl;
+    const profileUrl = rawProfileUrl;
 
     const isPinned = channel.isPinned;
     const isNotified = channel.is_mobile_push === "Y";

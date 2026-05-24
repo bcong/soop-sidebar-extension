@@ -17,9 +17,7 @@ const ChannelItemOffline: React.FC<ChannelItemOfflineProps> = observer(({ data }
     const userNick = channel.user_nick ?? userId;
     const rawProfileUrl =
         channel.profile_image || `https://stimg.sooplive.com/LOGO/${userId.slice(0, 2)}/${userId}/m/${userId}.webp`;
-    const profileUrl = settings.isProfileForceJpg
-        ? rawProfileUrl.replace(/\.(gif|png|webp)(\?.*)?$/, ".jpg$2")
-        : rawProfileUrl;
+    const profileUrl = rawProfileUrl;
 
     const isFeed = data.type === "soop_feed";
 

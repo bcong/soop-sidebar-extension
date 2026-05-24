@@ -26,7 +26,6 @@ const EXPORT_KEYS = [
     "isSmallUserLayoutEnabled",
     "isProfileHidden",
     "isCategoryHidden",
-    "isProfileForceJpg",
     "isSendLoadBroadEnabled",
     "isDuplicateRemovalEnabled",
     "isTopDuplicateRemovalEnabled",
@@ -678,13 +677,6 @@ const SettingModal: React.FC = observer(() => {
                                 label="카테고리 표시 숨기기"
                                 checked={s.isCategoryHidden}
                                 onChange={(v) => s.setSetting("isCategoryHidden", v)}
-                            />
-                            <Opt
-                                id="switchProfileForceJpg"
-                                badge="sidebar"
-                                label="프로필 이미지 JPG 고정 (GIF 최적화)"
-                                checked={s.isProfileForceJpg}
-                                onChange={(v) => s.setSetting("isProfileForceJpg", v)}
                             />
                             <Opt
                                 id="sendLoadBroadCheck"
