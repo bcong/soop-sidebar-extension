@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260525052246
+// @version      20260525054911
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -11450,6 +11450,8 @@
       __publicField(this, "isPinnedStreamWithPinEnabled");
       __publicField(this, "isPinnedOnlineOnlyEnabled");
       __publicField(this, "isSmallUserLayoutEnabled");
+      __publicField(this, "isProfileHidden");
+      __publicField(this, "isCategoryHidden");
       __publicField(this, "isSendLoadBroadEnabled");
       __publicField(this, "isDuplicateRemovalEnabled");
       __publicField(this, "isTopDuplicateRemovalEnabled");
@@ -11530,6 +11532,8 @@
       this.isPinnedStreamWithPinEnabled = _GM_getValue("isPinnedStreamWithPinEnabled", false);
       this.isPinnedOnlineOnlyEnabled = _GM_getValue("isPinnedOnlineOnlyEnabled", false);
       this.isSmallUserLayoutEnabled = _GM_getValue("isSmallUserLayoutEnabled", false);
+      this.isProfileHidden = _GM_getValue("isProfileHidden", false);
+      this.isCategoryHidden = _GM_getValue("isCategoryHidden", false);
       this.isSendLoadBroadEnabled = _GM_getValue("isSendLoadBroadEnabled", true);
       this.isDuplicateRemovalEnabled = _GM_getValue("isDuplicateRemovalEnabled", true);
       this.isTopDuplicateRemovalEnabled = _GM_getValue("isTopDuplicateRemovalEnabled", true);
@@ -11605,6 +11609,8 @@
         isPinnedStreamWithPinEnabled: observable,
         isPinnedOnlineOnlyEnabled: observable,
         isSmallUserLayoutEnabled: observable,
+        isProfileHidden: observable,
+        isCategoryHidden: observable,
         isSendLoadBroadEnabled: observable,
         isDuplicateRemovalEnabled: observable,
         isTopDuplicateRemovalEnabled: observable,
@@ -12784,7 +12790,7 @@
         "data-broad-start": channel.broad_start,
         "data-total-view-cnt": channel.total_view_cnt,
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "profile-picture-container", children: [
+          !settings.isProfileHidden && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "profile-picture-container", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(
               "img",
               {
@@ -12809,7 +12815,7 @@
             isNotified && /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-bell", style: { marginRight: 3, fontSize: 11 } }),
             channel.user_nick
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: channel.category_name || getCategoryName(channel.broad_cate_no) || "" }),
+          !settings.isCategoryHidden && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: channel.category_name || getCategoryName(channel.broad_cate_no) || "" }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "watchers", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "dot", children: "●" }),
             addNumberSeparator(channel.total_view_cnt)
@@ -12868,7 +12874,7 @@
         "data-live-image-url": liveImageUrl,
         "data-open-date": openDate,
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "profile-picture-container", children: [
+          !settings.isProfileHidden && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "profile-picture-container", children: [
             profileUrl && /* @__PURE__ */ jsxRuntimeExports.jsx(
               "img",
               {
@@ -12884,7 +12890,7 @@
             isPinned && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "pin-badge", children: "🖈" })
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "username", children: channelName }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: category }),
+          !settings.isCategoryHidden && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: category }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "watchers", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "dot greendot", children: "●" }),
             addNumberSeparator(viewers)
@@ -12921,7 +12927,7 @@
           rel: "noreferrer",
           title: `${userNick} - 피드`,
           children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
+            !settings.isProfileHidden && /* @__PURE__ */ jsxRuntimeExports.jsx(
               "img",
               {
                 className: "profile-picture profile-grayscale",
@@ -12938,7 +12944,7 @@
               }
             ),
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "username", children: userNick }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: channel.title ?? ((_a2 = channel.content) == null ? void 0 : _a2.slice(0, 30)) ?? "피드" }),
+            !settings.isCategoryHidden && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: channel.title ?? ((_a2 = channel.content) == null ? void 0 : _a2.slice(0, 30)) ?? "피드" }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "watchers", children: channel.reg_timestamp ? timeSince(new Date(channel.reg_timestamp * 1e3).toISOString()) : "" })
           ]
         }
@@ -12953,7 +12959,7 @@
         rel: "noreferrer",
         title: userNick,
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
+          !settings.isProfileHidden && /* @__PURE__ */ jsxRuntimeExports.jsx(
             "img",
             {
               className: "profile-picture profile-grayscale",
@@ -12970,7 +12976,7 @@
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "username", children: userNick }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: "오프라인" }),
+          !settings.isCategoryHidden && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: "오프라인" }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "watchers", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "dot profile-grayscale", role: "img", children: "●" }),
             "오프라인"
@@ -13783,6 +13789,7 @@
     var _a2;
     const s = useSettingsStore();
     const sb2 = useSidebarStore();
+    const lastSyncTime = sb2.lastSyncTime;
     const [open, setOpen] = reactExports.useState(false);
     const [activeSection, setActiveSection] = reactExports.useState(SECTIONS[0].id);
     const [searchText, setSearchText] = reactExports.useState("");
@@ -13852,7 +13859,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525052246";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525054911";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -14205,6 +14212,26 @@
                     label: "미니 방송 목록",
                     checked: s.isSmallUserLayoutEnabled,
                     onChange: (v2) => s.setSetting("isSmallUserLayoutEnabled", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchProfileHidden",
+                    badge: "sidebar",
+                    label: "프로필 이미지 숨기기",
+                    checked: s.isProfileHidden,
+                    onChange: (v2) => s.setSetting("isProfileHidden", v2)
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Opt,
+                  {
+                    id: "switchCategoryHidden",
+                    badge: "sidebar",
+                    label: "카테고리 표시 숨기기",
+                    checked: s.isCategoryHidden,
+                    onChange: (v2) => s.setSetting("isCategoryHidden", v2)
                   }
                 ),
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -14810,7 +14837,7 @@
                   s.isChzzkPinSyncEnabled && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { fontSize: "11px", opacity: 0.7, paddingLeft: "8px" }, children: [
                     "마지막 동기화:",
                     " ",
-                    sb2.lastSyncTime ? new Date(sb2.lastSyncTime).toLocaleTimeString("ko-KR", {
+                    lastSyncTime ? new Date(lastSyncTime).toLocaleTimeString("ko-KR", {
                       hour: "2-digit",
                       minute: "2-digit",
                       second: "2-digit"

@@ -245,6 +245,10 @@ const Opt: React.FC<{
 const SettingModal: React.FC = observer(() => {
     const s = useSettingsStore();
     const sb = useSidebarStore();
+    // modal = open ? (...) : null 구조에서 open=false이면 sb.lastSyncTime이 JSX 평가에서
+    // 제외되어 MobX 추적이 끊김 → sync 실행 시 리렌더 트리거 없음.
+    // 최상단에서 unconditionally 읽어 항상 MobX 구독을 유지.
+    const lastSyncTime = sb.lastSyncTime;
     const [open, setOpen] = useState(false);
     const [activeSection, setActiveSection] = useState(SECTIONS[0].id);
     const [searchText, setSearchText] = useState("");
@@ -658,6 +662,20 @@ const SettingModal: React.FC = observer(() => {
                                 label="미니 방송 목록"
                                 checked={s.isSmallUserLayoutEnabled}
                                 onChange={(v) => s.setSetting("isSmallUserLayoutEnabled", v)}
+                            />
+                            <Opt
+                                id="switchProfileHidden"
+                                badge="sidebar"
+                                label="프로필 이미지 숨기기"
+                                checked={s.isProfileHidden}
+                                onChange={(v) => s.setSetting("isProfileHidden", v)}
+                            />
+                            <Opt
+                                id="switchCategoryHidden"
+                                badge="sidebar"
+                                label="카테고리 표시 숨기기"
+                                checked={s.isCategoryHidden}
+                                onChange={(v) => s.setSetting("isCategoryHidden", v)}
                             />
                             <Opt
                                 id="sendLoadBroadCheck"
@@ -1122,8 +1140,8 @@ const SettingModal: React.FC = observer(() => {
                                 {s.isChzzkPinSyncEnabled && (
                                     <span style={{ fontSize: "11px", opacity: 0.7, paddingLeft: "8px" }}>
                                         마지막 동기화:{" "}
-                                        {sb.lastSyncTime
-                                            ? new Date(sb.lastSyncTime).toLocaleTimeString("ko-KR", {
+                                        {lastSyncTime
+                                            ? new Date(lastSyncTime).toLocaleTimeString("ko-KR", {
                                                   hour: "2-digit",
                                                   minute: "2-digit",
                                                   second: "2-digit",

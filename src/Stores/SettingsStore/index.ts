@@ -16,6 +16,8 @@ export class SettingsStore {
     isPinnedStreamWithPinEnabled: boolean;
     isPinnedOnlineOnlyEnabled: boolean;
     isSmallUserLayoutEnabled: boolean;
+    isProfileHidden: boolean;
+    isCategoryHidden: boolean;
     isSendLoadBroadEnabled: boolean;
     isDuplicateRemovalEnabled: boolean;
     isTopDuplicateRemovalEnabled: boolean;
@@ -106,6 +108,8 @@ export class SettingsStore {
         this.isPinnedStreamWithPinEnabled = GM_getValue("isPinnedStreamWithPinEnabled", false);
         this.isPinnedOnlineOnlyEnabled = GM_getValue("isPinnedOnlineOnlyEnabled", false);
         this.isSmallUserLayoutEnabled = GM_getValue("isSmallUserLayoutEnabled", false);
+        this.isProfileHidden = GM_getValue("isProfileHidden", false);
+        this.isCategoryHidden = GM_getValue("isCategoryHidden", false);
         this.isSendLoadBroadEnabled = GM_getValue("isSendLoadBroadEnabled", true);
         this.isDuplicateRemovalEnabled = GM_getValue("isDuplicateRemovalEnabled", true);
         this.isTopDuplicateRemovalEnabled = GM_getValue("isTopDuplicateRemovalEnabled", true);
@@ -191,6 +195,8 @@ export class SettingsStore {
             isPinnedStreamWithPinEnabled: observable,
             isPinnedOnlineOnlyEnabled: observable,
             isSmallUserLayoutEnabled: observable,
+            isProfileHidden: observable,
+            isCategoryHidden: observable,
             isSendLoadBroadEnabled: observable,
             isDuplicateRemovalEnabled: observable,
             isTopDuplicateRemovalEnabled: observable,

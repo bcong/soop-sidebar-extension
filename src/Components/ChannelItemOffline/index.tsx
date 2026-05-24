@@ -31,21 +31,25 @@ const ChannelItemOffline: React.FC<ChannelItemOfflineProps> = observer(({ data }
                 rel="noreferrer"
                 title={`${userNick} - 피드`}
             >
-                <img
-                    className="profile-picture profile-grayscale"
-                    src={profileUrl}
-                    alt={userNick}
-                    loading="lazy"
-                    onError={(e) => {
-                        const img = e.target as HTMLImageElement;
-                        img.src = `https://profile.img.sooplive.com/LOGO/${userId.slice(0, 2)}/${userId}/m/${userId}.jpg`;
-                        img.onerror = () => {
-                            img.src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
-                        };
-                    }}
-                />
+                {!settings.isProfileHidden && (
+                    <img
+                        className="profile-picture profile-grayscale"
+                        src={profileUrl}
+                        alt={userNick}
+                        loading="lazy"
+                        onError={(e) => {
+                            const img = e.target as HTMLImageElement;
+                            img.src = `https://profile.img.sooplive.com/LOGO/${userId.slice(0, 2)}/${userId}/m/${userId}.jpg`;
+                            img.onerror = () => {
+                                img.src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
+                            };
+                        }}
+                    />
+                )}
                 <span className="username">{userNick}</span>
-                <span className="description">{channel.title ?? channel.content?.slice(0, 30) ?? "피드"}</span>
+                {!settings.isCategoryHidden && (
+                    <span className="description">{channel.title ?? channel.content?.slice(0, 30) ?? "피드"}</span>
+                )}
                 <span className="watchers">
                     {channel.reg_timestamp ? timeSince(new Date(channel.reg_timestamp * 1000).toISOString()) : ""}
                 </span>
@@ -61,21 +65,23 @@ const ChannelItemOffline: React.FC<ChannelItemOfflineProps> = observer(({ data }
             rel="noreferrer"
             title={userNick}
         >
-            <img
-                className="profile-picture profile-grayscale"
-                src={profileUrl}
-                alt={userNick}
-                loading="lazy"
-                onError={(e) => {
-                    const img = e.target as HTMLImageElement;
-                    img.src = `https://profile.img.sooplive.com/LOGO/${userId.slice(0, 2)}/${userId}/m/${userId}.jpg`;
-                    img.onerror = () => {
-                        img.src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
-                    };
-                }}
-            />
+            {!settings.isProfileHidden && (
+                <img
+                    className="profile-picture profile-grayscale"
+                    src={profileUrl}
+                    alt={userNick}
+                    loading="lazy"
+                    onError={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        img.src = `https://profile.img.sooplive.com/LOGO/${userId.slice(0, 2)}/${userId}/m/${userId}.jpg`;
+                        img.onerror = () => {
+                            img.src = "https://profile.img.sooplive.com/LOGO/no_profile.png";
+                        };
+                    }}
+                />
+            )}
             <span className="username">{userNick}</span>
-            <span className="description">오프라인</span>
+            {!settings.isCategoryHidden && <span className="description">오프라인</span>}
             <span className="watchers">
                 <span className="dot profile-grayscale" role="img">
                     ●
