@@ -200,13 +200,18 @@ export class SidebarStore {
     // 설정 변경 시 저장된 원본 데이터로 즉시 재처리
     reprocessFollow(): void {
         if (!this._rawFollow) return;
+        const _t0 = performance.now();
+        console.log("[Sidebar] reprocessFollow START");
         const { soopData, chzzkRes, hiddenBjList, feedItems } = this._rawFollow;
         const processed = this._processFollowData(soopData, chzzkRes, hiddenBjList, feedItems);
         this._diffApply(this.followChannels, processed);
+        console.log(`[Sidebar] reprocessFollow END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
 
     reprocessMyplus(): void {
         if (!this._rawMyplus) return;
+        const _t0 = performance.now();
+        console.log("[Sidebar] reprocessMyplus START");
         const { liveList } = this._rawMyplus;
         const blockedUserSet = new Set(this.blockedUsers.map((u) => u.userId));
         const blockedCatSet = new Set(this.blockedCategories.map((c) => c.categoryId));
@@ -220,10 +225,13 @@ export class SidebarStore {
             );
         }
         this._diffApply(this.myplusChannels, liveChannels);
+        console.log(`[Sidebar] reprocessMyplus END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
 
     reprocessTop(): void {
         if (!this._rawTop) return;
+        const _t0 = performance.now();
+        console.log("[Sidebar] reprocessTop START");
         const { soopData, chzzkRes } = this._rawTop;
         const result: I_ChannelData[] = [];
         const hiddenBjSet = new Set(this.hiddenBjList);
@@ -254,6 +262,7 @@ export class SidebarStore {
         // SOOP+Chzzk 통합 시청자순 정렬
         result.sort((a, b) => getViewerCount(b) - getViewerCount(a));
         this._diffApply(this.topChannels, result);
+        console.log(`[Sidebar] reprocessTop END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
 
     // ===========================
@@ -262,6 +271,8 @@ export class SidebarStore {
 
     async fetchFollowData(): Promise<void> {
         if (!this._settings.displayFollow) return;
+        const _t0 = performance.now();
+        console.log("[Sidebar] fetchFollowData START");
         if (this.followChannels.length === 0) {
             runInAction(() => {
                 this.isFollowLoading = true;
@@ -329,6 +340,8 @@ export class SidebarStore {
             runInAction(() => {
                 this.isFollowLoading = false;
             });
+        } finally {
+            console.log(`[Sidebar] fetchFollowData END ${(performance.now() - _t0).toFixed(1)}ms`);
         }
     }
 
@@ -338,6 +351,8 @@ export class SidebarStore {
         hiddenBjList: string[],
         feedItems: any[],
     ): I_ChannelData[] {
+        const _t0 = performance.now();
+        console.log("[Sidebar] _processFollowData START");
         const s = this._settings;
         const result: I_ChannelData[] = [];
 
@@ -451,12 +466,16 @@ export class SidebarStore {
             rest.sort((a, b) => getViewerCount(b) - getViewerCount(a));
         }
 
-        return [...pinned, ...rest, ...blockedCat];
+        const _result = [...pinned, ...rest, ...blockedCat];
+        console.log(`[Sidebar] _processFollowData END (${_result.length}ch) ${(performance.now() - _t0).toFixed(1)}ms`);
+        return _result;
     }
 
     async fetchMyplusData(): Promise<void> {
         const { displayMyplus, displayMyplusvod } = this._settings;
         if (!displayMyplus && !displayMyplusvod) return;
+        const _t0 = performance.now();
+        console.log("[Sidebar] fetchMyplusData START");
         if (this.myplusChannels.length === 0) {
             runInAction(() => {
                 this.isMyplusLoading = true;
@@ -517,11 +536,15 @@ export class SidebarStore {
             runInAction(() => {
                 this.isMyplusLoading = false;
             });
+        } finally {
+            console.log(`[Sidebar] fetchMyplusData END ${(performance.now() - _t0).toFixed(1)}ms`);
         }
     }
 
     async fetchTopData(): Promise<void> {
         if (!this._settings.displayTop) return;
+        const _t0 = performance.now();
+        console.log("[Sidebar] fetchTopData START");
         if (this.topChannels.length === 0) {
             runInAction(() => {
                 this.isTopLoading = true;
@@ -588,15 +611,20 @@ export class SidebarStore {
             runInAction(() => {
                 this.isTopLoading = false;
             });
+        } finally {
+            console.log(`[Sidebar] fetchTopData END ${(performance.now() - _t0).toFixed(1)}ms`);
         }
     }
 
     async fetchAllData(): Promise<void> {
+        const _t0 = performance.now();
+        console.log("[Sidebar] fetchAllData START");
         runInAction(() => {
             this.lastFetchTime = Date.now();
         });
         await Promise.all([this.fetchFollowData(), this.fetchMyplusData(), this.fetchTopData()]);
         await this._syncPull();
+        console.log(`[Sidebar] fetchAllData END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
 
     /** 치지직 유저 ID를 GM 스토리지에서 읽어 반환. 없으면 1회 fetch 후 GM_setValue로 저장 */
@@ -610,6 +638,8 @@ export class SidebarStore {
 
     private async _syncPull(): Promise<void> {
         if (!this._settings.isChzzkPinSyncEnabled || !isSyncConfigured()) return;
+        const _t0 = performance.now();
+        console.log("[Sidebar] _syncPull START");
         try {
             const uid = await this._getChzzkUserId();
             if (!uid) return;
@@ -630,6 +660,8 @@ export class SidebarStore {
             });
         } catch {
             // 네트워크 오류 무시
+        } finally {
+            console.log(`[Sidebar] _syncPull END ${(performance.now() - _t0).toFixed(1)}ms`);
         }
     }
 
@@ -658,6 +690,8 @@ export class SidebarStore {
 
     /** localStorage 캐시에서 이전 데이터 동기 로드 — 첫 렌더링 종료 전에 채널 표시 */
     private _initFromLocalStorageCache(): void {
+        const _t0 = performance.now();
+        console.log("[Sidebar] _initFromLocalStorageCache START");
         const readCache = (url: string, expiryMs: number): any | null => {
             try {
                 const raw = localStorage.getItem(`fetchCache_${encodeURIComponent(url)}`);
@@ -723,6 +757,7 @@ export class SidebarStore {
                 }),
             );
         }
+        console.log(`[Sidebar] _initFromLocalStorageCache END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
 
     // ===========================
@@ -760,6 +795,8 @@ export class SidebarStore {
 
     /** 기존 배열을 in-place로 diff 업데이트. 없어진 채널 제거, 기존 채널 필드 업데이트, 새 채널 삽입, 순서 재정렬 */
     private _diffApply(current: I_ChannelData[], next: I_ChannelData[]): void {
+        const _t0 = performance.now();
+        console.log(`[Sidebar] _diffApply START (${current.length} → ${next.length})`);
         const currentMap = new Map(current.map((c) => [this._getChannelKey(c), c]));
         const nextMap = new Map(next.map((c) => [this._getChannelKey(c), c]));
 
@@ -772,5 +809,6 @@ export class SidebarStore {
         // next 순서 기준으로 재구성: 기존 참조 재사용, 신규는 그대로 삽입 — O(n)
         const newOrder = next.map((n) => currentMap.get(this._getChannelKey(n)) ?? n);
         current.splice(0, current.length, ...newOrder);
+        console.log(`[Sidebar] _diffApply END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
 }

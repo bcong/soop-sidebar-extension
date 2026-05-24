@@ -4,7 +4,6 @@ import "../ChannelItem/style.less";
 import { useSidebarStore, useSettingsStore } from "@Stores/index";
 import type { I_ChannelData } from "@Types/index.d";
 import { addNumberSeparator } from "@Utils/format";
-import { blockUser } from "@Utils/blocking";
 
 interface ChannelItemChzzkProps {
     data: I_ChannelData;
@@ -40,15 +39,6 @@ const ChannelItemChzzk: React.FC<ChannelItemChzzkProps> = observer(({ data }) =>
         }
     };
 
-    const handleContextMenu = (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (confirm(`"${channelName}" (${channelId}) 를 차단하시겠습니까?`)) {
-            blockUser(channelId, channelName, sidebarStore.blockedUsers, (newList) =>
-                sidebarStore.setBlockedUsers(newList),
-            );
-        }
-    };
-
     const liveUrl = `https://chzzk.naver.com/live/${channelId}`;
 
     return (
@@ -57,7 +47,6 @@ const ChannelItemChzzk: React.FC<ChannelItemChzzkProps> = observer(({ data }) =>
             href={liveUrl}
             target={settings.isSendLoadBroadEnabled ? "_self" : "_blank"}
             rel="noreferrer"
-            onContextMenu={handleContextMenu}
             data-chzzk-channel-id={channelId}
             data-channel-name={channelName}
             data-live-title={liveTitle}

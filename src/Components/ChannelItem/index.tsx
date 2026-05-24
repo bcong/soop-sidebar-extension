@@ -1,10 +1,9 @@
 import React from "react";
 import { observer } from "mobx-react-lite";
 import "./style.less";
-import { useSidebarStore, useSettingsStore } from "@Stores/index";
+import { useSettingsStore } from "@Stores/index";
 import type { I_ChannelData } from "@Types/index.d";
 import { addNumberSeparator } from "@Utils/format";
-import { blockUser } from "@Utils/blocking";
 import { getCategoryName } from "@Utils/api";
 import { sleep } from "@Utils/index";
 
@@ -14,7 +13,6 @@ interface ChannelItemProps {
 
 const ChannelItem: React.FC<ChannelItemProps> = observer(({ data }) => {
     const settings = useSettingsStore();
-    const sidebarStore = useSidebarStore();
     const { channel } = data;
 
     const liveUrl = `https://play.sooplive.com/${channel.user_id}/${channel.broad_no}`;
@@ -78,15 +76,6 @@ const ChannelItem: React.FC<ChannelItemProps> = observer(({ data }) => {
         }
     };
 
-    const handleContextMenu = (e: React.MouseEvent<HTMLElement>) => {
-        e.preventDefault();
-        if (confirm(`"${channel.user_nick}" (${channel.user_id}) 를 차단하시겠습니까?`)) {
-            blockUser(channel.user_id, channel.user_nick, sidebarStore.blockedUsers, (newList) =>
-                sidebarStore.setBlockedUsers(newList),
-            );
-        }
-    };
-
     const rawProfileUrl =
         channel.profile_image ||
         `https://stimg.sooplive.com/LOGO/${channel.user_id.slice(0, 2)}/${channel.user_id}/m/${channel.user_id}.webp`;
@@ -104,7 +93,6 @@ const ChannelItem: React.FC<ChannelItemProps> = observer(({ data }) => {
             target="_self"
             rel="noreferrer"
             onClick={handleClick}
-            onContextMenu={handleContextMenu}
             data-broadcast-no={channel.broad_no}
             data-user-id={channel.user_id}
             data-user-nick={channel.user_nick}

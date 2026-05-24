@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260525055528
+// @version      20260525060753
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -12184,12 +12184,17 @@
     // 설정 변경 시 저장된 원본 데이터로 즉시 재처리
     reprocessFollow() {
       if (!this._rawFollow) return;
+      const _t0 = performance.now();
+      console.log("[Sidebar] reprocessFollow START");
       const { soopData, chzzkRes, hiddenBjList, feedItems } = this._rawFollow;
       const processed = this._processFollowData(soopData, chzzkRes, hiddenBjList, feedItems);
       this._diffApply(this.followChannels, processed);
+      console.log(`[Sidebar] reprocessFollow END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
     reprocessMyplus() {
       if (!this._rawMyplus) return;
+      const _t0 = performance.now();
+      console.log("[Sidebar] reprocessMyplus START");
       const { liveList } = this._rawMyplus;
       const blockedUserSet = new Set(this.blockedUsers.map((u2) => u2.userId));
       const blockedCatSet = new Set(this.blockedCategories.map((c) => c.categoryId));
@@ -12200,10 +12205,13 @@
         );
       }
       this._diffApply(this.myplusChannels, liveChannels);
+      console.log(`[Sidebar] reprocessMyplus END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
     reprocessTop() {
       var _a2, _b2;
       if (!this._rawTop) return;
+      const _t0 = performance.now();
+      console.log("[Sidebar] reprocessTop START");
       const { soopData, chzzkRes } = this._rawTop;
       const result = [];
       const hiddenBjSet = new Set(this.hiddenBjList);
@@ -12231,12 +12239,15 @@
       }
       result.sort((a, b) => getViewerCount(b) - getViewerCount(a));
       this._diffApply(this.topChannels, result);
+      console.log(`[Sidebar] reprocessTop END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
     // ===========================
     // 데이터 fetch
     // ===========================
     async fetchFollowData() {
       if (!this._settings.displayFollow) return;
+      const _t0 = performance.now();
+      console.log("[Sidebar] fetchFollowData START");
       if (this.followChannels.length === 0) {
         runInAction(() => {
           this.isFollowLoading = true;
@@ -12285,10 +12296,14 @@
         runInAction(() => {
           this.isFollowLoading = false;
         });
+      } finally {
+        console.log(`[Sidebar] fetchFollowData END ${(performance.now() - _t0).toFixed(1)}ms`);
       }
     }
     _processFollowData(soopData, chzzkRes, hiddenBjList, feedItems) {
       var _a2, _b2, _c, _d, _e, _f;
+      const _t0 = performance.now();
+      console.log("[Sidebar] _processFollowData START");
       const s = this._settings;
       const result = [];
       const hiddenBjSet = new Set(hiddenBjList);
@@ -12371,12 +12386,16 @@
       if (!s.isRandomSortEnabled) {
         rest.sort((a, b) => getViewerCount(b) - getViewerCount(a));
       }
-      return [...pinned, ...rest, ...blockedCat];
+      const _result = [...pinned, ...rest, ...blockedCat];
+      console.log(`[Sidebar] _processFollowData END (${_result.length}ch) ${(performance.now() - _t0).toFixed(1)}ms`);
+      return _result;
     }
     async fetchMyplusData() {
       var _a2, _b2;
       const { displayMyplus, displayMyplusvod } = this._settings;
       if (!displayMyplus && !displayMyplusvod) return;
+      const _t0 = performance.now();
+      console.log("[Sidebar] fetchMyplusData START");
       if (this.myplusChannels.length === 0) {
         runInAction(() => {
           this.isMyplusLoading = true;
@@ -12422,11 +12441,15 @@
         runInAction(() => {
           this.isMyplusLoading = false;
         });
+      } finally {
+        console.log(`[Sidebar] fetchMyplusData END ${(performance.now() - _t0).toFixed(1)}ms`);
       }
     }
     async fetchTopData() {
       var _a2, _b2;
       if (!this._settings.displayTop) return;
+      const _t0 = performance.now();
+      console.log("[Sidebar] fetchTopData START");
       if (this.topChannels.length === 0) {
         runInAction(() => {
           this.isTopLoading = true;
@@ -12474,14 +12497,19 @@
         runInAction(() => {
           this.isTopLoading = false;
         });
+      } finally {
+        console.log(`[Sidebar] fetchTopData END ${(performance.now() - _t0).toFixed(1)}ms`);
       }
     }
     async fetchAllData() {
+      const _t0 = performance.now();
+      console.log("[Sidebar] fetchAllData START");
       runInAction(() => {
         this.lastFetchTime = Date.now();
       });
       await Promise.all([this.fetchFollowData(), this.fetchMyplusData(), this.fetchTopData()]);
       await this._syncPull();
+      console.log(`[Sidebar] fetchAllData END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
     /** 치지직 유저 ID를 GM 스토리지에서 읽어 반환. 없으면 1회 fetch 후 GM_setValue로 저장 */
     async _getChzzkUserId() {
@@ -12493,6 +12521,8 @@
     }
     async _syncPull() {
       if (!this._settings.isChzzkPinSyncEnabled || !isSyncConfigured()) return;
+      const _t0 = performance.now();
+      console.log("[Sidebar] _syncPull START");
       try {
         const uid = await this._getChzzkUserId();
         if (!uid) return;
@@ -12512,6 +12542,8 @@
           this.reprocessFollow();
         });
       } catch {
+      } finally {
+        console.log(`[Sidebar] _syncPull END ${(performance.now() - _t0).toFixed(1)}ms`);
       }
     }
     startPolling(intervalSeconds = 30) {
@@ -12536,6 +12568,8 @@
     /** localStorage 캐시에서 이전 데이터 동기 로드 — 첫 렌더링 종료 전에 채널 표시 */
     _initFromLocalStorageCache() {
       var _a2, _b2, _c, _d, _e;
+      const _t0 = performance.now();
+      console.log("[Sidebar] _initFromLocalStorageCache START");
       const readCache = (url, expiryMs) => {
         try {
           const raw = localStorage.getItem(`fetchCache_${encodeURIComponent(url)}`);
@@ -12595,6 +12629,7 @@
           })
         );
       }
+      console.log(`[Sidebar] _initFromLocalStorageCache END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
     // ===========================
     // 채널 목록 diff 업데이트
@@ -12629,6 +12664,8 @@
     }
     /** 기존 배열을 in-place로 diff 업데이트. 없어진 채널 제거, 기존 채널 필드 업데이트, 새 채널 삽입, 순서 재정렬 */
     _diffApply(current, next) {
+      const _t0 = performance.now();
+      console.log(`[Sidebar] _diffApply START (${current.length} → ${next.length})`);
       const currentMap = new Map(current.map((c) => [this._getChannelKey(c), c]));
       const nextMap = new Map(next.map((c) => [this._getChannelKey(c), c]));
       for (const [key, existing] of currentMap) {
@@ -12637,6 +12674,7 @@
       }
       const newOrder = next.map((n2) => currentMap.get(this._getChannelKey(n2)) ?? n2);
       current.splice(0, current.length, ...newOrder);
+      console.log(`[Sidebar] _diffApply END ${(performance.now() - _t0).toFixed(1)}ms`);
     }
   }
   class RootStore {
@@ -12702,15 +12740,8 @@
     if (minutes > 0) return `${minutes}분 전`;
     return `${seconds}초 전`;
   };
-  const blockUser = (userId, userName, currentList, onUpdate) => {
-    if (currentList.some((u2) => u2.userId === userId)) return;
-    const newList = [...currentList, { userId, userName }];
-    _GM_setValue("blockedUsers", JSON.stringify(newList));
-    onUpdate(newList);
-  };
   const ChannelItem = observer(({ data }) => {
     const settings = useSettingsStore();
-    const sidebarStore = useSidebarStore();
     const { channel } = data;
     const liveUrl = `https://play.sooplive.com/${channel.user_id}/${channel.broad_no}`;
     const isOnPlayerPage = window.location.href.includes("play.sooplive.com");
@@ -12763,17 +12794,6 @@
         window.location.href = liveUrl;
       }
     };
-    const handleContextMenu = (e) => {
-      e.preventDefault();
-      if (confirm(`"${channel.user_nick}" (${channel.user_id}) 를 차단하시겠습니까?`)) {
-        blockUser(
-          channel.user_id,
-          channel.user_nick,
-          sidebarStore.blockedUsers,
-          (newList) => sidebarStore.setBlockedUsers(newList)
-        );
-      }
-    };
     const rawProfileUrl = channel.profile_image || `https://stimg.sooplive.com/LOGO/${channel.user_id.slice(0, 2)}/${channel.user_id}/m/${channel.user_id}.webp`;
     const profileUrl = settings.isProfileForceJpg ? rawProfileUrl.replace(/\.(gif|png|webp)(\?.*)?$/, ".jpg$2") : rawProfileUrl;
     const isPinned = channel.isPinned;
@@ -12786,7 +12806,6 @@
         target: "_self",
         rel: "noreferrer",
         onClick: handleClick,
-        onContextMenu: handleContextMenu,
         "data-broadcast-no": channel.broad_no,
         "data-user-id": channel.user_id,
         "data-user-nick": channel.user_nick,
@@ -12852,17 +12871,6 @@
         sidebarStore.setPinnedChzzkUsers([...sidebarStore.pinnedChzzkUsers, channelId]);
       }
     };
-    const handleContextMenu = (e) => {
-      e.preventDefault();
-      if (confirm(`"${channelName}" (${channelId}) 를 차단하시겠습니까?`)) {
-        blockUser(
-          channelId,
-          channelName,
-          sidebarStore.blockedUsers,
-          (newList) => sidebarStore.setBlockedUsers(newList)
-        );
-      }
-    };
     const liveUrl = `https://chzzk.naver.com/live/${channelId}`;
     return /* @__PURE__ */ jsxRuntimeExports.jsxs(
       "a",
@@ -12871,7 +12879,6 @@
         href: liveUrl,
         target: settings.isSendLoadBroadEnabled ? "_self" : "_blank",
         rel: "noreferrer",
-        onContextMenu: handleContextMenu,
         "data-chzzk-channel-id": channelId,
         "data-channel-name": channelName,
         "data-live-title": liveTitle,
@@ -13865,7 +13872,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525055528";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525060753";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
