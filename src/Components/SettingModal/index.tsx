@@ -623,7 +623,7 @@ const SettingModal: React.FC = observer(() => {
                                         type="range"
                                         id="popularChannelsDisplay"
                                         min={0}
-                                        max={40}
+                                        max={100}
                                         title="0 = 숨김"
                                         value={s.displayTop}
                                         onChange={(e) => s.setSetting("displayTop", Number(e.target.value))}

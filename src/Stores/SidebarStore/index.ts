@@ -561,7 +561,7 @@ export class SidebarStore {
             const [soopRes, chzzkRes] = await Promise.all([
                 fetchBroadList(soopUrl, 100),
                 this._settings.isChzzkTopChannelsEnabled
-                    ? fetchBroadList("https://api.chzzk.naver.com/service/v1/lives?size=50&sortType=POPULAR", 100)
+                    ? fetchBroadList("https://api.chzzk.naver.com/service/v1/lives?size=100&sortType=POPULAR", 100)
                     : Promise.resolve(null),
             ]);
 
