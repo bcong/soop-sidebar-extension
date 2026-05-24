@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260524181202
+// @version      20260524181903
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -11976,33 +11976,6 @@
       });
     });
   }
-  async function diagnoseChzzkLogin() {
-    return new Promise((resolve) => {
-      _GM_xmlhttpRequest({
-        method: "GET",
-        url: "https://comm-api.game.naver.com/nng_main/v1/user/getUserStatus",
-        onload: (res) => {
-          var _a2, _b2, _c;
-          try {
-            const json = JSON.parse(res.responseText);
-            const userIdHash = ((_a2 = json == null ? void 0 : json.content) == null ? void 0 : _a2.userIdHash) ?? null;
-            const nickname = ((_b2 = json == null ? void 0 : json.content) == null ? void 0 : _b2.nickname) ?? "";
-            if (userIdHash && ((_c = json == null ? void 0 : json.content) == null ? void 0 : _c.loggedIn)) {
-              resolve({ ok: true, detail: `${nickname} (${userIdHash.slice(0, 8)}...)` });
-            } else {
-              resolve({ ok: false, detail: `로그인 안 됨 | HTTP ${res.status}` });
-            }
-          } catch {
-            resolve({
-              ok: false,
-              detail: `파싱 실패 | HTTP ${res.status} | ${res.responseText.slice(0, 120)}`
-            });
-          }
-        },
-        onerror: () => resolve({ ok: false, detail: "네트워크 오류 (GM_xmlhttpRequest)" })
-      });
-    });
-  }
   async function syncPush(userId, pins) {
     if (!userId) return;
     return new Promise((resolve, reject) => {
@@ -13772,10 +13745,6 @@
     const [searchText, setSearchText] = reactExports.useState("");
     const [exportMsg, setExportMsg] = reactExports.useState("");
     const [importMsg, setImportMsg] = reactExports.useState("");
-    const [kvdbTestMsg, setKvdbTestMsg] = reactExports.useState("");
-    const [kvdbLastSyncTime, setKvdbLastSyncTime] = reactExports.useState(
-      () => _GM_getValue("kvdbLastSyncTime", 0)
-    );
     const bodyRef = reactExports.useRef(null);
     const [triggerContainer, setTriggerContainer] = reactExports.useState(null);
     reactExports.useEffect(() => {
@@ -13840,7 +13809,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260524181202";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260524181903";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -14793,69 +14762,6 @@
                       label: "치지직 상위 고정 동기화",
                       checked: s.isChzzkPinSyncEnabled,
                       onChange: (v2) => s.setSetting("isChzzkPinSyncEnabled", v2)
-                    }
-                  ),
-                  s.isChzzkPinSyncEnabled && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                    "div",
-                    {
-                      style: {
-                        paddingLeft: "8px",
-                        paddingBottom: "4px",
-                        display: "flex",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        gap: "6px"
-                      },
-                      children: [
-                        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { fontSize: "11px", opacity: 0.7 }, children: [
-                          "마지막 동기화:",
-                          " ",
-                          kvdbLastSyncTime ? new Date(kvdbLastSyncTime).toLocaleTimeString("ko-KR", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit"
-                          }) : "없음"
-                        ] }),
-                        /* @__PURE__ */ jsxRuntimeExports.jsx(
-                          "button",
-                          {
-                            style: { fontSize: "11px", padding: "2px 8px", cursor: "pointer" },
-                            onClick: async () => {
-                              setKvdbTestMsg("확인 중...");
-                              if (!isSyncConfigured()) {
-                                setKvdbTestMsg(`❌ KVDB_BUCKET 미설정 (소스에 버킷 ID 입력 필요)`);
-                                return;
-                              }
-                              try {
-                                const diag = await diagnoseChzzkLogin();
-                                if (!diag.ok) {
-                                  setKvdbTestMsg(`❌ 치지직 로그인 실패 | ${diag.detail}`);
-                                  return;
-                                }
-                                const uid = await fetchChzzkUserId();
-                                if (!uid) {
-                                  setKvdbTestMsg(`❌ 치지직 채널 ID 없음`);
-                                  return;
-                                }
-                                const localPins = sb2.pinnedChzzkUsers;
-                                await syncPush(uid, localPins);
-                                const remotePins = await syncPull(uid);
-                                const now = Date.now();
-                                _GM_setValue("kvdbLastSyncTime", now);
-                                setKvdbLastSyncTime(now);
-                                setKvdbTestMsg(
-                                  `✅ UID: ${uid.slice(0, 8)}... | 업로드 ${localPins.length}명 → 클라우드 확인 ${remotePins.length}명`
-                                );
-                              } catch (e) {
-                                const msg = e instanceof Error ? e.message : String(e);
-                                setKvdbTestMsg(`❌ 오류: ${msg}`);
-                              }
-                            },
-                            children: "동기화 확인"
-                          }
-                        ),
-                        kvdbTestMsg && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "11px" }, children: kvdbTestMsg })
-                      ]
                     }
                   )
                 ] }),
