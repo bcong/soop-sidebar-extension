@@ -62,9 +62,6 @@ export class SidebarStore {
     private _rawMyplus: { liveList: any[]; vodList: any[] } | null = null;
     private _rawTop: { soopData: any[]; chzzkRes: any } | null = null;
 
-    // kvdb.io 세션 최초 pull 여부
-    private _chzzkSyncDone = false;
-
     constructor(settings: SettingsStore) {
         this._settings = settings;
 
@@ -299,26 +296,6 @@ export class SidebarStore {
             }
 
             const processed = this._processFollowData(soopData, chzzkRes, hiddenBjList, feedItems);
-
-            // kvdb.io 자동 pull: Chzzk 로그인 확인 + 세션 최초 1회
-            const chzzkLoggedIn = chzzkRes?.code === 200;
-            if (chzzkLoggedIn && !this._chzzkSyncDone && this._settings.isChzzkPinSyncEnabled && isKvdbConfigured()) {
-                this._chzzkSyncDone = true;
-                fetchChzzkUserId()
-                    .then((uid) => {
-                        if (!uid) return;
-                        return kvdbPull(uid).then((pins) => {
-                            const current = JSON.stringify([...this.pinnedChzzkUsers].sort());
-                            const remote = JSON.stringify([...pins].sort());
-                            if (remote !== current) {
-                                this.pinnedChzzkUsers = pins;
-                                GM_setValue("pinnedChzzkUsers", JSON.stringify(pins));
-                                this.reprocessFollow();
-                            }
-                        });
-                    })
-                    .catch(() => {});
-            }
 
             runInAction(() => {
                 // 원본 데이터 저장 (설정 변경 시 재처리용)
@@ -580,6 +557,27 @@ export class SidebarStore {
             this.lastFetchTime = Date.now();
         });
         await Promise.all([this.fetchFollowData(), this.fetchMyplusData(), this.fetchTopData()]);
+        await this._kvdbSyncPull();
+    }
+
+    private async _kvdbSyncPull(): Promise<void> {
+        if (!this._settings.isChzzkPinSyncEnabled || !isKvdbConfigured()) return;
+        try {
+            const uid = await fetchChzzkUserId();
+            if (!uid) return;
+            const pins = await kvdbPull(uid);
+            if (pins.length === 0) return; // 클라우드 비어있으면 로컬 유지
+            const current = JSON.stringify([...this.pinnedChzzkUsers].sort());
+            const remote = JSON.stringify([...pins].sort());
+            if (remote === current) return;
+            runInAction(() => {
+                this.pinnedChzzkUsers = pins;
+                GM_setValue("pinnedChzzkUsers", JSON.stringify(pins));
+                this.reprocessFollow();
+            });
+        } catch {
+            // 네트워크 오류 무시
+        }
     }
 
     startPolling(intervalSeconds = 30): void {
