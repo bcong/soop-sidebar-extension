@@ -22,6 +22,7 @@ export class SettingsStore {
     myplusOrder: number;
     isChzzkFollowChannelsEnabled: boolean;
     isChzzkTopChannelsEnabled: boolean;
+    isChzzkPinSyncEnabled: boolean;
     displayFollow: number;
     displayMyplus: number;
     displayMyplusvod: number;
@@ -113,6 +114,7 @@ export class SettingsStore {
             typeof storedMyplusOrder === "number" ? storedMyplusOrder : storedMyplusOrder === "viewerCount" ? 0 : 1;
         this.isChzzkFollowChannelsEnabled = GM_getValue("isChzzkFollowChannelsEnabled", false);
         this.isChzzkTopChannelsEnabled = GM_getValue("isChzzkTopChannelsEnabled", false);
+        this.isChzzkPinSyncEnabled = GM_getValue("isChzzkPinSyncEnabled", false);
         this.displayFollow = GM_getValue("displayFollow", 6);
         this.displayMyplus = GM_getValue("displayMyplus", 6);
         this.displayMyplusvod = GM_getValue("displayMyplusvod", 4);
@@ -195,6 +197,7 @@ export class SettingsStore {
             myplusOrder: observable,
             isChzzkFollowChannelsEnabled: observable,
             isChzzkTopChannelsEnabled: observable,
+            isChzzkPinSyncEnabled: observable,
             displayFollow: observable,
             displayMyplus: observable,
             displayMyplusvod: observable,

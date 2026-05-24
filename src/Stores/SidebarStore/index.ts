@@ -1,6 +1,7 @@
 import { makeObservable, observable, action, runInAction } from "mobx";
 import { fetchBroadList, getStationFeed, getHiddenbjList } from "@Utils/api";
 import { isCategoryBlocked, isUserBlocked } from "@Utils/blocking";
+import { kvdbPush, kvdbPull, fetchChzzkUserId, isKvdbConfigured } from "@Utils/kvdbSync";
 import type {
     I_BlockedUser,
     I_BlockedCategory,
@@ -60,6 +61,9 @@ export class SidebarStore {
     private _rawFollow: { soopData: any[]; chzzkRes: any; hiddenBjList: string[]; feedItems: any[] } | null = null;
     private _rawMyplus: { liveList: any[]; vodList: any[] } | null = null;
     private _rawTop: { soopData: any[]; chzzkRes: any } | null = null;
+
+    // kvdb.io 세션 최초 pull 여부
+    private _chzzkSyncDone = false;
 
     constructor(settings: SettingsStore) {
         this._settings = settings;
@@ -180,6 +184,12 @@ export class SidebarStore {
     setPinnedChzzkUsers(users: string[]): void {
         this.pinnedChzzkUsers = users;
         GM_setValue("pinnedChzzkUsers", JSON.stringify(users));
+        // kvdb.io 자동 push: 치지직 팔로우 통합 활성화 + KVDB_BUCKET 설정된 경우만
+        if (isKvdbConfigured() && this._settings.isChzzkPinSyncEnabled) {
+            fetchChzzkUserId().then((uid) => {
+                if (uid) kvdbPush(uid, users).catch(() => {});
+            });
+        }
         // 핀 변경 즉시 즐찾 목록 재정렬
         this.reprocessFollow();
     }
@@ -289,6 +299,26 @@ export class SidebarStore {
             }
 
             const processed = this._processFollowData(soopData, chzzkRes, hiddenBjList, feedItems);
+
+            // kvdb.io 자동 pull: Chzzk 로그인 확인 + 세션 최초 1회
+            const chzzkLoggedIn = chzzkRes?.code === 200;
+            if (chzzkLoggedIn && !this._chzzkSyncDone && this._settings.isChzzkPinSyncEnabled && isKvdbConfigured()) {
+                this._chzzkSyncDone = true;
+                fetchChzzkUserId()
+                    .then((uid) => {
+                        if (!uid) return;
+                        return kvdbPull(uid).then((pins) => {
+                            const current = JSON.stringify([...this.pinnedChzzkUsers].sort());
+                            const remote = JSON.stringify([...pins].sort());
+                            if (remote !== current) {
+                                this.pinnedChzzkUsers = pins;
+                                GM_setValue("pinnedChzzkUsers", JSON.stringify(pins));
+                                this.reprocessFollow();
+                            }
+                        });
+                    })
+                    .catch(() => {});
+            }
 
             runInAction(() => {
                 // 원본 데이터 저장 (설정 변경 시 재처리용)

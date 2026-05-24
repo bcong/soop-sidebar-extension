@@ -1101,11 +1101,7 @@ const SettingModal: React.FC = observer(() => {
                                 <Opt
                                     id="switchChzzkFollowChannels"
                                     badge="etc"
-                                    label={
-                                        <>
-                                            치지직 팔로우 채널 통합<sup>4)</sup>
-                                        </>
-                                    }
+                                    label="치지직 팔로우 채널 통합"
                                     checked={s.isChzzkFollowChannelsEnabled}
                                     onChange={(v) => s.setSetting("isChzzkFollowChannelsEnabled", v)}
                                 />
@@ -1115,6 +1111,13 @@ const SettingModal: React.FC = observer(() => {
                                     label="치지직 인기 채널 통합"
                                     checked={s.isChzzkTopChannelsEnabled}
                                     onChange={(v) => s.setSetting("isChzzkTopChannelsEnabled", v)}
+                                />
+                                <Opt
+                                    id="switchChzzkPinSync"
+                                    badge="etc"
+                                    label="치지직 상위 고정 동기화"
+                                    checked={s.isChzzkPinSyncEnabled}
+                                    onChange={(v) => s.setSetting("isChzzkPinSyncEnabled", v)}
                                 />
                             </div>
                             <Opt
