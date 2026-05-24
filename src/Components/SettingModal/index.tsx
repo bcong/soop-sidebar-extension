@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import { observer } from "mobx-react-lite";
 import { useSettingsStore, useSidebarStore } from "@Stores/index";
+import { fetchChzzkUserId, syncPush, syncPull, isSyncConfigured, diagnoseChzzkLogin } from "@Utils/pinSync";
+import { GM_getValue, GM_setValue } from "vite-plugin-monkey/dist/client";
 import "./style.less";
 
 // ============================================================
@@ -250,6 +252,10 @@ const SettingModal: React.FC = observer(() => {
     const [searchText, setSearchText] = useState("");
     const [exportMsg, setExportMsg] = useState("");
     const [importMsg, setImportMsg] = useState("");
+    const [kvdbTestMsg, setKvdbTestMsg] = useState("");
+    const [kvdbLastSyncTime, setKvdbLastSyncTime] = useState<number>(
+        () => GM_getValue("kvdbLastSyncTime", 0) as number,
+    );
     const bodyRef = useRef<HTMLDivElement>(null);
     const [triggerContainer, setTriggerContainer] = useState<HTMLElement | null>(null);
 
@@ -1119,6 +1125,66 @@ const SettingModal: React.FC = observer(() => {
                                     checked={s.isChzzkPinSyncEnabled}
                                     onChange={(v) => s.setSetting("isChzzkPinSyncEnabled", v)}
                                 />
+                                {s.isChzzkPinSyncEnabled && (
+                                    <div
+                                        style={{
+                                            paddingLeft: "8px",
+                                            paddingBottom: "4px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            flexWrap: "wrap",
+                                            gap: "6px",
+                                        }}
+                                    >
+                                        <span style={{ fontSize: "11px", opacity: 0.7 }}>
+                                            마지막 동기화:{" "}
+                                            {kvdbLastSyncTime
+                                                ? new Date(kvdbLastSyncTime).toLocaleTimeString("ko-KR", {
+                                                      hour: "2-digit",
+                                                      minute: "2-digit",
+                                                      second: "2-digit",
+                                                  })
+                                                : "없음"}
+                                        </span>
+                                        <button
+                                            style={{ fontSize: "11px", padding: "2px 8px", cursor: "pointer" }}
+                                            onClick={async () => {
+                                                setKvdbTestMsg("확인 중...");
+                                                if (!isSyncConfigured()) {
+                                                    setKvdbTestMsg(`❌ KVDB_BUCKET 미설정 (소스에 버킷 ID 입력 필요)`);
+                                                    return;
+                                                }
+                                                try {
+                                                    const diag = await diagnoseChzzkLogin();
+                                                    if (!diag.ok) {
+                                                        setKvdbTestMsg(`❌ 치지직 로그인 실패 | ${diag.detail}`);
+                                                        return;
+                                                    }
+                                                    const uid = await fetchChzzkUserId();
+                                                    if (!uid) {
+                                                        setKvdbTestMsg(`❌ 치지직 채널 ID 없음`);
+                                                        return;
+                                                    }
+                                                    const localPins = sb.pinnedChzzkUsers;
+                                                    await syncPush(uid, localPins);
+                                                    const remotePins = await syncPull(uid);
+                                                    const now = Date.now();
+                                                    GM_setValue("kvdbLastSyncTime", now);
+                                                    setKvdbLastSyncTime(now);
+                                                    setKvdbTestMsg(
+                                                        `✅ UID: ${uid.slice(0, 8)}... | 업로드 ${localPins.length}명 → 클라우드 확인 ${remotePins.length}명`,
+                                                    );
+                                                } catch (e: unknown) {
+                                                    const msg = e instanceof Error ? e.message : String(e);
+                                                    setKvdbTestMsg(`❌ 오류: ${msg}`);
+                                                }
+                                            }}
+                                        >
+                                            동기화 확인
+                                        </button>
+                                        {kvdbTestMsg && <span style={{ fontSize: "11px" }}>{kvdbTestMsg}</span>}
+                                    </div>
+                                )}
                             </div>
                             <Opt
                                 id="switchThemeLock"

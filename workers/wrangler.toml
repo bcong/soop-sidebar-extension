@@ -1,0 +1,8 @@
+name = "soop-sidebar"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "soop-sidebar"
+database_id = "50207c86-3d8a-4899-b5e4-f0aa14540145"

@@ -1,0 +1,15 @@
+{
+    "name": "soop-sidebar",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "deploy": "wrangler deploy",
+        "dev": "wrangler dev",
+        "db:create": "wrangler d1 create soop-sidebar",
+        "db:migrate": "wrangler d1 execute soop-sidebar --file=schema.sql"
+    },
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20240529.0",
+        "wrangler": "^3.60.0"
+    }
+}

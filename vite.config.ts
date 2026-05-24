@@ -46,7 +46,7 @@ export default defineConfig({
                     "GM_unregisterMenuCommand",
                 ],
                 icon: "https://res.sooplive.co.kr/afreeca.ico",
-                connect: ["sooplive.com", "naver.com"],
+                connect: ["sooplive.com", "naver.com", "workers.dev"],
                 downloadURL:
                     "https://raw.githubusercontent.com/bcong/soop-sidebar-extension/master/dist/userscripts.user.js",
                 updateURL:

@@ -1,7 +1,7 @@
 import { makeObservable, observable, action, runInAction } from "mobx";
 import { fetchBroadList, getStationFeed, getHiddenbjList } from "@Utils/api";
 import { isCategoryBlocked, isUserBlocked } from "@Utils/blocking";
-import { kvdbPush, kvdbPull, fetchChzzkUserId, isKvdbConfigured } from "@Utils/kvdbSync";
+import { syncPush, syncPull, fetchChzzkUserId, isSyncConfigured } from "@Utils/pinSync";
 import type {
     I_BlockedUser,
     I_BlockedCategory,
@@ -182,9 +182,9 @@ export class SidebarStore {
         this.pinnedChzzkUsers = users;
         GM_setValue("pinnedChzzkUsers", JSON.stringify(users));
         // kvdb.io 자동 push: 치지직 팔로우 통합 활성화 + KVDB_BUCKET 설정된 경우만
-        if (isKvdbConfigured() && this._settings.isChzzkPinSyncEnabled) {
+        if (isSyncConfigured() && this._settings.isChzzkPinSyncEnabled) {
             fetchChzzkUserId().then((uid) => {
-                if (uid) kvdbPush(uid, users).catch(() => {});
+                if (uid) syncPush(uid, users).catch(() => {});
             });
         }
         // 핀 변경 즉시 즐찾 목록 재정렬
@@ -557,16 +557,17 @@ export class SidebarStore {
             this.lastFetchTime = Date.now();
         });
         await Promise.all([this.fetchFollowData(), this.fetchMyplusData(), this.fetchTopData()]);
-        await this._kvdbSyncPull();
+        await this._syncPull();
     }
 
-    private async _kvdbSyncPull(): Promise<void> {
-        if (!this._settings.isChzzkPinSyncEnabled || !isKvdbConfigured()) return;
+    private async _syncPull(): Promise<void> {
+        if (!this._settings.isChzzkPinSyncEnabled || !isSyncConfigured()) return;
         try {
             const uid = await fetchChzzkUserId();
             if (!uid) return;
-            const pins = await kvdbPull(uid);
-            if (pins.length === 0) return; // 클라우드 비어있으면 로컬 유지
+            const pins = await syncPull(uid);
+            GM_setValue("kvdbLastSyncTime", Date.now()); // pull 성공 시각 기록
+            if (pins.length === 0) return;
             const current = JSON.stringify([...this.pinnedChzzkUsers].sort());
             const remote = JSON.stringify([...pins].sort());
             if (remote === current) return;
