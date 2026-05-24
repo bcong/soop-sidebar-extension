@@ -19,10 +19,10 @@ interface SidebarSectionProps {
     children?: React.ReactNode;
 }
 
-const SECTION_FA_ICONS: Record<string, string> = {
-    follow: "fa-star",
-    myplus: "fa-thumbs-up",
-    top: "fa-fire",
+const SECTION_ICONS: Record<string, string> = {
+    follow: "⭐",
+    myplus: "👍",
+    top: "🔥",
 };
 
 const SidebarSection: React.FC<SidebarSectionProps> = observer(
@@ -65,7 +65,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = observer(
                     </span>
                     <span className="min">
                         <a href={href} target="_blank" rel="noreferrer">
-                            <i className={`fa ${SECTION_FA_ICONS[id] ?? "fa-list"} section-icon`} />
+                            <span className="section-icon">{SECTION_ICONS[id] ?? "📋"}</span>
                         </a>
                     </span>
                 </div>

@@ -453,9 +453,7 @@ const SettingModal: React.FC = observer(() => {
                     <header className="modal-header_v8xK4z">
                         <div className="modal-search-container_v8xK4z">
                             <div className="search-input-wrapper_v8xK4z">
-                                <span className="search-icon_v8xK4z">
-                                    <i className="fa fa-search" />
-                                </span>
+                                <span className="search-icon_v8xK4z">🔍</span>
                                 <input
                                     id="modal-search-input_v8xK4z"
                                     type="text"
@@ -1172,22 +1170,17 @@ const SettingModal: React.FC = observer(() => {
                                 차단 관리 및 부가 설명
                             </h3>
                             <p className="description_v8xK4z">
-                                <i className="fa fa-ban" /> 채널 차단: 본문 방송 목록 -&gt; ⋮ 버튼 -&gt; [이
-                                브라우저에서 ... 숨기기]
+                                🚫 채널 차단: 본문 방송 목록 -&gt; ⋮ 버튼 -&gt; [이 브라우저에서 ... 숨기기]
                             </p>
                             <p className="description_v8xK4z">
-                                <i className="fa fa-check-circle" /> 카테고리 탭 추가: 본문 방송 목록 -&gt; ⋮ 버튼 -&gt;
-                                [이 카테고리를 탭에 추가]
+                                ✅ 카테고리 탭 추가: 본문 방송 목록 -&gt; ⋮ 버튼 -&gt; [이 카테고리를 탭에 추가]
                             </p>
                             <p className="description_v8xK4z">
-                                <i className="fa fa-check-circle" /> 카테고리 탭 해제: Tampermonkey 아이콘을 눌러서
-                                가능합니다.
+                                ✅ 카테고리 탭 해제: Tampermonkey 아이콘을 눌러서 가능합니다.
                             </p>
                             <div className="divider_v8xK4z" />
                             <p className="description_v8xK4z">
-                                1) MY 페이지에서 스트리머 고정 버튼(
-                                <i className="fa fa-thumb-tack" />
-                                )을 누르면 사이드바에 고정이 됩니다.
+                                1) MY 페이지에서 스트리머 고정 버튼(📌)을 누르면 사이드바에 고정이 됩니다.
                             </p>
                             <p className="description_v8xK4z">
                                 3) 즐겨찾기 채널 중에서만 이동. 커스텀은 고정-&gt;알림-&gt;일반 순. 열린 탭 체크 후

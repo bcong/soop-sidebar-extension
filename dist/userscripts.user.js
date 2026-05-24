@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260525065411
+// @version      20260525065905
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -12839,7 +12839,7 @@
             isPinned && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "pin-badge", children: "🖈" })
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "username", children: [
-            isNotified && /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-bell", style: { marginRight: 3, fontSize: 11 } }),
+            isNotified && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { marginRight: 3, fontSize: 11 }, children: "🔔" }),
             channel.user_nick
           ] }),
           !settings.isCategoryHidden && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "description", children: channel.category_name || getCategoryName(channel.broad_cate_no) || "" }),
@@ -13003,10 +13003,10 @@
     );
   });
   const DEFAULT_SHOW_COUNT = 30;
-  const SECTION_FA_ICONS = {
-    follow: "fa-star",
-    myplus: "fa-thumbs-up",
-    top: "fa-fire"
+  const SECTION_ICONS = {
+    follow: "⭐",
+    myplus: "👍",
+    top: "🔥"
   };
   const SidebarSection = observer(
     ({ id: id2, title, href, channels, isLoading = false, maxCount, children }) => {
@@ -13035,7 +13035,7 @@
       return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `section-wrapper ${id2}`, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `top-section ${id2}`, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "max", children: /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href, target: "_blank", rel: "noreferrer", children: title }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "min", children: /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href, target: "_blank", rel: "noreferrer", children: /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: `fa ${SECTION_FA_ICONS[id2] ?? "fa-list"} section-icon` }) }) })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "min", children: /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href, target: "_blank", rel: "noreferrer", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "section-icon", children: SECTION_ICONS[id2] ?? "📋" }) }) })
         ] }),
         children,
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `users-section ${id2}`, children: isLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "8px 10px", fontSize: 13, color: "#888" }, children: "로딩 중..." }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
@@ -13900,7 +13900,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525065411";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525065905";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -14022,7 +14022,7 @@
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "modal-main-content_v8xK4z", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "modal-header_v8xK4z", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "modal-search-container_v8xK4z", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "search-input-wrapper_v8xK4z", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "search-icon_v8xK4z", children: /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-search" }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "search-icon_v8xK4z", children: "🔍" }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
                   "input",
                   {
@@ -14908,24 +14908,11 @@
               ] }),
               /* @__PURE__ */ jsxRuntimeExports.jsxs("footer", { className: "modal-footer_v8xK4z", children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { id: "management-title", className: "section-title_v8xK4z", children: "차단 관리 및 부가 설명" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "description_v8xK4z", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-ban" }),
-                  " 채널 차단: 본문 방송 목록 -> ⋮ 버튼 -> [이 브라우저에서 ... 숨기기]"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "description_v8xK4z", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-check-circle" }),
-                  " 카테고리 탭 추가: 본문 방송 목록 -> ⋮ 버튼 -> [이 카테고리를 탭에 추가]"
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "description_v8xK4z", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-check-circle" }),
-                  " 카테고리 탭 해제: Tampermonkey 아이콘을 눌러서 가능합니다."
-                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "description_v8xK4z", children: "🚫 채널 차단: 본문 방송 목록 -> ⋮ 버튼 -> [이 브라우저에서 ... 숨기기]" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "description_v8xK4z", children: "✅ 카테고리 탭 추가: 본문 방송 목록 -> ⋮ 버튼 -> [이 카테고리를 탭에 추가]" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "description_v8xK4z", children: "✅ 카테고리 탭 해제: Tampermonkey 아이콘을 눌러서 가능합니다." }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "divider_v8xK4z" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "description_v8xK4z", children: [
-                  "1) MY 페이지에서 스트리머 고정 버튼(",
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("i", { className: "fa fa-thumb-tack" }),
-                  ")을 누르면 사이드바에 고정이 됩니다."
-                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "description_v8xK4z", children: "1) MY 페이지에서 스트리머 고정 버튼(📌)을 누르면 사이드바에 고정이 됩니다." }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "description_v8xK4z", children: "3) 즐겨찾기 채널 중에서만 이동. 커스텀은 고정->알림->일반 순. 열린 탭 체크 후 이동." }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "description_v8xK4z", children: "4) 치지직 로그인이 되어있지 않으면 응답지연이 생겨서 느려집니다" }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "description_v8xK4z", children: "5) 'SOOP (숲) - 현재 방송을 보고 있는 스트리머' 실행 필요. 없을 시 0명으로 나옵니다" })

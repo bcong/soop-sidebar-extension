@@ -121,7 +121,7 @@ const ChannelItem: React.FC<ChannelItemProps> = observer(({ data }) => {
                 </div>
             )}
             <span className="username">
-                {isNotified && <i className="fa fa-bell" style={{ marginRight: 3, fontSize: 11 }} />}
+                {isNotified && <span style={{ marginRight: 3, fontSize: 11 }}>🔔</span>}
                 {channel.user_nick}
             </span>
             {!settings.isCategoryHidden && (
