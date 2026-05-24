@@ -40,10 +40,10 @@ if (typeof GM_getValue === "undefined") {
 }
 
 // Font Awesome v4 CSS 주입
-const _faLink = document.createElement("link");
-_faLink.rel = "stylesheet";
-_faLink.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css";
-document.head.appendChild(_faLink);
+// const _faLink = document.createElement("link");
+// _faLink.rel = "stylesheet";
+// _faLink.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css";
+// document.head.appendChild(_faLink);
 
 function mount() {
     // Tampermonkey에서 DOM이 없을 수도 있으므로 안전하게 컨테이너 생성
