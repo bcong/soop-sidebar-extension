@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260525063423
+// @version      20260525064849
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -12460,7 +12460,7 @@
         const soopUrl = catIdx === 0 ? "https://live.sooplive.com/api/main_broad_list_api.php?selectType=action&orderType=view_cnt&pageNo=1&lang=ko_KR" : `https://live.sooplive.com/api/main_broad_list_api.php?selectType=cate&selectValue=${catIdx}&orderType=view_cnt&pageNo=1&lang=ko_KR`;
         const [soopRes, chzzkRes] = await Promise.all([
           fetchBroadList(soopUrl, 100),
-          this._settings.isChzzkTopChannelsEnabled ? fetchBroadList("https://api.chzzk.naver.com/service/v1/lives?size=100&sortType=POPULAR", 100) : Promise.resolve(null)
+          this._settings.isChzzkTopChannelsEnabled ? fetchBroadList("https://api.chzzk.naver.com/service/v1/lives?sortType=POPULAR", 100) : Promise.resolve(null)
         ]);
         const soopData = (soopRes == null ? void 0 : soopRes.broad) ?? [];
         const result = [];
@@ -12508,9 +12508,9 @@
         this.lastFetchTime = Date.now();
       });
       await this.fetchFollowData();
-      await new Promise((r2) => setTimeout(r2, 200));
+      await new Promise((r2) => setTimeout(r2, 1e3));
       await this.fetchMyplusData();
-      await new Promise((r2) => setTimeout(r2, 200));
+      await new Promise((r2) => setTimeout(r2, 1e3));
       await this.fetchTopData();
       await this._syncPull();
       console.log(`[Sidebar] fetchAllData END ${(performance.now() - _t0).toFixed(1)}ms`);
@@ -13900,7 +13900,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525063423";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525064849";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {

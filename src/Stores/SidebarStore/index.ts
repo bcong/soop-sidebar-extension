@@ -259,7 +259,6 @@ export class SidebarStore {
                 result.push({ channel: item, type: "chzzk" as T_ChannelType, args: [] });
             }
         }
-        // SOOP+Chzzk 통합 시청자순 정렬
         result.sort((a, b) => getViewerCount(b) - getViewerCount(a));
         this._diffApply(this.topChannels, result);
         console.log(`[Sidebar] reprocessTop END ${(performance.now() - _t0).toFixed(1)}ms`);
@@ -561,7 +560,7 @@ export class SidebarStore {
             const [soopRes, chzzkRes] = await Promise.all([
                 fetchBroadList(soopUrl, 100),
                 this._settings.isChzzkTopChannelsEnabled
-                    ? fetchBroadList("https://api.chzzk.naver.com/service/v1/lives?size=100&sortType=POPULAR", 100)
+                    ? fetchBroadList("https://api.chzzk.naver.com/service/v1/lives?sortType=POPULAR", 100)
                     : Promise.resolve(null),
             ]);
 
@@ -584,7 +583,6 @@ export class SidebarStore {
                 result.push({ channel: item, type: "soop_live" as T_ChannelType, args: [] });
             }
 
-            // Chzzk 인기 채널 추가
             if (catIdx === 0 && chzzkRes?.content?.data) {
                 const chzzkFollowSet = new Set(
                     this._settings.isTopDuplicateRemovalEnabled
@@ -600,7 +598,6 @@ export class SidebarStore {
                 }
             }
 
-            // SOOP+Chzzk 통합 시청자순 정렬
             result.sort((a, b) => getViewerCount(b) - getViewerCount(a));
 
             runInAction(() => {
@@ -623,9 +620,9 @@ export class SidebarStore {
             this.lastFetchTime = Date.now();
         });
         await this.fetchFollowData();
-        await new Promise((r) => setTimeout(r, 200));
+        await new Promise((r) => setTimeout(r, 1000));
         await this.fetchMyplusData();
-        await new Promise((r) => setTimeout(r, 200));
+        await new Promise((r) => setTimeout(r, 1000));
         await this.fetchTopData();
         await this._syncPull();
         console.log(`[Sidebar] fetchAllData END ${(performance.now() - _t0).toFixed(1)}ms`);
