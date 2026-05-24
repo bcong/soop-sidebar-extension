@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import type { I_ChannelData } from "@Types/index.d";
 import ChannelItem from "@Components/ChannelItem";
@@ -37,10 +37,7 @@ const SidebarSection: React.FC<SidebarSectionProps> = observer(
             setShowAll(false);
         }, [limit]);
 
-        const visibleChannels = useMemo(
-            () => (showAll ? channels : channels.slice(0, limit)),
-            [showAll, channels, limit],
-        );
+        const visibleChannels = showAll ? channels : channels.slice(0, limit);
 
         const renderChannel = (data: I_ChannelData, idx: number) => {
             switch (data.type) {

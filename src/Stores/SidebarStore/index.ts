@@ -318,6 +318,11 @@ export class SidebarStore {
                 this.hiddenBjList = hiddenBjList;
                 this.isFollowLoading = false;
                 this._diffApply(this.followChannels, processed);
+                // 팔로우 완료 후 인기채널 중복 제거 재처리
+                // (fetchTopData와 동시 실행 시 allFollowUserIds가 비어 있을 수 있으므로)
+                if (this._settings.isTopDuplicateRemovalEnabled && this._rawTop) {
+                    this.reprocessTop();
+                }
             });
         } catch (e) {
             console.error("[SOOP Sidebar] fetchFollowData 에러:", e);
