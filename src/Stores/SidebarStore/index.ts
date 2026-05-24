@@ -52,6 +52,9 @@ export class SidebarStore {
     // 마지막 fetch 시각 (프로그래스바용)
     lastFetchTime = 0;
 
+    // 마지막 핀 동기화 시각
+    lastSyncTime: number = GM_getValue("kvdbLastSyncTime", 0) as number;
+
     // 폴링 타이머
     private _pollTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -116,6 +119,7 @@ export class SidebarStore {
             isMyplusLoading: observable,
             isTopLoading: observable,
             lastFetchTime: observable,
+            lastSyncTime: observable,
             setFollowChannels: action,
             setMyplusChannels: action,
             setTopChannels: action,
@@ -566,7 +570,11 @@ export class SidebarStore {
             const uid = await fetchChzzkUserId();
             if (!uid) return;
             const pins = await syncPull(uid);
-            GM_setValue("kvdbLastSyncTime", Date.now()); // pull 성공 시각 기록
+            const now = Date.now();
+            GM_setValue("kvdbLastSyncTime", now);
+            runInAction(() => {
+                this.lastSyncTime = now;
+            });
             if (pins.length === 0) return;
             const current = JSON.stringify([...this.pinnedChzzkUsers].sort());
             const remote = JSON.stringify([...pins].sort());

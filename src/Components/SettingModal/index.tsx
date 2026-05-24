@@ -1119,6 +1119,18 @@ const SettingModal: React.FC = observer(() => {
                                     checked={s.isChzzkPinSyncEnabled}
                                     onChange={(v) => s.setSetting("isChzzkPinSyncEnabled", v)}
                                 />
+                                {s.isChzzkPinSyncEnabled && (
+                                    <span style={{ fontSize: "11px", opacity: 0.7, paddingLeft: "8px" }}>
+                                        마지막 동기화:{" "}
+                                        {sb.lastSyncTime
+                                            ? new Date(sb.lastSyncTime).toLocaleTimeString("ko-KR", {
+                                                  hour: "2-digit",
+                                                  minute: "2-digit",
+                                                  second: "2-digit",
+                                              })
+                                            : "없음"}
+                                    </span>
+                                )}
                             </div>
                             <Opt
                                 id="switchThemeLock"
