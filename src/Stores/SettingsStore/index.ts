@@ -18,6 +18,7 @@ export class SettingsStore {
     isSmallUserLayoutEnabled: boolean;
     isProfileHidden: boolean;
     isCategoryHidden: boolean;
+    isProfileForceJpg: boolean;
     isSendLoadBroadEnabled: boolean;
     isDuplicateRemovalEnabled: boolean;
     isTopDuplicateRemovalEnabled: boolean;
@@ -110,6 +111,7 @@ export class SettingsStore {
         this.isSmallUserLayoutEnabled = GM_getValue("isSmallUserLayoutEnabled", false);
         this.isProfileHidden = GM_getValue("isProfileHidden", false);
         this.isCategoryHidden = GM_getValue("isCategoryHidden", false);
+        this.isProfileForceJpg = GM_getValue("isProfileForceJpg", false);
         this.isSendLoadBroadEnabled = GM_getValue("isSendLoadBroadEnabled", true);
         this.isDuplicateRemovalEnabled = GM_getValue("isDuplicateRemovalEnabled", true);
         this.isTopDuplicateRemovalEnabled = GM_getValue("isTopDuplicateRemovalEnabled", true);
@@ -197,6 +199,7 @@ export class SettingsStore {
             isSmallUserLayoutEnabled: observable,
             isProfileHidden: observable,
             isCategoryHidden: observable,
+            isProfileForceJpg: observable,
             isSendLoadBroadEnabled: observable,
             isDuplicateRemovalEnabled: observable,
             isTopDuplicateRemovalEnabled: observable,

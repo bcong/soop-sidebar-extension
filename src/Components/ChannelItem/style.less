@@ -6,6 +6,21 @@
 }
 
 // ── 소형 유저 레이아웃 ────────────────────────────────────
+#sidebar.max .small-user-layout.profile-hidden {
+    grid-template-areas: "username description watchers" !important;
+    grid-template-columns: auto 1fr auto !important;
+}
+
+#sidebar.max .small-user-layout.category-hidden {
+    grid-template-areas: "profile-picture username watchers" !important;
+    grid-template-columns: 24px auto auto !important;
+}
+
+#sidebar.max .small-user-layout.profile-hidden.category-hidden {
+    grid-template-areas: "username watchers" !important;
+    grid-template-columns: auto auto !important;
+}
+
 #sidebar.max .small-user-layout {
     &.show-more {
         max-height: 0;

@@ -222,6 +222,24 @@
                 }
             }
         }
+
+        // ── 프로필 숨김: 프로필 컬럼 제거 ─────────────────────
+        &.profile-hidden {
+            grid-template-areas: "username watchers" "description blank";
+            grid-template-columns: auto auto;
+        }
+
+        // ── 카테고리 숨김: 하단 행 제거 ──────────────────────
+        &.category-hidden {
+            grid-template-areas: "profile-picture username watchers";
+            grid-template-columns: 40px auto auto;
+        }
+
+        // ── 둘 다 숨김: 단일 행 ────────────────────────────
+        &.profile-hidden.category-hidden {
+            grid-template-areas: "username watchers";
+            grid-template-columns: auto auto;
+        }
     }
 }
 

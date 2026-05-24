@@ -678,6 +678,13 @@ const SettingModal: React.FC = observer(() => {
                                 onChange={(v) => s.setSetting("isCategoryHidden", v)}
                             />
                             <Opt
+                                id="switchProfileForceJpg"
+                                badge="sidebar"
+                                label="프로필 이미지 JPG 고정 (GIF 최적화)"
+                                checked={s.isProfileForceJpg}
+                                onChange={(v) => s.setSetting("isProfileForceJpg", v)}
+                            />
+                            <Opt
                                 id="sendLoadBroadCheck"
                                 badge="sidebar"
                                 label="새로고침 없는 방송 전환 사용"

@@ -15,8 +15,11 @@ const ChannelItemOffline: React.FC<ChannelItemOfflineProps> = observer(({ data }
 
     const userId = channel.user_id ?? channel.station_user_id;
     const userNick = channel.user_nick ?? userId;
-    const profileUrl =
+    const rawProfileUrl =
         channel.profile_image || `https://stimg.sooplive.com/LOGO/${userId.slice(0, 2)}/${userId}/m/${userId}.webp`;
+    const profileUrl = settings.isProfileForceJpg
+        ? rawProfileUrl.replace(/\.(gif|png|webp)(\?.*)?$/, ".jpg$2")
+        : rawProfileUrl;
 
     const isFeed = data.type === "soop_feed";
 
@@ -25,7 +28,7 @@ const ChannelItemOffline: React.FC<ChannelItemOfflineProps> = observer(({ data }
     if (isFeed) {
         return (
             <a
-                className={`user user-offline${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}`}
+                className={`user user-offline${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}${settings.isProfileHidden ? " profile-hidden" : ""}${settings.isCategoryHidden ? " category-hidden" : ""}`}
                 href={stationUrl}
                 target="_self"
                 rel="noreferrer"
@@ -59,7 +62,7 @@ const ChannelItemOffline: React.FC<ChannelItemOfflineProps> = observer(({ data }
 
     return (
         <a
-            className={`user user-offline${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}`}
+            className={`user user-offline${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}${settings.isProfileHidden ? " profile-hidden" : ""}${settings.isCategoryHidden ? " category-hidden" : ""}`}
             href={stationUrl}
             target="_self"
             rel="noreferrer"

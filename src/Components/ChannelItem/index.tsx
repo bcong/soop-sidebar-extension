@@ -87,16 +87,19 @@ const ChannelItem: React.FC<ChannelItemProps> = observer(({ data }) => {
         }
     };
 
-    const profileUrl =
+    const rawProfileUrl =
         channel.profile_image ||
         `https://stimg.sooplive.com/LOGO/${channel.user_id.slice(0, 2)}/${channel.user_id}/m/${channel.user_id}.webp`;
+    const profileUrl = settings.isProfileForceJpg
+        ? rawProfileUrl.replace(/\.(gif|png|webp)(\?.*)?$/, ".jpg$2")
+        : rawProfileUrl;
 
     const isPinned = channel.isPinned;
     const isNotified = channel.is_mobile_push === "Y";
 
     return (
         <a
-            className={`user${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}`}
+            className={`user${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}${settings.isProfileHidden ? " profile-hidden" : ""}${settings.isCategoryHidden ? " category-hidden" : ""}`}
             href={liveUrl}
             target="_self"
             rel="noreferrer"

@@ -20,7 +20,11 @@ const ChannelItemChzzk: React.FC<ChannelItemChzzkProps> = observer(({ data }) =>
     const liveTitle = channel.liveInfo?.liveTitle ?? channel.liveTitle ?? "";
     const category = channel.liveInfo?.liveCategoryValue ?? channel.liveCategoryValue ?? "";
     const viewers = channel.liveInfo?.concurrentUserCount ?? channel.concurrentUserCount ?? 0;
-    const profileUrl = channel.channel?.channelImageUrl ?? channel.channelImageUrl;
+    const rawProfileUrl = channel.channel?.channelImageUrl ?? channel.channelImageUrl;
+    const profileUrl =
+        settings.isProfileForceJpg && rawProfileUrl
+            ? rawProfileUrl.replace(/\.(gif|png|webp)(\?.*)?$/, ".jpg$2")
+            : rawProfileUrl;
     const liveImageUrl = (channel.liveInfo?.liveImageUrl ?? channel.liveImageUrl ?? "").replace("{type}", "360");
     const openDate = channel.liveInfo?.openDate ?? channel.openDate ?? "";
 
@@ -49,7 +53,7 @@ const ChannelItemChzzk: React.FC<ChannelItemChzzkProps> = observer(({ data }) =>
 
     return (
         <a
-            className={`user${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}`}
+            className={`user${settings.isSmallUserLayoutEnabled ? " small-user-layout" : ""}${settings.isProfileHidden ? " profile-hidden" : ""}${settings.isCategoryHidden ? " category-hidden" : ""}`}
             href={liveUrl}
             target={settings.isSendLoadBroadEnabled ? "_self" : "_blank"}
             rel="noreferrer"
