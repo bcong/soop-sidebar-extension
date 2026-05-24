@@ -705,6 +705,7 @@ export class SidebarStore {
             e.broad_cate_no = n.broad_cate_no;
             e.is_mobile_push = n.is_mobile_push;
             e.isPinned = n.isPinned;
+            if (n.profile_image != null) e.profile_image = n.profile_image;
         } else if (existing.type === "chzzk") {
             if (n.liveInfo) e.liveInfo = n.liveInfo;
             if (n.concurrentUserCount != null) e.concurrentUserCount = n.concurrentUserCount;

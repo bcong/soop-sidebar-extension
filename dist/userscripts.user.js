@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260524182427
+// @version      20260524233117
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -12581,6 +12581,7 @@
         e.broad_cate_no = n2.broad_cate_no;
         e.is_mobile_push = n2.is_mobile_push;
         e.isPinned = n2.isPinned;
+        if (n2.profile_image != null) e.profile_image = n2.profile_image;
       } else if (existing.type === "chzzk") {
         if (n2.liveInfo) e.liveInfo = n2.liveInfo;
         if (n2.concurrentUserCount != null) e.concurrentUserCount = n2.concurrentUserCount;
@@ -13297,9 +13298,9 @@
         setResolvedThumbnail(null);
         return;
       }
-      const direct = data.thumbnailUrl || (data.broadNo ? `https://liveimg.sooplive.com/m/${data.broadNo}.jpg` : null);
-      if (direct) {
-        setResolvedThumbnail(direct);
+      const directBase = data.thumbnailUrl || (data.broadNo ? `https://liveimg.sooplive.com/m/${data.broadNo}.jpg` : null);
+      if (directBase) {
+        setResolvedThumbnail(`${directBase}?t=${Date.now()}`);
         return;
       }
       if (data.platform === "chzzk" && data.userId) {
@@ -13311,7 +13312,7 @@
           var _a2, _b2, _c;
           const liveImageUrl = (_c = (_b2 = (_a2 = res == null ? void 0 : res.content) == null ? void 0 : _a2.topExposedVideos) == null ? void 0 : _b2.openLive) == null ? void 0 : _c.liveImageUrl;
           if (liveImageUrl) {
-            setResolvedThumbnail(liveImageUrl.replace("{type}", "360"));
+            setResolvedThumbnail(`${liveImageUrl.replace("{type}", "360")}?t=${Date.now()}`);
           }
         }).catch(() => {
         });
@@ -13816,7 +13817,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260524182427";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260524233117";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {

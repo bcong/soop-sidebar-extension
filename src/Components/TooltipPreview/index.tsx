@@ -234,10 +234,10 @@ const TooltipPreview: React.FC = observer(() => {
             setResolvedThumbnail(null);
             return;
         }
-        const direct =
+        const directBase =
             data.thumbnailUrl || (data.broadNo ? `https://liveimg.sooplive.com/m/${data.broadNo}.jpg` : null);
-        if (direct) {
-            setResolvedThumbnail(direct);
+        if (directBase) {
+            setResolvedThumbnail(`${directBase}?t=${Date.now()}`);
             return;
         }
         if (data.platform === "chzzk" && data.userId) {
@@ -249,7 +249,7 @@ const TooltipPreview: React.FC = observer(() => {
                 .then((res: any) => {
                     const liveImageUrl = res?.content?.topExposedVideos?.openLive?.liveImageUrl;
                     if (liveImageUrl) {
-                        setResolvedThumbnail(liveImageUrl.replace("{type}", "360"));
+                        setResolvedThumbnail(`${liveImageUrl.replace("{type}", "360")}?t=${Date.now()}`);
                     }
                 })
                 .catch(() => {});
