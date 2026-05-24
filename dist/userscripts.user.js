@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260525042819
+// @version      20260525051343
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -11948,14 +11948,6 @@
     };
     return search(saved.CHANNEL.BROAD_CATEGORY);
   };
-  const blockUser = (userId, userName, currentList, onUpdate) => {
-    if (currentList.some((u2) => u2.userId === userId)) return;
-    const newList = [...currentList, { userId, userName }];
-    _GM_setValue("blockedUsers", JSON.stringify(newList));
-    onUpdate(newList);
-  };
-  const isUserBlocked = (userId, blockedUsers) => blockedUsers.some((u2) => u2.userId === userId);
-  const isCategoryBlocked = (categoryId, blockedCategories) => blockedCategories.some((c) => c.categoryId === categoryId);
   const WORKER_URL = "https://soop-sidebar.bcong.workers.dev";
   async function fetchChzzkUserId() {
     return new Promise((resolve) => {
@@ -12190,7 +12182,9 @@
     reprocessMyplus() {
       if (!this._rawMyplus) return;
       const { liveList } = this._rawMyplus;
-      let liveChannels = liveList.filter((item) => !isUserBlocked(item.user_id, this.blockedUsers)).filter((item) => !isCategoryBlocked(item.broad_cate_no, this.blockedCategories)).map((item) => ({ channel: item, type: "soop_live", args: [] }));
+      const blockedUserSet = new Set(this.blockedUsers.map((u2) => u2.userId));
+      const blockedCatSet = new Set(this.blockedCategories.map((c) => c.categoryId));
+      let liveChannels = liveList.filter((item) => !blockedUserSet.has(item.user_id)).filter((item) => !blockedCatSet.has(item.broad_cate_no)).map((item) => ({ channel: item, type: "soop_live", args: [] }));
       if (!this._settings.myplusOrder) {
         liveChannels = liveChannels.sort(
           (a, b) => (b.channel.total_view_cnt ?? 0) - (a.channel.total_view_cnt ?? 0)
@@ -12203,11 +12197,15 @@
       if (!this._rawTop) return;
       const { soopData, chzzkRes } = this._rawTop;
       const result = [];
+      const hiddenBjSet = new Set(this.hiddenBjList);
+      const blockedUserSet = new Set(this.blockedUsers.map((u2) => u2.userId));
+      const blockedCatSet = new Set(this.blockedCategories.map((c) => c.categoryId));
+      const followSet = this._settings.isTopDuplicateRemovalEnabled ? new Set(this.allFollowUserIds) : null;
       for (const item of soopData) {
-        if (this.hiddenBjList.includes(item.user_id)) continue;
-        if (isUserBlocked(item.user_id, this.blockedUsers)) continue;
-        if (isCategoryBlocked(item.broad_cate_no, this.blockedCategories)) continue;
-        if (this._settings.isTopDuplicateRemovalEnabled && this.allFollowUserIds.includes(item.user_id)) continue;
+        if (hiddenBjSet.has(item.user_id)) continue;
+        if (blockedUserSet.has(item.user_id)) continue;
+        if (blockedCatSet.has(item.broad_cate_no)) continue;
+        if (followSet == null ? void 0 : followSet.has(item.user_id)) continue;
         result.push({ channel: item, type: "soop_live", args: [] });
       }
       if (this.selectedPinnedCategoryIdx === 0 && ((_a2 = chzzkRes == null ? void 0 : chzzkRes.content) == null ? void 0 : _a2.data)) {
@@ -12281,16 +12279,20 @@
       var _a2, _b2, _c, _d, _e, _f;
       const s = this._settings;
       const result = [];
+      const hiddenBjSet = new Set(hiddenBjList);
+      const blockedUserSet = new Set(this.blockedUsers.map((u2) => u2.userId));
+      const blockedCatSet = new Set(this.blockedCategories.map((c) => c.categoryId));
+      const pinnedChzzkSet = new Set(this.pinnedChzzkUsers);
       for (const item of soopData) {
         const userId = item.user_id;
-        if (hiddenBjList.includes(userId)) continue;
-        if (isUserBlocked(userId, this.blockedUsers)) continue;
+        if (hiddenBjSet.has(userId)) continue;
+        if (blockedUserSet.has(userId)) continue;
         if ((_a2 = item.broad_info) == null ? void 0 : _a2.length) {
           for (const broad of item.broad_info) {
-            const catBlocked = isCategoryBlocked(broad.broad_cate_no, this.blockedCategories);
+            const catBlocked = blockedCatSet.has(broad.broad_cate_no);
             if (catBlocked && !s.isBlockedCategorySortingEnabled) continue;
             const isPinned = !catBlocked && (s.isPinnedStreamWithNotificationEnabled && item.is_mobile_push === "Y" || s.isPinnedStreamWithPinEnabled && item.is_pin);
-            const chzzkChannelId = this.pinnedChzzkUsers.find((c) => c === userId);
+            const chzzkChannelId = pinnedChzzkSet.has(userId) ? userId : void 0;
             result.push({
               channel: {
                 ...broad,
@@ -12339,7 +12341,7 @@
         for (const item of followingList) {
           const channelId = ((_c = item == null ? void 0 : item.channel) == null ? void 0 : _c.channelId) ?? (item == null ? void 0 : item.channelId);
           const isMobilePush = s.isPinnedStreamWithNotificationEnabled && ((_f = (_e = (_d = item == null ? void 0 : item.channel) == null ? void 0 : _d.personalData) == null ? void 0 : _e.following) == null ? void 0 : _f.notification) ? "Y" : "N";
-          const isPinned = channelId ? this.pinnedChzzkUsers.includes(channelId) : false;
+          const isPinned = channelId ? pinnedChzzkSet.has(channelId) : false;
           result.push({
             channel: { ...item, isPinned },
             type: "chzzk",
@@ -12361,40 +12363,48 @@
     }
     async fetchMyplusData() {
       var _a2, _b2;
-      if (!this._settings.displayMyplus) return;
+      const { displayMyplus, displayMyplusvod } = this._settings;
+      if (!displayMyplus && !displayMyplusvod) return;
       if (this.myplusChannels.length === 0) {
         runInAction(() => {
           this.isMyplusLoading = true;
         });
       }
       try {
-        const url = "https://live.sooplive.com/api/myplus/preferbjLiveVodController.php?nInitCnt=6&szRelationType=C";
+        const nInitCnt = displayMyplusvod > 0 ? 6 : 0;
+        const url = `https://live.sooplive.com/api/myplus/preferbjLiveVodController.php?nInitCnt=${nInitCnt}&szRelationType=C`;
         const res = await fetchBroadList(url, 50);
         const liveList = ((_a2 = res == null ? void 0 : res.DATA) == null ? void 0 : _a2.live_list) ?? [];
-        const vodList = ((_b2 = res == null ? void 0 : res.DATA) == null ? void 0 : _b2.vod_list) ?? [];
+        const vodList = displayMyplusvod > 0 ? ((_b2 = res == null ? void 0 : res.DATA) == null ? void 0 : _b2.vod_list) ?? [] : [];
         runInAction(() => {
           this._rawMyplus = { liveList, vodList };
           this.isMyplusLoading = false;
-          let liveChannels = liveList.filter((item) => !isUserBlocked(item.user_id, this.blockedUsers)).filter((item) => !isCategoryBlocked(item.broad_cate_no, this.blockedCategories)).map(
-            (item) => ({
-              channel: item,
-              type: "soop_live",
-              args: []
-            })
-          );
-          if (!this._settings.myplusOrder) {
-            liveChannels = liveChannels.sort(
-              (a, b) => (b.channel.total_view_cnt ?? 0) - (a.channel.total_view_cnt ?? 0)
+          const blockedUserSet = new Set(this.blockedUsers.map((u2) => u2.userId));
+          const blockedCatSet = new Set(this.blockedCategories.map((c) => c.categoryId));
+          if (displayMyplus > 0) {
+            let liveChannels = liveList.filter((item) => !blockedUserSet.has(item.user_id)).filter((item) => !blockedCatSet.has(item.broad_cate_no)).map(
+              (item) => ({
+                channel: item,
+                type: "soop_live",
+                args: []
+              })
+            );
+            if (!this._settings.myplusOrder) {
+              liveChannels = liveChannels.sort(
+                (a, b) => (b.channel.total_view_cnt ?? 0) - (a.channel.total_view_cnt ?? 0)
+              );
+            }
+            this._diffApply(this.myplusChannels, liveChannels);
+          }
+          if (displayMyplusvod > 0) {
+            this.myplusVodChannels = vodList.filter((item) => !blockedUserSet.has(item.user_id)).map(
+              (item) => ({
+                channel: item,
+                type: "soop_live",
+                args: []
+              })
             );
           }
-          this._diffApply(this.myplusChannels, liveChannels);
-          this.myplusVodChannels = vodList.filter((item) => !isUserBlocked(item.user_id, this.blockedUsers)).map(
-            (item) => ({
-              channel: item,
-              type: "soop_live",
-              args: []
-            })
-          );
         });
       } catch (e) {
         runInAction(() => {
@@ -12419,13 +12429,16 @@
         ]);
         const soopData = (soopRes == null ? void 0 : soopRes.broad) ?? [];
         const result = [];
+        const hiddenBjSet = new Set(this.hiddenBjList);
+        const blockedUserSet = new Set(this.blockedUsers.map((u2) => u2.userId));
+        const blockedCatSet = new Set(this.blockedCategories.map((c) => c.categoryId));
+        const followSet = this._settings.isTopDuplicateRemovalEnabled ? new Set(this.allFollowUserIds) : null;
         this._rawTop = { soopData, chzzkRes };
         for (const item of soopData) {
-          if (this.hiddenBjList.includes(item.user_id)) continue;
-          if (isUserBlocked(item.user_id, this.blockedUsers)) continue;
-          if (isCategoryBlocked(item.broad_cate_no, this.blockedCategories)) continue;
-          if (this._settings.isTopDuplicateRemovalEnabled && this.allFollowUserIds.includes(item.user_id))
-            continue;
+          if (hiddenBjSet.has(item.user_id)) continue;
+          if (blockedUserSet.has(item.user_id)) continue;
+          if (blockedCatSet.has(item.broad_cate_no)) continue;
+          if (followSet == null ? void 0 : followSet.has(item.user_id)) continue;
           result.push({ channel: item, type: "soop_live", args: [] });
         }
         if (catIdx === 0 && ((_a2 = chzzkRes == null ? void 0 : chzzkRes.content) == null ? void 0 : _a2.data)) {
@@ -12604,27 +12617,14 @@
     }
     /** 기존 배열을 in-place로 diff 업데이트. 없어진 채널 제거, 기존 채널 필드 업데이트, 새 채널 삽입, 순서 재정렬 */
     _diffApply(current, next) {
-      const nextMap = new Map(next.map((c) => [this._getChannelKey(c), c]));
       const currentMap = new Map(current.map((c) => [this._getChannelKey(c), c]));
-      for (let i = current.length - 1; i >= 0; i--) {
-        if (!nextMap.has(this._getChannelKey(current[i]))) {
-          current.splice(i, 1);
-        }
-      }
+      const nextMap = new Map(next.map((c) => [this._getChannelKey(c), c]));
       for (const [key, existing] of currentMap) {
         const newItem = nextMap.get(key);
         if (newItem) this._updateMutableFields(existing, newItem);
       }
-      for (let targetIdx = 0; targetIdx < next.length; targetIdx++) {
-        const key = this._getChannelKey(next[targetIdx]);
-        const curIdx = current.findIndex((c) => this._getChannelKey(c) === key);
-        if (curIdx < 0) {
-          current.splice(targetIdx, 0, next[targetIdx]);
-        } else if (curIdx !== targetIdx) {
-          const [item] = current.splice(curIdx, 1);
-          current.splice(targetIdx, 0, item);
-        }
-      }
+      const newOrder = next.map((n2) => currentMap.get(this._getChannelKey(n2)) ?? n2);
+      current.splice(0, current.length, ...newOrder);
     }
   }
   class RootStore {
@@ -12689,6 +12689,12 @@
     if (hours > 0) return `${hours}시간 전`;
     if (minutes > 0) return `${minutes}분 전`;
     return `${seconds}초 전`;
+  };
+  const blockUser = (userId, userName, currentList, onUpdate) => {
+    if (currentList.some((u2) => u2.userId === userId)) return;
+    const newList = [...currentList, { userId, userName }];
+    _GM_setValue("blockedUsers", JSON.stringify(newList));
+    onUpdate(newList);
   };
   const ChannelItem = observer(({ data }) => {
     const settings = useSettingsStore();
@@ -12984,7 +12990,10 @@
       reactExports.useEffect(() => {
         setShowAll(false);
       }, [limit]);
-      const visibleChannels = showAll ? channels : channels.slice(0, limit);
+      const visibleChannels = reactExports.useMemo(
+        () => showAll ? channels : channels.slice(0, limit),
+        [showAll, channels, limit]
+      );
       const renderChannel = (data, idx) => {
         var _a2;
         switch (data.type) {
@@ -13415,51 +13424,64 @@
     }, [settings.myplusOrder]);
     reactExports.useEffect(() => {
       if (!settings.isThumbnailTooltipEnabled) return;
+      let rafId = null;
       const handleMouseOver = (e) => {
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        const clientX = e.clientX;
+        const clientY = e.clientY;
         const target = e.target;
-        const soopItem = target.closest("[data-broadcast-no]");
-        if (soopItem) {
-          const broadNo = soopItem.dataset.broadcastNo;
-          const userId = soopItem.dataset.userId ?? "";
-          const userNick = soopItem.dataset.userNick ?? "";
-          const broadTitle = soopItem.dataset.broadTitle ?? "";
-          if (!broadNo) return;
-          const broadStart = soopItem.dataset.broadStart;
-          const totalViewCntRaw = soopItem.dataset.totalViewCnt;
-          const totalViewCnt = totalViewCntRaw !== void 0 ? parseInt(totalViewCntRaw, 10) : void 0;
-          showTooltip(
-            { userId, userNick, broadTitle, broadNo, broadStart, totalViewCnt, type: "live" },
-            e.clientX,
-            e.clientY
-          );
-          return;
-        }
-        const chzzkItem = target.closest("[data-chzzk-channel-id]");
-        if (chzzkItem) {
-          const userId = chzzkItem.dataset.chzzkChannelId ?? "";
-          const userNick = chzzkItem.dataset.channelName ?? "";
-          const broadTitle = chzzkItem.dataset.liveTitle ?? "";
-          const thumbnailUrl = chzzkItem.dataset.liveImageUrl || void 0;
-          const broadStart = chzzkItem.dataset.openDate || void 0;
-          const viewsRaw = chzzkItem.dataset.concurrentUserCount;
-          const totalViewCnt = viewsRaw !== void 0 ? parseInt(viewsRaw, 10) : void 0;
-          showTooltip(
-            {
-              userId,
-              userNick,
-              broadTitle,
-              thumbnailUrl,
-              broadStart,
-              totalViewCnt,
-              type: "live",
-              platform: "chzzk"
-            },
-            e.clientX,
-            e.clientY
-          );
-        }
+        rafId = requestAnimationFrame(() => {
+          rafId = null;
+          const soopItem = target.closest("[data-broadcast-no]");
+          if (soopItem) {
+            const broadNo = soopItem.dataset.broadcastNo;
+            const userId = soopItem.dataset.userId ?? "";
+            const userNick = soopItem.dataset.userNick ?? "";
+            const broadTitle = soopItem.dataset.broadTitle ?? "";
+            if (!broadNo) return;
+            const broadStart = soopItem.dataset.broadStart;
+            const totalViewCntRaw = soopItem.dataset.totalViewCnt;
+            const totalViewCnt = totalViewCntRaw !== void 0 ? parseInt(totalViewCntRaw, 10) : void 0;
+            showTooltip(
+              { userId, userNick, broadTitle, broadNo, broadStart, totalViewCnt, type: "live" },
+              clientX,
+              clientY
+            );
+            return;
+          }
+          const chzzkItem = target.closest("[data-chzzk-channel-id]");
+          if (chzzkItem) {
+            const userId = chzzkItem.dataset.chzzkChannelId ?? "";
+            const userNick = chzzkItem.dataset.channelName ?? "";
+            const broadTitle = chzzkItem.dataset.liveTitle ?? "";
+            const thumbnailUrl = chzzkItem.dataset.liveImageUrl || void 0;
+            const broadStart = chzzkItem.dataset.openDate || void 0;
+            const viewsRaw = chzzkItem.dataset.concurrentUserCount;
+            const totalViewCnt = viewsRaw !== void 0 ? parseInt(viewsRaw, 10) : void 0;
+            showTooltip(
+              {
+                userId,
+                userNick,
+                broadTitle,
+                thumbnailUrl,
+                broadStart,
+                totalViewCnt,
+                type: "live",
+                platform: "chzzk"
+              },
+              clientX,
+              clientY
+            );
+          }
+        });
       };
-      const handleMouseOut = () => hideTooltip();
+      const handleMouseOut = () => {
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+        hideTooltip();
+      };
       document.addEventListener("mouseover", handleMouseOver);
       document.addEventListener("mouseout", handleMouseOut);
       return () => {
@@ -13830,7 +13852,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525042819";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525051343";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {

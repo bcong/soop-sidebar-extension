@@ -55,55 +55,68 @@ const SidebarView: React.FC = observer(() => {
     // 썸네일 툴팁 (모든 페이지 공통)
     useEffect(() => {
         if (!settings.isThumbnailTooltipEnabled) return;
+        let rafId: number | null = null;
         const handleMouseOver = (e: MouseEvent) => {
+            if (rafId !== null) cancelAnimationFrame(rafId);
+            const clientX = e.clientX;
+            const clientY = e.clientY;
             const target = e.target as HTMLElement;
+            rafId = requestAnimationFrame(() => {
+                rafId = null;
 
-            // SOOP 채널 hover
-            const soopItem = target.closest("[data-broadcast-no]") as HTMLElement | null;
-            if (soopItem) {
-                const broadNo = soopItem.dataset.broadcastNo;
-                const userId = soopItem.dataset.userId ?? "";
-                const userNick = soopItem.dataset.userNick ?? "";
-                const broadTitle = soopItem.dataset.broadTitle ?? "";
-                if (!broadNo) return;
-                const broadStart = soopItem.dataset.broadStart;
-                const totalViewCntRaw = soopItem.dataset.totalViewCnt;
-                const totalViewCnt = totalViewCntRaw !== undefined ? parseInt(totalViewCntRaw, 10) : undefined;
-                showTooltip(
-                    { userId, userNick, broadTitle, broadNo, broadStart, totalViewCnt, type: "live" },
-                    e.clientX,
-                    e.clientY,
-                );
-                return;
-            }
+                // SOOP 채널 hover
+                const soopItem = target.closest("[data-broadcast-no]") as HTMLElement | null;
+                if (soopItem) {
+                    const broadNo = soopItem.dataset.broadcastNo;
+                    const userId = soopItem.dataset.userId ?? "";
+                    const userNick = soopItem.dataset.userNick ?? "";
+                    const broadTitle = soopItem.dataset.broadTitle ?? "";
+                    if (!broadNo) return;
+                    const broadStart = soopItem.dataset.broadStart;
+                    const totalViewCntRaw = soopItem.dataset.totalViewCnt;
+                    const totalViewCnt = totalViewCntRaw !== undefined ? parseInt(totalViewCntRaw, 10) : undefined;
+                    showTooltip(
+                        { userId, userNick, broadTitle, broadNo, broadStart, totalViewCnt, type: "live" },
+                        clientX,
+                        clientY,
+                    );
+                    return;
+                }
 
-            // Chzzk 채널 hover
-            const chzzkItem = target.closest("[data-chzzk-channel-id]") as HTMLElement | null;
-            if (chzzkItem) {
-                const userId = chzzkItem.dataset.chzzkChannelId ?? "";
-                const userNick = chzzkItem.dataset.channelName ?? "";
-                const broadTitle = chzzkItem.dataset.liveTitle ?? "";
-                const thumbnailUrl = chzzkItem.dataset.liveImageUrl || undefined;
-                const broadStart = chzzkItem.dataset.openDate || undefined;
-                const viewsRaw = chzzkItem.dataset.concurrentUserCount;
-                const totalViewCnt = viewsRaw !== undefined ? parseInt(viewsRaw, 10) : undefined;
-                showTooltip(
-                    {
-                        userId,
-                        userNick,
-                        broadTitle,
-                        thumbnailUrl,
-                        broadStart,
-                        totalViewCnt,
-                        type: "live",
-                        platform: "chzzk",
-                    },
-                    e.clientX,
-                    e.clientY,
-                );
-            }
+                // Chzzk 채널 hover
+                const chzzkItem = target.closest("[data-chzzk-channel-id]") as HTMLElement | null;
+                if (chzzkItem) {
+                    const userId = chzzkItem.dataset.chzzkChannelId ?? "";
+                    const userNick = chzzkItem.dataset.channelName ?? "";
+                    const broadTitle = chzzkItem.dataset.liveTitle ?? "";
+                    const thumbnailUrl = chzzkItem.dataset.liveImageUrl || undefined;
+                    const broadStart = chzzkItem.dataset.openDate || undefined;
+                    const viewsRaw = chzzkItem.dataset.concurrentUserCount;
+                    const totalViewCnt = viewsRaw !== undefined ? parseInt(viewsRaw, 10) : undefined;
+                    showTooltip(
+                        {
+                            userId,
+                            userNick,
+                            broadTitle,
+                            thumbnailUrl,
+                            broadStart,
+                            totalViewCnt,
+                            type: "live",
+                            platform: "chzzk",
+                        },
+                        clientX,
+                        clientY,
+                    );
+                }
+            });
         };
-        const handleMouseOut = () => hideTooltip();
+        const handleMouseOut = () => {
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
+            hideTooltip();
+        };
         document.addEventListener("mouseover", handleMouseOver);
         document.addEventListener("mouseout", handleMouseOut);
         return () => {

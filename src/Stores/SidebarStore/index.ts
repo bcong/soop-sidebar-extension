@@ -1,6 +1,5 @@
 import { makeObservable, observable, action, runInAction } from "mobx";
 import { fetchBroadList, getStationFeed, getHiddenbjList } from "@Utils/api";
-import { isCategoryBlocked, isUserBlocked } from "@Utils/blocking";
 import { syncPush, syncPull, fetchChzzkUserId, isSyncConfigured } from "@Utils/pinSync";
 import type {
     I_BlockedUser,
@@ -209,9 +208,11 @@ export class SidebarStore {
     reprocessMyplus(): void {
         if (!this._rawMyplus) return;
         const { liveList } = this._rawMyplus;
+        const blockedUserSet = new Set(this.blockedUsers.map((u) => u.userId));
+        const blockedCatSet = new Set(this.blockedCategories.map((c) => c.categoryId));
         let liveChannels = liveList
-            .filter((item: any) => !isUserBlocked(item.user_id, this.blockedUsers))
-            .filter((item: any) => !isCategoryBlocked(item.broad_cate_no, this.blockedCategories))
+            .filter((item: any) => !blockedUserSet.has(item.user_id))
+            .filter((item: any) => !blockedCatSet.has(item.broad_cate_no))
             .map((item: any): I_ChannelData => ({ channel: item, type: "soop_live" as T_ChannelType, args: [] }));
         if (!this._settings.myplusOrder) {
             liveChannels = liveChannels.sort(
@@ -225,11 +226,15 @@ export class SidebarStore {
         if (!this._rawTop) return;
         const { soopData, chzzkRes } = this._rawTop;
         const result: I_ChannelData[] = [];
+        const hiddenBjSet = new Set(this.hiddenBjList);
+        const blockedUserSet = new Set(this.blockedUsers.map((u) => u.userId));
+        const blockedCatSet = new Set(this.blockedCategories.map((c) => c.categoryId));
+        const followSet = this._settings.isTopDuplicateRemovalEnabled ? new Set(this.allFollowUserIds) : null;
         for (const item of soopData) {
-            if (this.hiddenBjList.includes(item.user_id)) continue;
-            if (isUserBlocked(item.user_id, this.blockedUsers)) continue;
-            if (isCategoryBlocked(item.broad_cate_no, this.blockedCategories)) continue;
-            if (this._settings.isTopDuplicateRemovalEnabled && this.allFollowUserIds.includes(item.user_id)) continue;
+            if (hiddenBjSet.has(item.user_id)) continue;
+            if (blockedUserSet.has(item.user_id)) continue;
+            if (blockedCatSet.has(item.broad_cate_no)) continue;
+            if (followSet?.has(item.user_id)) continue;
             result.push({ channel: item, type: "soop_live" as T_ChannelType, args: [] });
         }
         if (this.selectedPinnedCategoryIdx === 0 && chzzkRes?.content?.data) {
@@ -331,15 +336,21 @@ export class SidebarStore {
         const s = this._settings;
         const result: I_ChannelData[] = [];
 
+        // O(1) 조회를 위해 Set으로 변환
+        const hiddenBjSet = new Set(hiddenBjList);
+        const blockedUserSet = new Set(this.blockedUsers.map((u) => u.userId));
+        const blockedCatSet = new Set(this.blockedCategories.map((c) => c.categoryId));
+        const pinnedChzzkSet = new Set(this.pinnedChzzkUsers);
+
         for (const item of soopData) {
             const userId = item.user_id;
 
-            if (hiddenBjList.includes(userId)) continue;
-            if (isUserBlocked(userId, this.blockedUsers)) continue;
+            if (hiddenBjSet.has(userId)) continue;
+            if (blockedUserSet.has(userId)) continue;
 
             if (item.broad_info?.length) {
                 for (const broad of item.broad_info) {
-                    const catBlocked = isCategoryBlocked(broad.broad_cate_no, this.blockedCategories);
+                    const catBlocked = blockedCatSet.has(broad.broad_cate_no);
                     // isBlockedCategorySortingEnabled: true → 하단 이동, false → 완전 제외
                     if (catBlocked && !s.isBlockedCategorySortingEnabled) continue;
 
@@ -349,7 +360,7 @@ export class SidebarStore {
                         ((s.isPinnedStreamWithNotificationEnabled && item.is_mobile_push === "Y") ||
                             (s.isPinnedStreamWithPinEnabled && item.is_pin));
 
-                    const chzzkChannelId = this.pinnedChzzkUsers.find((c) => c === userId);
+                    const chzzkChannelId = pinnedChzzkSet.has(userId) ? userId : undefined;
 
                     result.push({
                         channel: {
@@ -408,7 +419,7 @@ export class SidebarStore {
                     s.isPinnedStreamWithNotificationEnabled && item?.channel?.personalData?.following?.notification
                         ? "Y"
                         : "N";
-                const isPinned = channelId ? this.pinnedChzzkUsers.includes(channelId) : false;
+                const isPinned = channelId ? pinnedChzzkSet.has(channelId) : false;
                 result.push({
                     channel: { ...item, isPinned },
                     type: "chzzk" as T_ChannelType,
@@ -439,7 +450,8 @@ export class SidebarStore {
     }
 
     async fetchMyplusData(): Promise<void> {
-        if (!this._settings.displayMyplus) return;
+        const { displayMyplus, displayMyplusvod } = this._settings;
+        if (!displayMyplus && !displayMyplusvod) return;
         if (this.myplusChannels.length === 0) {
             runInAction(() => {
                 this.isMyplusLoading = true;
@@ -447,45 +459,54 @@ export class SidebarStore {
         }
 
         try {
-            const url =
-                "https://live.sooplive.com/api/myplus/preferbjLiveVodController.php?nInitCnt=6&szRelationType=C";
+            // displayMyplusvod가 0이면 서버에 VOD를 요청하지 않음 (nInitCnt=0)
+            const nInitCnt = displayMyplusvod > 0 ? 6 : 0;
+            const url = `https://live.sooplive.com/api/myplus/preferbjLiveVodController.php?nInitCnt=${nInitCnt}&szRelationType=C`;
             const res = await fetchBroadList(url, 50);
 
             const liveList: any[] = res?.DATA?.live_list ?? [];
-            const vodList: any[] = res?.DATA?.vod_list ?? [];
+            const vodList: any[] = displayMyplusvod > 0 ? (res?.DATA?.vod_list ?? []) : [];
 
             runInAction(() => {
                 this._rawMyplus = { liveList, vodList };
                 this.isMyplusLoading = false;
-                let liveChannels = liveList
-                    .filter((item: any) => !isUserBlocked(item.user_id, this.blockedUsers))
-                    .filter((item: any) => !isCategoryBlocked(item.broad_cate_no, this.blockedCategories))
-                    .map(
-                        (item: any): I_ChannelData => ({
-                            channel: item,
-                            type: "soop_live" as T_ChannelType,
-                            args: [],
-                        }),
-                    );
+                const blockedUserSet = new Set(this.blockedUsers.map((u) => u.userId));
+                const blockedCatSet = new Set(this.blockedCategories.map((c) => c.categoryId));
+                if (displayMyplus > 0) {
+                    let liveChannels = liveList
+                        .filter((item: any) => !blockedUserSet.has(item.user_id))
+                        .filter((item: any) => !blockedCatSet.has(item.broad_cate_no))
+                        .map(
+                            (item: any): I_ChannelData => ({
+                                channel: item,
+                                type: "soop_live" as T_ChannelType,
+                                args: [],
+                            }),
+                        );
 
-                // myplusOrder === 0 이면 시청자 수 순 정렬
-                if (!this._settings.myplusOrder) {
-                    liveChannels = liveChannels.sort(
-                        (a, b) =>
-                            ((b.channel.total_view_cnt ?? 0) as number) - ((a.channel.total_view_cnt ?? 0) as number),
-                    );
+                    // myplusOrder === 0 이면 시청자 수 순 정렬
+                    if (!this._settings.myplusOrder) {
+                        liveChannels = liveChannels.sort(
+                            (a, b) =>
+                                ((b.channel.total_view_cnt ?? 0) as number) -
+                                ((a.channel.total_view_cnt ?? 0) as number),
+                        );
+                    }
+
+                    this._diffApply(this.myplusChannels, liveChannels);
                 }
 
-                this._diffApply(this.myplusChannels, liveChannels);
-                this.myplusVodChannels = vodList
-                    .filter((item: any) => !isUserBlocked(item.user_id, this.blockedUsers))
-                    .map(
-                        (item: any): I_ChannelData => ({
-                            channel: item,
-                            type: "soop_live" as T_ChannelType,
-                            args: [],
-                        }),
-                    );
+                if (displayMyplusvod > 0) {
+                    this.myplusVodChannels = vodList
+                        .filter((item: any) => !blockedUserSet.has(item.user_id))
+                        .map(
+                            (item: any): I_ChannelData => ({
+                                channel: item,
+                                type: "soop_live" as T_ChannelType,
+                                args: [],
+                            }),
+                        );
+                }
             });
         } catch (e) {
             runInAction(() => {
@@ -519,16 +540,19 @@ export class SidebarStore {
             const soopData: any[] = soopRes?.broad ?? [];
 
             const result: I_ChannelData[] = [];
+            const hiddenBjSet = new Set(this.hiddenBjList);
+            const blockedUserSet = new Set(this.blockedUsers.map((u) => u.userId));
+            const blockedCatSet = new Set(this.blockedCategories.map((c) => c.categoryId));
+            const followSet = this._settings.isTopDuplicateRemovalEnabled ? new Set(this.allFollowUserIds) : null;
 
             // 원본 데이터 저장 (설정 변경 시 재처리용)
             this._rawTop = { soopData, chzzkRes };
 
             for (const item of soopData) {
-                if (this.hiddenBjList.includes(item.user_id)) continue;
-                if (isUserBlocked(item.user_id, this.blockedUsers)) continue;
-                if (isCategoryBlocked(item.broad_cate_no, this.blockedCategories)) continue;
-                if (this._settings.isTopDuplicateRemovalEnabled && this.allFollowUserIds.includes(item.user_id))
-                    continue;
+                if (hiddenBjSet.has(item.user_id)) continue;
+                if (blockedUserSet.has(item.user_id)) continue;
+                if (blockedCatSet.has(item.broad_cate_no)) continue;
+                if (followSet?.has(item.user_id)) continue;
                 result.push({ channel: item, type: "soop_live" as T_ChannelType, args: [] });
             }
 
@@ -731,34 +755,17 @@ export class SidebarStore {
 
     /** 기존 배열을 in-place로 diff 업데이트. 없어진 채널 제거, 기존 채널 필드 업데이트, 새 채널 삽입, 순서 재정렬 */
     private _diffApply(current: I_ChannelData[], next: I_ChannelData[]): void {
-        const nextMap = new Map(next.map((c) => [this._getChannelKey(c), c]));
         const currentMap = new Map(current.map((c) => [this._getChannelKey(c), c]));
+        const nextMap = new Map(next.map((c) => [this._getChannelKey(c), c]));
 
-        // 1. 없어진 채널 제거
-        for (let i = current.length - 1; i >= 0; i--) {
-            if (!nextMap.has(this._getChannelKey(current[i]))) {
-                current.splice(i, 1);
-            }
-        }
-
-        // 2. 기존 채널 필드 업데이트 (같은 참조 유지)
+        // 기존 채널 필드 업데이트 (같은 참조 유지)
         for (const [key, existing] of currentMap) {
             const newItem = nextMap.get(key);
             if (newItem) this._updateMutableFields(existing, newItem);
         }
 
-        // 3. 순서 재정렬 + 새 채널 삽입
-        for (let targetIdx = 0; targetIdx < next.length; targetIdx++) {
-            const key = this._getChannelKey(next[targetIdx]);
-            const curIdx = current.findIndex((c) => this._getChannelKey(c) === key);
-            if (curIdx < 0) {
-                // 새 채널 삽입
-                current.splice(targetIdx, 0, next[targetIdx]);
-            } else if (curIdx !== targetIdx) {
-                // 순서 변경
-                const [item] = current.splice(curIdx, 1);
-                current.splice(targetIdx, 0, item);
-            }
-        }
+        // next 순서 기준으로 재구성: 기존 참조 재사용, 신규는 그대로 삽입 — O(n)
+        const newOrder = next.map((n) => currentMap.get(this._getChannelKey(n)) ?? n);
+        current.splice(0, current.length, ...newOrder);
     }
 }
