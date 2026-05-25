@@ -199,7 +199,7 @@ export class SettingsStore {
         this.watchingStreamersSortOrder = GM_getValue("watchingStreamersSortOrder", "date");
         this.isWatchingStreamersFollowingListEnabled = GM_getValue("isWatchingStreamersFollowingListEnabled", true);
         this.watchingStreamersRegisteredUsers = GM_getValue("watchingStreamersRegisteredUsers", []);
-        this.watchingStreamersMinDisplay = GM_getValue("watchingStreamersMinDisplay", 1);
+        this.watchingStreamersMinDisplay = GM_getValue("watchingStreamersMinDisplay", 0);
 
         makeObservable(this, {
             isCustomSidebarEnabled: observable,

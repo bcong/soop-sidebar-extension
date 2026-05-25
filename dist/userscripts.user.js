@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260526005216
+// @version      20260526005829
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -11612,7 +11612,7 @@
       this.watchingStreamersSortOrder = _GM_getValue("watchingStreamersSortOrder", "date");
       this.isWatchingStreamersFollowingListEnabled = _GM_getValue("isWatchingStreamersFollowingListEnabled", true);
       this.watchingStreamersRegisteredUsers = _GM_getValue("watchingStreamersRegisteredUsers", []);
-      this.watchingStreamersMinDisplay = _GM_getValue("watchingStreamersMinDisplay", 1);
+      this.watchingStreamersMinDisplay = _GM_getValue("watchingStreamersMinDisplay", 0);
       makeObservable(this, {
         isCustomSidebarEnabled: observable,
         isRandomSortEnabled: observable,
@@ -13998,7 +13998,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260526005216";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260526005829";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -15087,7 +15087,7 @@
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z range-option_v8xK4z", children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "wsMinDisplay", children: [
                     /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "watching" }),
-                    "최소 표시 인원 (명)"
+                    "팔로워 필터 (패 수 이상만 표시)"
                   ] }),
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "range-container_v8xK4z", children: [
                     /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -15095,16 +15095,14 @@
                       {
                         type: "range",
                         id: "wsMinDisplay",
-                        min: 1,
-                        max: 10,
+                        min: 0,
+                        max: 1e4,
+                        step: 500,
                         value: s.watchingStreamersMinDisplay,
                         onChange: (e) => s.setSetting("watchingStreamersMinDisplay", Number(e.target.value))
                       }
                     ),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "range-value_v8xK4z", children: [
-                      s.watchingStreamersMinDisplay,
-                      "명"
-                    ] })
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "range-value_v8xK4z", children: s.watchingStreamersMinDisplay === 0 ? "제한 없음" : `${s.watchingStreamersMinDisplay.toLocaleString()}명 이상` })
                   ] })
                 ] }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx(WatchingUserAddForm, {}),
@@ -15633,6 +15631,23 @@
         return "gray";
     }
   }
+  function fetchFanCount(userId) {
+    return new Promise((resolve) => {
+      _GM_xmlhttpRequest({
+        method: "GET",
+        url: `https://st.sooplive.com/api/get_station_status.php?szBjId=${userId}`,
+        onload: (res) => {
+          var _a2, _b2;
+          try {
+            resolve(((_b2 = (_a2 = JSON.parse(res.responseText)) == null ? void 0 : _a2.DATA) == null ? void 0 : _b2.fan_cnt) ?? 0);
+          } catch {
+            resolve(0);
+          }
+        },
+        onerror: () => resolve(0)
+      });
+    });
+  }
   function getProfileUrl(userId) {
     return `https://profile.img.sooplive.com/LOGO/${userId.substring(0, 2)}/${userId}/m/${userId}.webp`;
   }
@@ -15684,12 +15699,14 @@ self.onmessage = function(e) {
     const [scannedCount, setScannedCount] = reactExports.useState(0);
     const [displayScannedCount, setDisplayScannedCount] = reactExports.useState(0);
     const [countdown, setCountdown] = reactExports.useState(0);
+    const [fanCountVersion, setFanCountVersion] = reactExports.useState(0);
     const followingSetRef = reactExports.useRef(/* @__PURE__ */ new Set());
     const intervalRef = reactExports.useRef(null);
     const workerRef = reactExports.useRef(null);
     const isFetchingRef = reactExports.useRef(false);
     const lastRefreshTimeRef = reactExports.useRef(0);
     const viewerCacheRef = reactExports.useRef(/* @__PURE__ */ new Map());
+    const fanCountCacheRef = reactExports.useRef(/* @__PURE__ */ new Map());
     const workerTimeoutRef = reactExports.useRef(null);
     const workerCallbackRef = reactExports.useRef(null);
     const nextFireTimeRef = reactExports.useRef(0);
@@ -15889,9 +15906,37 @@ self.onmessage = function(e) {
         }
         lv.Chat.chatUserListLayer.reconnect();
         lv.playerController.sendChUser();
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const waitForViewerList = () => new Promise((resolve) => {
+          let prevCount = -1;
+          let stableCount = 0;
+          const deadline = Date.now() + 3e3;
+          const check = () => {
+            const raw = lv.Chat.chatUserListLayer.userListSeparatedByGrade;
+            const total = raw ? Object.values(raw).reduce(
+              (s, a) => s + (Array.isArray(a) ? a.length : 0),
+              0
+            ) : 0;
+            if (total > 0 && total === prevCount) {
+              stableCount++;
+              if (stableCount >= 2) {
+                resolve();
+                return;
+              }
+            } else {
+              stableCount = 0;
+              prevCount = total;
+            }
+            if (Date.now() >= deadline) {
+              resolve();
+              return;
+            }
+            setTimeout(check, 300);
+          };
+          setTimeout(check, 300);
+        });
+        await waitForViewerList();
         await postAndWait(getNewViewers());
-        await new Promise((resolve) => setTimeout(resolve, 2500));
+        await new Promise((resolve) => setTimeout(resolve, 2e3));
         await postAndWait(getNewViewers());
       } finally {
         isFetchingRef.current = false;
@@ -15944,6 +15989,23 @@ self.onmessage = function(e) {
       fetchAndFilter
     ]);
     reactExports.useEffect(() => {
+      if (settings.watchingStreamersMinDisplay === 0) return;
+      const uncached = watchingUsers.filter((u2) => !fanCountCacheRef.current.has(u2.userId));
+      if (uncached.length === 0) return;
+      let cancelled = false;
+      void Promise.all(
+        uncached.map(async (u2) => {
+          const count = await fetchFanCount(u2.userId);
+          if (!cancelled) fanCountCacheRef.current.set(u2.userId, count);
+        })
+      ).then(() => {
+        if (!cancelled) setFanCountVersion((v2) => v2 + 1);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [watchingUsers, settings.watchingStreamersMinDisplay]);
+    reactExports.useEffect(() => {
       if (!settings.isWatchingStreamersEnabled) return;
       const tick = setInterval(() => {
         setCountdown(Math.max(0, Math.ceil((nextFireTimeRef.current - Date.now()) / 1e3)));
@@ -15979,8 +16041,11 @@ self.onmessage = function(e) {
         (a, b) => (srcOrder[a.source] ?? 9) - (srcOrder[b.source] ?? 9) || gradeOrder.indexOf(a.grade) - gradeOrder.indexOf(b.grade)
       );
     }
+    const displayedUsers = settings.watchingStreamersMinDisplay > 0 ? sortedUsers.filter((u2) => {
+      if (!fanCountCacheRef.current.has(u2.userId)) return true;
+      return (fanCountCacheRef.current.get(u2.userId) ?? 0) >= settings.watchingStreamersMinDisplay;
+    }) : sortedUsers;
     if (!settings.isWatchingStreamersEnabled || !container) return null;
-    if (watchingUsers.length > 0 && watchingUsers.length < settings.watchingStreamersMinDisplay) return null;
     return ReactDOM.createPortal(
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "view_streamer", className: "view_streamer", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "ws-header", children: [
@@ -16012,7 +16077,7 @@ self.onmessage = function(e) {
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "ws-countdown-label", title: "다음 갱신까지", children: isRefreshing ? "..." : countdown >= 60 ? `${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, "0")}` : `${countdown}s` })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "user-list-container", children: sortedUsers.map((user) => {
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "user-list-container", children: displayedUsers.map((user) => {
           const koreanRank = getKoreanRank(user.grade);
           const usernameWithRank = `${user.nickname} (${koreanRank})`;
           const profileUrl = getProfileUrl(user.userId);

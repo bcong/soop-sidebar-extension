@@ -59,6 +59,20 @@ function getBorderColorByRank(koreanRank: string): string {
 type WatchingUser = { userId: string; nickname: string; grade: string; source: "following" | "registered" };
 type SortOrder = "date" | "favorites" | "rank";
 
+function fetchFanCount(userId: string): Promise<number> {
+    return new Promise((resolve) => {
+        GM_xmlhttpRequest({
+            method: "GET",
+            url: `https://st.sooplive.com/api/get_station_status.php?szBjId=${userId}`,
+            onload: (res) => {
+                try { resolve(JSON.parse(res.responseText)?.DATA?.fan_cnt ?? 0); }
+                catch { resolve(0); }
+            },
+            onerror: () => resolve(0),
+        });
+    });
+}
+
 function getProfileUrl(userId: string): string {
     return `https://profile.img.sooplive.com/LOGO/${userId.substring(0, 2)}/${userId}/m/${userId}.webp`;
 }
@@ -115,6 +129,7 @@ const WatchingStreamers: React.FC = observer(() => {
     const [displayScannedCount, setDisplayScannedCount] = useState(0);
 
     const [countdown, setCountdown] = useState(0);
+    const [fanCountVersion, setFanCountVersion] = useState(0);
     const followingSetRef = useRef<Set<string>>(new Set());
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const workerRef = useRef<Worker | null>(null);
@@ -122,6 +137,8 @@ const WatchingStreamers: React.FC = observer(() => {
     const lastRefreshTimeRef = useRef(0);
     // 캐시: uid → WatchingUser(발견) | null(탐색했으나 대상 아님)
     const viewerCacheRef = useRef<Map<string, WatchingUser | null>>(new Map());
+    // 팝 카운트 캐시: userId → fan_cnt
+    const fanCountCacheRef = useRef<Map<string, number>>(new Map());
     // 워커 무응답 시 잠금 해제용 타임아웃
     const workerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     // 워커 응답을 Promise로 기다리기 위한 콜백
@@ -362,12 +379,39 @@ const WatchingStreamers: React.FC = observer(() => {
             lv.Chat.chatUserListLayer.reconnect();
             lv.playerController.sendChUser();
 
-            // ① 1차 스캔: 1.5초 후 빠른 초기 결과
-            await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+            // 시청자 목록이 채워질 때까지 폴링 (최대 3초, 300ms 간격으로 안정화 감지)
+            const waitForViewerList = (): Promise<void> =>
+                new Promise((resolve) => {
+                    let prevCount = -1;
+                    let stableCount = 0;
+                    const deadline = Date.now() + 3000;
+                    const check = () => {
+                        const raw = lv.Chat.chatUserListLayer.userListSeparatedByGrade;
+                        const total = raw
+                            ? Object.values(raw as Record<string, unknown[]>).reduce(
+                                  (s, a) => s + (Array.isArray(a) ? a.length : 0),
+                                  0,
+                              )
+                            : 0;
+                        if (total > 0 && total === prevCount) {
+                            stableCount++;
+                            if (stableCount >= 2) { resolve(); return; }
+                        } else {
+                            stableCount = 0;
+                            prevCount = total;
+                        }
+                        if (Date.now() >= deadline) { resolve(); return; }
+                        setTimeout(check, 300);
+                    };
+                    setTimeout(check, 300);
+                });
+
+            // ① 1차 스캔: 목록 안정화 즉시
+            await waitForViewerList();
             await postAndWait(getNewViewers());
 
-            // ② 2차 스캔: 2.5초 더 대기 후 추가 수신된 시청자 delta
-            await new Promise<void>((resolve) => setTimeout(resolve, 2500));
+            // ② 2차 스캔: 2초 더 대기 후 추가 수신된 시청자 delta
+            await new Promise<void>((resolve) => setTimeout(resolve, 2000));
             await postAndWait(getNewViewers());
         } finally {
             isFetchingRef.current = false;
@@ -428,6 +472,25 @@ const WatchingStreamers: React.FC = observer(() => {
         fetchAndFilter,
     ]);
 
+    // ── 팔로워 수 페치 (필터 설정 > 0일 때만) ──────────────────────────
+    useEffect(() => {
+        if (settings.watchingStreamersMinDisplay === 0) return;
+        const uncached = watchingUsers.filter((u) => !fanCountCacheRef.current.has(u.userId));
+        if (uncached.length === 0) return;
+        let cancelled = false;
+        void Promise.all(
+            uncached.map(async (u) => {
+                const count = await fetchFanCount(u.userId);
+                if (!cancelled) fanCountCacheRef.current.set(u.userId, count);
+            }),
+        ).then(() => {
+            if (!cancelled) setFanCountVersion((v) => v + 1);
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [watchingUsers, settings.watchingStreamersMinDisplay]);
+
     // ── 카운트다운 tick ───────────────────────────────────────────────
     useEffect(() => {
         if (!settings.isWatchingStreamersEnabled) return;
@@ -475,9 +538,18 @@ const WatchingStreamers: React.FC = observer(() => {
     }
     // date(기본): 워커 출력 순 = 개별등록(1) → 즐겨찾기(2), 각 그룹 내 grade 순(3)
 
+    // 팔로워 수 필터 (비동기 페치 중인 유저는 낙관적으로 표시)
+    const displayedUsers =
+        settings.watchingStreamersMinDisplay > 0
+            ? sortedUsers.filter((u) => {
+                  if (!fanCountCacheRef.current.has(u.userId)) return true;
+                  return (fanCountCacheRef.current.get(u.userId) ?? 0) >= settings.watchingStreamersMinDisplay;
+              })
+            : sortedUsers;
+    void fanCountVersion; // 렌더 직접 구돕 유도
+
     // ── 렌더 ─────────────────────────────────────────────────────────
     if (!settings.isWatchingStreamersEnabled || !container) return null;
-    if (watchingUsers.length > 0 && watchingUsers.length < settings.watchingStreamersMinDisplay) return null;
 
     return ReactDOM.createPortal(
         <div id="view_streamer" className="view_streamer">
@@ -510,7 +582,7 @@ const WatchingStreamers: React.FC = observer(() => {
 
             {/* 유저 목록 */}
             <div id="user-list-container">
-                {sortedUsers.map((user) => {
+                {displayedUsers.map((user) => {
                     const koreanRank = getKoreanRank(user.grade);
                     const usernameWithRank = `${user.nickname} (${koreanRank})`;
                     const profileUrl = getProfileUrl(user.userId);

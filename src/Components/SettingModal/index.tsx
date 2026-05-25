@@ -1323,20 +1323,23 @@ const SettingModal: React.FC = observer(() => {
                             <div className="option_v8xK4z range-option_v8xK4z">
                                 <label htmlFor="wsMinDisplay">
                                     <B k="watching" />
-                                    최소 표시 인원 (명)
+                                    팔로워 필터 (패 수 이상만 표시)
                                 </label>
                                 <div className="range-container_v8xK4z">
                                     <input
                                         type="range"
                                         id="wsMinDisplay"
-                                        min={1}
-                                        max={10}
+                                        min={0}
+                                        max={10000}
+                                        step={500}
                                         value={s.watchingStreamersMinDisplay}
                                         onChange={(e) =>
                                             s.setSetting("watchingStreamersMinDisplay", Number(e.target.value))
                                         }
                                     />
-                                    <span className="range-value_v8xK4z">{s.watchingStreamersMinDisplay}명</span>
+                                    <span className="range-value_v8xK4z">
+                                        {s.watchingStreamersMinDisplay === 0 ? "제한 없음" : `${s.watchingStreamersMinDisplay.toLocaleString()}명 이상`}
+                                    </span>
                                 </div>
                             </div>
                             {/* 개별 모니터링 유저 추가 */}
