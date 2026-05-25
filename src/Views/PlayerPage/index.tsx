@@ -6,6 +6,7 @@ import PlayerControls from "@Components/PlayerControls";
 import PreviewModal from "@Components/PreviewModal";
 import NavBar from "@Components/NavBar";
 import SettingModal from "@Components/SettingModal";
+import WatchingStreamers from "@Components/WatchingStreamers";
 import ReactDOM from "react-dom";
 import { isUserTyping, customLog, sleep, waitForElementAsync, observeUrlChanges } from "@Utils/index";
 
@@ -1151,6 +1152,7 @@ const PlayerPage: React.FC = observer(() => {
             <SettingModal />
             <PlayerControls />
             <PreviewModal />
+            <WatchingStreamers />
         </>
     );
 });

@@ -81,6 +81,13 @@ const EXPORT_KEYS = [
     "isUnlockCopyPasteEnabled",
     "isHideButtonsAboveChatInputEnabled",
     "isHideChatItemsEnabled",
+    "isWatchingStreamersEnabled",
+    "watchingStreamersIntervalMinutes",
+    "watchingStreamersProfileSize",
+    "isWatchingStreamersTextModeEnabled",
+    "watchingStreamersSortOrder",
+    "isWatchingStreamersFollowingListEnabled",
+    "watchingStreamersRegisteredUsers",
 ] as const;
 
 async function compressSettings(data: unknown): Promise<string> {
@@ -144,6 +151,7 @@ const SECTIONS = [
     { id: "vod-player-options-title", label: "VOD 플레이어" },
     { id: "chat-options-title", label: "채팅창" },
     { id: "etc-options-title", label: "기타" },
+    { id: "watching-streamers-options-title", label: "시청 스트리머" },
     { id: "management-title", label: "차단/부가설명" },
 ];
 
@@ -178,7 +186,8 @@ type BadgeKey =
     | "tab"
     | "screen"
     | "nickname"
-    | "etc";
+    | "etc"
+    | "watching";
 
 const BADGE_CONFIG: Record<BadgeKey, { label: string; bg: string; color: string }> = {
     list: { label: "목록", bg: "rgba(121,134,203,0.18)", color: "#7986cb" },
@@ -189,6 +198,7 @@ const BADGE_CONFIG: Record<BadgeKey, { label: string; bg: string; color: string 
     live: { label: "LIVE", bg: "rgba(229,57,53,0.18)", color: "#ef5350" },
     vod: { label: "VOD", bg: "rgba(103,58,183,0.18)", color: "#9575cd" },
     etc: { label: "기타", bg: "rgba(158,158,158,0.18)", color: "#9e9e9e" },
+    watching: { label: "시청스트리머", bg: "rgba(255,152,0,0.18)", color: "#ff9800" },
     player: { label: "플레이어", bg: "rgba(33,150,243,0.18)", color: "#42a5f5" },
     chat: { label: "채팅창", bg: "rgba(0,188,212,0.18)", color: "#26c6da" },
     shortcut: { label: "단축키", bg: "rgba(156,39,176,0.18)", color: "#ce93d8" },
@@ -240,6 +250,73 @@ const Opt: React.FC<{
         <Toggle checked={checked} onChange={onChange} id={id} />
     </div>
 );
+
+// ============================================================
+// 개별 모니터링 유저 추가 폼
+// ============================================================
+
+const WatchingUserAddForm: React.FC = observer(() => {
+    const s = useSettingsStore();
+    const [newUserId, setNewUserId] = useState("");
+    const [addError, setAddError] = useState("");
+    const [isAdding, setIsAdding] = useState(false);
+
+    const handleAdd = () => {
+        const uid = newUserId.trim().toLowerCase();
+        if (!uid) return;
+        if (s.watchingStreamersRegisteredUsers.some((u) => u.userId === uid)) {
+            setAddError("이미 등록된 아이디입니다.");
+            return;
+        }
+        setIsAdding(true);
+        setAddError("");
+        fetch(`https://st.sooplive.com/api/get_station_status.php?szBjId=${encodeURIComponent(uid)}`)
+            .then((r) => r.json())
+            .then((data: { RESULT?: number; DATA?: { user_id?: string; user_nick?: string } }) => {
+                if (!data.RESULT || !data.DATA?.user_id) {
+                    setAddError("유효하지 않은 아이디입니다.");
+                    return;
+                }
+                const updated = [
+                    ...s.watchingStreamersRegisteredUsers,
+                    { userName: data.DATA?.user_nick ?? uid, userId: data.DATA.user_id },
+                ];
+                s.setSetting("watchingStreamersRegisteredUsers", updated);
+                setNewUserId("");
+            })
+            .catch(() => setAddError("조회에 실패했습니다."))
+            .finally(() => setIsAdding(false));
+    };
+
+    return (
+        <div className="option_v8xK4z" style={{ flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
+            <label>
+                <B k="watching" />
+                개별 스트리머 등록 (아이디 입력)
+            </label>
+            <div className="ws-add-row">
+                <input
+                    type="text"
+                    className="ws-add-input"
+                    placeholder="스트리머 아이디"
+                    value={newUserId}
+                    disabled={isAdding}
+                    onChange={(e) => {
+                        setNewUserId(e.target.value);
+                        setAddError("");
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") handleAdd();
+                    }}
+                />
+                <button className="ws-add-btn" onClick={handleAdd} disabled={isAdding || !newUserId.trim()}>
+                    {isAdding ? "..." : "+ 추가"}
+                </button>
+            </div>
+            {addError && <span style={{ fontSize: "11px", color: "#e53935" }}>{addError}</span>}
+        </div>
+    );
+});
 
 // ============================================================
 // Main modal component
@@ -642,6 +719,7 @@ const SettingModal: React.FC = observer(() => {
                                 <div className="mapper-setting_v8xK4z">
                                     <select
                                         id="pollIntervalSelect"
+                                        className="ws-select"
                                         value={s.pollIntervalSeconds}
                                         onChange={(e) => s.setSetting("pollIntervalSeconds", Number(e.target.value))}
                                     >
@@ -836,6 +914,7 @@ const SettingModal: React.FC = observer(() => {
                                 <div className="mapper-setting_v8xK4z">
                                     <select
                                         id="selectPreferredQuality"
+                                        className="ws-select"
                                         value={s.preferredQuality}
                                         onChange={(e) => s.setSetting("preferredQuality", e.target.value)}
                                     >
@@ -856,13 +935,11 @@ const SettingModal: React.FC = observer(() => {
                                     클릭/우클릭 기능 매핑
                                 </label>
                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                    <div
-                                        className="mapper-setting_v8xK4z"
-                                        style={{ marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }}
-                                    >
+                                    <div className="mapper-setting_v8xK4z">
                                         <label htmlFor="selectLeftClick">좌</label>
                                         <select
                                             id="selectLeftClick"
+                                            className="ws-select"
                                             value={s.selectLeftClick}
                                             onChange={(e) => s.setSetting("selectLeftClick", e.target.value)}
                                         >
@@ -874,13 +951,11 @@ const SettingModal: React.FC = observer(() => {
                                             <option value="toggleFullscreen">전체화면</option>
                                         </select>
                                     </div>
-                                    <div
-                                        className="mapper-setting_v8xK4z"
-                                        style={{ marginLeft: 0, display: "inline-flex", alignItems: "center", gap: 4 }}
-                                    >
+                                    <div className="mapper-setting_v8xK4z">
                                         <label htmlFor="selectRightClick">우</label>
                                         <select
                                             id="selectRightClick"
+                                            className="ws-select"
                                             value={s.selectRightClick}
                                             onChange={(e) => s.setSetting("selectRightClick", e.target.value)}
                                         >
@@ -1158,6 +1233,173 @@ const SettingModal: React.FC = observer(() => {
                                 checked={s.isThemeLockEnabled}
                                 onChange={(v) => s.setSetting("isThemeLockEnabled", v)}
                             />
+                        </section>
+
+                        <div className="divider_v8xK4z" />
+
+                        {/* ── 시청 스트리머 ── */}
+                        <section>
+                            <h3 id="watching-streamers-options-title" className="section-title_v8xK4z">
+                                시청 스트리머 옵션
+                            </h3>
+                            <p className="description_v8xK4z" style={{ marginBottom: 8 }}>
+                                현재 방송을 보고 있는 스트리머(즐겨찾기 목록 / 개별 등록)를 방송 정보 영역에 표시합니다.
+                            </p>
+                            <Opt
+                                id="switchWatchingStreamers"
+                                badge="watching"
+                                label="시청 스트리머 표시 활성화"
+                                checked={s.isWatchingStreamersEnabled}
+                                onChange={(v) => s.setSetting("isWatchingStreamersEnabled", v)}
+                            />
+                            <Opt
+                                id="switchWatchingStreamersFollowingList"
+                                badge="watching"
+                                label="즐겨찾기 목록에서 탐지"
+                                checked={s.isWatchingStreamersFollowingListEnabled}
+                                onChange={(v) => s.setSetting("isWatchingStreamersFollowingListEnabled", v)}
+                            />
+                            <Opt
+                                id="switchWatchingStreamersTextMode"
+                                badge="watching"
+                                label="텍스트 모드 (이미지 대신 닉네임)"
+                                checked={s.isWatchingStreamersTextModeEnabled}
+                                onChange={(v) => s.setSetting("isWatchingStreamersTextModeEnabled", v)}
+                            />
+                            <div className="option_v8xK4z">
+                                <label htmlFor="wsSortOrder">
+                                    <B k="watching" />
+                                    정렬 기준
+                                </label>
+                                <select
+                                    id="wsSortOrder"
+                                    className="ws-select"
+                                    value={s.watchingStreamersSortOrder}
+                                    onChange={(e) => s.setSetting("watchingStreamersSortOrder", e.target.value)}
+                                >
+                                    <option value="date">📅 뉴비순 (기본)</option>
+                                    <option value="rank">👑 등급순</option>
+                                    <option value="favorites">⭐ 즐찾순</option>
+                                </select>
+                            </div>
+                            <div className="option_v8xK4z range-option_v8xK4z">
+                                <label htmlFor="wsIntervalMinutes">
+                                    <B k="watching" />
+                                    검색 주기 (분)
+                                </label>
+                                <div className="range-container_v8xK4z">
+                                    <input
+                                        type="range"
+                                        id="wsIntervalMinutes"
+                                        min={1}
+                                        max={30}
+                                        value={s.watchingStreamersIntervalMinutes}
+                                        onChange={(e) =>
+                                            s.setSetting("watchingStreamersIntervalMinutes", Number(e.target.value))
+                                        }
+                                    />
+                                    <span className="range-value_v8xK4z">{s.watchingStreamersIntervalMinutes}분</span>
+                                </div>
+                            </div>
+                            <div className="option_v8xK4z range-option_v8xK4z">
+                                <label htmlFor="wsProfileSize">
+                                    <B k="watching" />
+                                    프로필 이미지 크기 (px)
+                                </label>
+                                <div className="range-container_v8xK4z">
+                                    <input
+                                        type="range"
+                                        id="wsProfileSize"
+                                        min={24}
+                                        max={80}
+                                        value={s.watchingStreamersProfileSize}
+                                        onChange={(e) =>
+                                            s.setSetting("watchingStreamersProfileSize", Number(e.target.value))
+                                        }
+                                    />
+                                    <span className="range-value_v8xK4z">{s.watchingStreamersProfileSize}px</span>
+                                </div>
+                            </div>
+                            <div className="option_v8xK4z range-option_v8xK4z">
+                                <label htmlFor="wsMinDisplay">
+                                    <B k="watching" />
+                                    최소 표시 인원 (명)
+                                </label>
+                                <div className="range-container_v8xK4z">
+                                    <input
+                                        type="range"
+                                        id="wsMinDisplay"
+                                        min={1}
+                                        max={10}
+                                        value={s.watchingStreamersMinDisplay}
+                                        onChange={(e) =>
+                                            s.setSetting("watchingStreamersMinDisplay", Number(e.target.value))
+                                        }
+                                    />
+                                    <span className="range-value_v8xK4z">{s.watchingStreamersMinDisplay}명</span>
+                                </div>
+                            </div>
+                            {/* 개별 모니터링 유저 추가 */}
+                            <WatchingUserAddForm />
+                            {/* 개별 모니터링 유저 목록 */}
+                            {s.watchingStreamersRegisteredUsers.length > 0 && (
+                                <div
+                                    className="option_v8xK4z"
+                                    style={{ flexDirection: "column", alignItems: "flex-start", gap: 6 }}
+                                >
+                                    <label>
+                                        <B k="watching" />
+                                        개별 모니터링 유저 ({s.watchingStreamersRegisteredUsers.length}명)
+                                    </label>
+                                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                                        {s.watchingStreamersRegisteredUsers.map((u) => (
+                                            <span
+                                                key={u.userId}
+                                                style={{
+                                                    display: "inline-flex",
+                                                    alignItems: "center",
+                                                    gap: 4,
+                                                    padding: "2px 6px 2px 8px",
+                                                    background: "rgba(255,152,0,0.12)",
+                                                    borderRadius: 10,
+                                                    fontSize: "11px",
+                                                    border: "1px solid rgba(255,152,0,0.3)",
+                                                }}
+                                            >
+                                                <span>{u.userName}</span>
+                                                <span
+                                                    style={{
+                                                        opacity: 0.55,
+                                                        fontSize: "10px",
+                                                    }}
+                                                >
+                                                    {u.userId}
+                                                </span>
+                                                <button
+                                                    title={`${u.userId} 등록 해제`}
+                                                    style={{
+                                                        border: "none",
+                                                        background: "none",
+                                                        cursor: "pointer",
+                                                        padding: 0,
+                                                        fontSize: 10,
+                                                        opacity: 0.6,
+                                                        color: "inherit",
+                                                    }}
+                                                    onClick={() => {
+                                                        const updated = s.watchingStreamersRegisteredUsers.filter(
+                                                            (r) => r.userId !== u.userId,
+                                                        );
+                                                        s.setSetting("watchingStreamersRegisteredUsers", updated);
+                                                    }}
+                                                >
+                                                    ✕
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </section>
 
                         {/* ── 차단/부가설명 (footer) ── */}

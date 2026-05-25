@@ -403,6 +403,133 @@
         gap: 15px;
     }
 
+    /* ── WatchingStreamers 셀렉트 / 추가 폼 ── */
+    .ws-select {
+        background-color: var(--surface-color-v8xK4z);
+        color: var(--primary-text-v8xK4z);
+        border: 1px solid var(--border-color-v8xK4z);
+        border-radius: 6px;
+        padding: 5px 8px;
+        font-size: 12px;
+        outline: none;
+        cursor: pointer;
+        transition:
+            border-color 0.15s,
+            box-shadow 0.15s;
+
+        &:not(:focus):hover {
+            border-color: var(--accent-color-v8xK4z);
+            box-shadow: inset 0 0 0 999px rgba(79, 143, 184, 0.12);
+        }
+    }
+
+    .ws-add-row {
+        display: flex;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .ws-add-input {
+        flex: 1;
+        font-size: 12px;
+        padding: 5px 8px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color-v8xK4z);
+        background: var(--bg-color-v8xK4z);
+        color: var(--primary-text-v8xK4z);
+        outline: none;
+        transition: border-color 0.15s;
+
+        &::placeholder {
+            color: var(--secondary-text-v8xK4z);
+            opacity: 0.7;
+        }
+
+        &:focus {
+            border-color: var(--accent-color-v8xK4z);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+
+    .ws-add-btn {
+        flex-shrink: 0;
+        font-size: 12px;
+        padding: 5px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color-v8xK4z);
+        background: var(--surface-color-v8xK4z);
+        color: var(--primary-text-v8xK4z);
+        cursor: pointer;
+        white-space: nowrap;
+        transition:
+            background 0.15s,
+            border-color 0.15s,
+            opacity 0.15s;
+
+        &:hover:not(:disabled) {
+            background: var(--accent-color-v8xK4z);
+            border-color: var(--accent-color-v8xK4z);
+            color: #fff;
+        }
+
+        &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    }
+
+    .ws-threshold-stepper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+
+        input[type="range"] {
+            flex: 1;
+        }
+    }
+
+    .ws-threshold-btn {
+        flex-shrink: 0;
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color-v8xK4z);
+        background: var(--surface-color-v8xK4z);
+        color: var(--primary-text-v8xK4z);
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+            background 0.15s,
+            opacity 0.15s;
+
+        &:hover:not(:disabled) {
+            background: var(--accent-color-v8xK4z);
+            color: #fff;
+            border-color: var(--accent-color-v8xK4z);
+        }
+
+        &:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+    }
+
+    .ws-threshold-value {
+        min-width: 60px;
+        text-align: right;
+        font-size: 14px;
+        font-variant-numeric: tabular-nums;
+    }
+
     input[type="range"] {
         width: 100%;
     }
@@ -475,17 +602,9 @@
     }
 
     .mapper-setting_v8xK4z {
-        display: inline;
-        margin-left: 16px;
-
-        select {
-            background-color: var(--surface-color-v8xK4z);
-            color: var(--primary-text-v8xK4z);
-            border: 1px solid var(--border-color-v8xK4z);
-            border-radius: 6px;
-            padding: 5px 8px;
-            outline: none;
-        }
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
     }
 
     textarea {

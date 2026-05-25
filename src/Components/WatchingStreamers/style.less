@@ -1,0 +1,281 @@
+/* ================================================ */
+/* WatchingStreamers — 클린 리디자인                */
+/* ================================================ */
+
+/* ── 컨테이너 ── */
+.broadcast_information #view_streamer {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 10px 0 8px !important;
+    font-size: 14px !important;
+}
+
+/* 모바일 세로/가로 숨김 */
+@media screen and (max-width: 964px) {
+    .broadcast_information #view_streamer {
+        display: none !important;
+    }
+    .broadcast_information.detail_open #view_streamer {
+        display: flex !important;
+    }
+}
+@media screen and (orientation: portrait) {
+    .broadcast_information #view_streamer {
+        display: none !important;
+    }
+    .broadcast_information.detail_open #view_streamer {
+        display: flex !important;
+    }
+}
+
+/* ── 헤더 행 ── */
+#view_streamer .ws-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+
+/* ── 카운트 배지 (테두리 없음, SOOP li.user 스타일) ── */
+#view_streamer .ws-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: default;
+    user-select: none;
+    line-height: 1;
+}
+
+#view_streamer .ws-count-icon {
+    font-size: 13px;
+    line-height: 1;
+    opacity: 0.75;
+}
+
+#view_streamer .ws-count-num {
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: #222;
+    letter-spacing: 0.2px;
+}
+
+html[dark="true"] #view_streamer .ws-count-num {
+    color: #e0e0e0;
+}
+
+#view_streamer .ws-scanned-num {
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: #222;
+    letter-spacing: 0.2px;
+}
+
+html[dark="true"] #view_streamer .ws-scanned-num {
+    color: #e0e0e0;
+}
+
+/* ── 카운트다운 라벨 ── */
+#view_streamer .ws-countdown-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #aaa;
+    user-select: none;
+    white-space: nowrap;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+html[dark="true"] #view_streamer .ws-countdown-label {
+    color: #666;
+}
+
+/* ── 새로고침 버튼 (테두리 없음) ── */
+#view_streamer .ws-refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    color: #222;
+    opacity: 0.6;
+}
+
+html[dark="true"] #view_streamer .ws-refresh-btn {
+    color: #e0e0e0;
+}
+
+#view_streamer .ws-refresh-btn {
+    user-select: none;
+    transition:
+        opacity 0.15s,
+        transform 0.1s;
+    flex-shrink: 0;
+}
+
+#view_streamer .ws-refresh-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* 갱신 중 스핀 */
+@keyframes ws-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#view_streamer .ws-refresh-btn.ws-refreshing {
+    animation: ws-spin 0.7s linear infinite;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* ── 유저 목록 ── */
+#view_streamer #user-list-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: flex-end;
+}
+
+/* 이미지 모드 링크 */
+#view_streamer #user-list-container a.user-link {
+    position: relative;
+    display: inline-block;
+    vertical-align: bottom;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: transform 0.12s;
+}
+
+#view_streamer #user-list-container a.user-link:hover {
+    transform: translateY(-2px);
+}
+
+/* 텍스트 모드 링크 */
+#view_streamer #user-list-container a.user-link.textMode {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border: 1px solid rgba(0, 0, 0, 0.11);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.04);
+    font-size: 13px;
+    font-weight: 500;
+    color: #222 !important;
+    text-decoration: none;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+}
+
+html[dark="true"] #view_streamer #user-list-container a.user-link.textMode {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: #e0e0e0 !important;
+}
+
+#view_streamer #user-list-container a.user-link.textMode:hover {
+    background: rgba(0, 0, 0, 0.09);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+html[dark="true"] #view_streamer #user-list-container a.user-link.textMode:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* ── 이미지 래퍼 / 프로필 사진 ── */
+#view_streamer .user-image-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-picture-chat {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    cursor: pointer;
+    object-fit: cover;
+    display: block;
+    border: 1.5px solid rgba(0, 0, 0, 0.08);
+}
+
+html[dark="true"] .profile-picture-chat {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ── 등급 컬러 닷 ── */
+#view_streamer .color-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+/* ── 툴팁 ── */
+#view_streamer .user-link .custom-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(30, 30, 30, 0.92);
+    color: #fff;
+    padding: 7px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    position: absolute;
+    z-index: 10;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    font-size: 12px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    transition:
+        opacity 0.1s,
+        visibility 0.1s;
+}
+
+.tooltip-profile-img {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+}
+
+#view_streamer .user-link:hover .custom-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+#view_streamer .user-link:hover .custom-tooltip {
+    visibility: visible;
+    opacity: 1;
+}

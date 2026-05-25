@@ -95,6 +95,16 @@ export class SettingsStore {
     // 다크 모드
     isDarkMode: boolean;
 
+    // 시청 스트리머 (현재 방송을 보고 있는 스트리머)
+    isWatchingStreamersEnabled: boolean;
+    watchingStreamersIntervalMinutes: number;
+    watchingStreamersProfileSize: number;
+    isWatchingStreamersTextModeEnabled: boolean;
+    watchingStreamersSortOrder: string;
+    isWatchingStreamersFollowingListEnabled: boolean;
+    watchingStreamersRegisteredUsers: Array<{ userName: string; userId: string }>;
+    watchingStreamersMinDisplay: number;
+
     constructor() {
         this.isCustomSidebarEnabled = GM_getValue("isCustomSidebarEnabled", true);
         this.isRandomSortEnabled = GM_getValue("isRandomSortEnabled", false);
@@ -182,6 +192,15 @@ export class SettingsStore {
             document.documentElement.getAttribute("dark") === "true" ||
             document.documentElement.classList.contains("dark");
 
+        this.isWatchingStreamersEnabled = GM_getValue("isWatchingStreamersEnabled", true);
+        this.watchingStreamersIntervalMinutes = GM_getValue("watchingStreamersIntervalMinutes", 3);
+        this.watchingStreamersProfileSize = GM_getValue("watchingStreamersProfileSize", 46);
+        this.isWatchingStreamersTextModeEnabled = GM_getValue("isWatchingStreamersTextModeEnabled", false);
+        this.watchingStreamersSortOrder = GM_getValue("watchingStreamersSortOrder", "date");
+        this.isWatchingStreamersFollowingListEnabled = GM_getValue("isWatchingStreamersFollowingListEnabled", true);
+        this.watchingStreamersRegisteredUsers = GM_getValue("watchingStreamersRegisteredUsers", []);
+        this.watchingStreamersMinDisplay = GM_getValue("watchingStreamersMinDisplay", 1);
+
         makeObservable(this, {
             isCustomSidebarEnabled: observable,
             isRandomSortEnabled: observable,
@@ -258,6 +277,14 @@ export class SettingsStore {
             isHideChatItemsEnabled: observable,
             savedCategory: observable,
             isDarkMode: observable,
+            isWatchingStreamersEnabled: observable,
+            watchingStreamersIntervalMinutes: observable,
+            watchingStreamersProfileSize: observable,
+            isWatchingStreamersTextModeEnabled: observable,
+            watchingStreamersSortOrder: observable,
+            isWatchingStreamersFollowingListEnabled: observable,
+            watchingStreamersRegisteredUsers: observable,
+            watchingStreamersMinDisplay: observable,
             setSetting: action,
             setDarkMode: action,
         });
