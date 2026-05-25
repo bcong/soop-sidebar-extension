@@ -443,6 +443,8 @@ const WatchingStreamers: React.FC = observer(() => {
 
         const startPolling = async () => {
             await waitForElementAsync(".broadcast_information");
+            // nAllViewer 가 나타날 때까지 추가 대기 (liveView/chatUserListLayer 초기화 완료 신호)
+            await waitForElementAsync("#nAllViewer");
             void fetchAndFilter();
         };
         void startPolling();
