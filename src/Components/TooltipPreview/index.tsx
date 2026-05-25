@@ -204,6 +204,7 @@ const TooltipPreview: React.FC = observer(() => {
     const [data, setData] = useState<TooltipData | null>(null);
     const [resolvedThumbnail, setResolvedThumbnail] = useState<string | null>(null);
     const [capturedFrame, setCapturedFrame] = useState<string | null>(null);
+    const [thumbTick, setThumbTick] = useState(0);
     const ref = useRef<HTMLDivElement>(null);
 
     // SOOP 라이브 스트림: 툴팁 표시 시 즉시 HLS 캡처 (sample.js replaceThumbnails 방식)
@@ -264,19 +265,19 @@ const TooltipPreview: React.FC = observer(() => {
         const directBase =
             data.thumbnailUrl || (data.broadNo ? `https://liveimg.sooplive.com/m/${data.broadNo}.jpg` : null);
         if (directBase) {
-            setResolvedThumbnail(`${directBase}?t=${Date.now()}`);
+            setResolvedThumbnail(directBase);
             return;
         }
         if (data.platform === "chzzk" && data.userId) {
             setResolvedThumbnail(null);
             fetchBroadList(
                 `https://api.chzzk.naver.com/service/v1/channels/${data.userId}/data?fields=topExposedVideos`,
-                100,
+                30,
             )
                 .then((res: any) => {
                     const liveImageUrl = res?.content?.topExposedVideos?.openLive?.liveImageUrl;
                     if (liveImageUrl) {
-                        setResolvedThumbnail(`${liveImageUrl.replace("{type}", "360")}?t=${Date.now()}`);
+                        setResolvedThumbnail(liveImageUrl.replace("{type}", "360"));
                     }
                 })
                 .catch(() => {});
@@ -284,6 +285,14 @@ const TooltipPreview: React.FC = observer(() => {
             setResolvedThumbnail(null);
         }
     }, [data]);
+
+    // 툴팁 표시 중 30초마다 섬네일 강제 갱신
+    useEffect(() => {
+        if (!visible) return;
+        setThumbTick(0);
+        const timer = setInterval(() => setThumbTick((t) => t + 1), 30000);
+        return () => clearInterval(timer);
+    }, [visible, data]);
 
     useEffect(() => {
         globalShowFn = (tooltipData, x, y) => {
@@ -320,7 +329,7 @@ const TooltipPreview: React.FC = observer(() => {
 
     if (!settings.isThumbnailTooltipEnabled || !visible || !data) return null;
 
-    const cacheBuster = `?${Math.floor(Date.now() / 10000)}`;
+    const cacheBuster = `?t=${thumbTick}_${Math.floor(Date.now() / 1000)}`;
     const thumbnailSrc = capturedFrame
         ? capturedFrame
         : resolvedThumbnail

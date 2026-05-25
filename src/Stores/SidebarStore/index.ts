@@ -460,8 +460,9 @@ export class SidebarStore {
         const pinned = main.filter((c) => c.channel.isPinned);
         const rest = main.filter((c) => !c.channel.isPinned);
 
-        // 랜덤이 아닌 경우 SOOP+Chzzk 통합 시청자순 정렬
+        // 랜덤이 아닌 경우 SOOP+Chzzk 통합 시청자순 정렬 (핀 포함)
         if (!s.isRandomSortEnabled) {
+            pinned.sort((a, b) => getViewerCount(b) - getViewerCount(a));
             rest.sort((a, b) => getViewerCount(b) - getViewerCount(a));
         }
 

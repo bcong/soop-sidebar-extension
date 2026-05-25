@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260525160806
+// @version      20260525201504
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -12381,6 +12381,7 @@
       const pinned = main.filter((c) => c.channel.isPinned);
       const rest = main.filter((c) => !c.channel.isPinned);
       if (!s.isRandomSortEnabled) {
+        pinned.sort((a, b) => getViewerCount(b) - getViewerCount(a));
         rest.sort((a, b) => getViewerCount(b) - getViewerCount(a));
       }
       const _result = [...pinned, ...rest, ...blockedCat];
@@ -13324,6 +13325,7 @@
     const [data, setData] = reactExports.useState(null);
     const [resolvedThumbnail, setResolvedThumbnail] = reactExports.useState(null);
     const [capturedFrame, setCapturedFrame] = reactExports.useState(null);
+    const [thumbTick, setThumbTick] = reactExports.useState(0);
     const ref = reactExports.useRef(null);
     reactExports.useEffect(() => {
       if (!settings.isReplaceEmptyThumbnailEnabled) return;
@@ -13366,19 +13368,19 @@
       }
       const directBase = data.thumbnailUrl || (data.broadNo ? `https://liveimg.sooplive.com/m/${data.broadNo}.jpg` : null);
       if (directBase) {
-        setResolvedThumbnail(`${directBase}?t=${Date.now()}`);
+        setResolvedThumbnail(directBase);
         return;
       }
       if (data.platform === "chzzk" && data.userId) {
         setResolvedThumbnail(null);
         fetchBroadList(
           `https://api.chzzk.naver.com/service/v1/channels/${data.userId}/data?fields=topExposedVideos`,
-          100
+          30
         ).then((res) => {
           var _a2, _b2, _c;
           const liveImageUrl = (_c = (_b2 = (_a2 = res == null ? void 0 : res.content) == null ? void 0 : _a2.topExposedVideos) == null ? void 0 : _b2.openLive) == null ? void 0 : _c.liveImageUrl;
           if (liveImageUrl) {
-            setResolvedThumbnail(`${liveImageUrl.replace("{type}", "360")}?t=${Date.now()}`);
+            setResolvedThumbnail(liveImageUrl.replace("{type}", "360"));
           }
         }).catch(() => {
         });
@@ -13386,6 +13388,12 @@
         setResolvedThumbnail(null);
       }
     }, [data]);
+    reactExports.useEffect(() => {
+      if (!visible) return;
+      setThumbTick(0);
+      const timer = setInterval(() => setThumbTick((t2) => t2 + 1), 3e4);
+      return () => clearInterval(timer);
+    }, [visible, data]);
     reactExports.useEffect(() => {
       globalShowFn = (tooltipData, x2, y2) => {
         if (!settings.isThumbnailTooltipEnabled) return;
@@ -13413,7 +13421,7 @@
       el2.style.top = `${y2}px`;
     }, [visible, pos]);
     if (!settings.isThumbnailTooltipEnabled || !visible || !data) return null;
-    const cacheBuster = `?${Math.floor(Date.now() / 1e4)}`;
+    const cacheBuster = `?t=${thumbTick}_${Math.floor(Date.now() / 1e3)}`;
     const thumbnailSrc = capturedFrame ? capturedFrame : resolvedThumbnail ? resolvedThumbnail + (resolvedThumbnail.startsWith("http") && !resolvedThumbnail.startsWith("https://stimg.") ? cacheBuster : "") : null;
     const elapsed = data.broadStart && data.type === "live" ? getElapsedTime(data.broadStart) : null;
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { ref, className: `tooltip-container${visible ? " visible" : ""}`, style: { position: "fixed" }, children: [
@@ -13900,7 +13908,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525160806";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525201504";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
