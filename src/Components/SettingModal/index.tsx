@@ -88,6 +88,7 @@ const EXPORT_KEYS = [
     "watchingStreamersSortOrder",
     "isWatchingStreamersFollowingListEnabled",
     "watchingStreamersRegisteredUsers",
+    "watchingStreamersMinDisplay",
 ] as const;
 
 async function compressSettings(data: unknown): Promise<string> {
@@ -1323,7 +1324,7 @@ const SettingModal: React.FC = observer(() => {
                             <div className="option_v8xK4z range-option_v8xK4z">
                                 <label htmlFor="wsMinDisplay">
                                     <B k="watching" />
-                                    팔로워 필터 (패 수 이상만 표시)
+                                    팔로워 필터 (인원 이상만 표시)
                                 </label>
                                 <div className="range-container_v8xK4z">
                                     <input
@@ -1338,7 +1339,9 @@ const SettingModal: React.FC = observer(() => {
                                         }
                                     />
                                     <span className="range-value_v8xK4z">
-                                        {s.watchingStreamersMinDisplay === 0 ? "제한 없음" : `${s.watchingStreamersMinDisplay.toLocaleString()}명 이상`}
+                                        {s.watchingStreamersMinDisplay === 0
+                                            ? "제한 없음"
+                                            : `${s.watchingStreamersMinDisplay.toLocaleString()}명 이상`}
                                     </span>
                                 </div>
                             </div>

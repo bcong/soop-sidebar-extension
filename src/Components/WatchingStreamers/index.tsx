@@ -65,8 +65,11 @@ function fetchFanCount(userId: string): Promise<number> {
             method: "GET",
             url: `https://st.sooplive.com/api/get_station_status.php?szBjId=${userId}`,
             onload: (res) => {
-                try { resolve(JSON.parse(res.responseText)?.DATA?.fan_cnt ?? 0); }
-                catch { resolve(0); }
+                try {
+                    resolve(JSON.parse(res.responseText)?.DATA?.fan_cnt ?? 0);
+                } catch {
+                    resolve(0);
+                }
             },
             onerror: () => resolve(0),
         });
@@ -395,12 +398,18 @@ const WatchingStreamers: React.FC = observer(() => {
                             : 0;
                         if (total > 0 && total === prevCount) {
                             stableCount++;
-                            if (stableCount >= 2) { resolve(); return; }
+                            if (stableCount >= 2) {
+                                resolve();
+                                return;
+                            }
                         } else {
                             stableCount = 0;
                             prevCount = total;
                         }
-                        if (Date.now() >= deadline) { resolve(); return; }
+                        if (Date.now() >= deadline) {
+                            resolve();
+                            return;
+                        }
                         setTimeout(check, 300);
                     };
                     setTimeout(check, 300);

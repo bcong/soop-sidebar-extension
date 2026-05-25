@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260526005829
+// @version      20260526011053
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -11612,7 +11612,7 @@
       this.watchingStreamersSortOrder = _GM_getValue("watchingStreamersSortOrder", "date");
       this.isWatchingStreamersFollowingListEnabled = _GM_getValue("isWatchingStreamersFollowingListEnabled", true);
       this.watchingStreamersRegisteredUsers = _GM_getValue("watchingStreamersRegisteredUsers", []);
-      this.watchingStreamersMinDisplay = _GM_getValue("watchingStreamersMinDisplay", 0);
+      this.watchingStreamersMinDisplay = _GM_getValue("watchingStreamersMinDisplay", 5e3);
       makeObservable(this, {
         isCustomSidebarEnabled: observable,
         isRandomSortEnabled: observable,
@@ -13758,7 +13758,8 @@
     "isWatchingStreamersTextModeEnabled",
     "watchingStreamersSortOrder",
     "isWatchingStreamersFollowingListEnabled",
-    "watchingStreamersRegisteredUsers"
+    "watchingStreamersRegisteredUsers",
+    "watchingStreamersMinDisplay"
   ];
   async function compressSettings(data) {
     const encoded = new TextEncoder().encode(JSON.stringify(data));
@@ -13998,7 +13999,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260526005829";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260526011053";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -15087,7 +15088,7 @@
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "option_v8xK4z range-option_v8xK4z", children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { htmlFor: "wsMinDisplay", children: [
                     /* @__PURE__ */ jsxRuntimeExports.jsx(B, { k: "watching" }),
-                    "팔로워 필터 (패 수 이상만 표시)"
+                    "팔로워 필터 (인원 이상만 표시)"
                   ] }),
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "range-container_v8xK4z", children: [
                     /* @__PURE__ */ jsxRuntimeExports.jsx(
