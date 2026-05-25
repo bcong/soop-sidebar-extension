@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260526013917
+// @version      20260526020359
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -13999,7 +13999,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260526013917";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260526020359";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -15973,12 +15973,19 @@ self.onmessage = function(e) {
         return;
       }
       fetchFollowingList();
+      const triggerScan = () => {
+        isFetchingRef.current = false;
+        void fetchAndFilter();
+      };
       const startPolling = async () => {
         await waitForElementAsync(".broadcast_information");
         await waitForLiveView();
-        void fetchAndFilter();
+        triggerScan();
       };
       void startPolling();
+      const fallbackTimer = setTimeout(() => {
+        if (!isFetchingRef.current) triggerScan();
+      }, 1e4);
       if (intervalRef.current) clearInterval(intervalRef.current);
       const intervalMs = settings.watchingStreamersIntervalMinutes * 60 * 1e3;
       nextFireTimeRef.current = Date.now() + intervalMs;
@@ -15997,10 +16004,11 @@ self.onmessage = function(e) {
           if (el2) setContainer(el2);
         }, 500);
         fetchFollowingList();
-        void waitForLiveView().then(() => fetchAndFilter());
+        void waitForLiveView().then(() => triggerScan());
       });
       return () => {
         if (intervalRef.current) clearInterval(intervalRef.current);
+        clearTimeout(fallbackTimer);
         unsub();
       };
     }, [

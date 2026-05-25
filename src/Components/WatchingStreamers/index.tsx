@@ -461,13 +461,24 @@ const WatchingStreamers: React.FC = observer(() => {
 
         fetchFollowingList();
 
+        // 수동 새로고침과 동일하게: isFetchingRef 리셋 후 fetchAndFilter 호출
+        const triggerScan = () => {
+            isFetchingRef.current = false;
+            void fetchAndFilter();
+        };
+
         const startPolling = async () => {
             await waitForElementAsync(".broadcast_information");
             // chatUserListLayer 가 실제로 준비될 때까지 폴링 대기
             await waitForLiveView();
-            void fetchAndFilter();
+            triggerScan();
         };
         void startPolling();
+
+        // 10초 폴백: waitForLiveView 가 너무 일찍 끝났거나 다른 이유로 스캔이 안 됐을 때
+        const fallbackTimer = setTimeout(() => {
+            if (!isFetchingRef.current) triggerScan();
+        }, 10000);
 
         if (intervalRef.current) clearInterval(intervalRef.current);
         const intervalMs = settings.watchingStreamersIntervalMinutes * 60 * 1000;
@@ -489,12 +500,13 @@ const WatchingStreamers: React.FC = observer(() => {
                 if (el) setContainer(el);
             }, 500);
             fetchFollowingList();
-            // URL 변경 후에도 chatUserListLayer 준비될 때까지 대기
-            void waitForLiveView().then(() => fetchAndFilter());
+            // URL 변경 후에도 chatUserListLayer 준비될 때까지 대기 (리셋 포함)
+            void waitForLiveView().then(() => triggerScan());
         });
 
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
+            clearTimeout(fallbackTimer);
             unsub();
         };
     }, [
