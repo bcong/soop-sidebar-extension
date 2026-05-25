@@ -825,6 +825,24 @@ const PlayerPage: React.FC = observer(() => {
         disableAutoVOD();
     }, [settings.isNoAutoVODEnabled]);
 
+    // ─── 로고/검색 링크 현재 탭으로 열기 (homePageCurrentTab) ──────────
+    useEffect(() => {
+        if (!settings.isSendLoadBroadEnabled) return;
+
+        const applyCurrentTab = () => {
+            document.querySelectorAll<HTMLAnchorElement>("#logo > a, #serviceHeader a[target]").forEach((el) => {
+                el.removeAttribute("target");
+            });
+        };
+
+        waitForElementAsync("#logo > a").then((el) => {
+            if (el) applyCurrentTab();
+        });
+
+        const unsub = observeUrlChanges(() => setTimeout(applyCurrentTab, 200));
+        return unsub;
+    }, [settings.isSendLoadBroadEnabled]);
+
     // ─── cBox-list 방송 링크 클릭 → sendLoadBroad ──────────────────
     useEffect(() => {
         if (!settings.isSendLoadBroadEnabled) return;

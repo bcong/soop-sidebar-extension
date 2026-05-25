@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260525070533
+// @version      20260525160806
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -13900,7 +13900,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525070533";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260525160806";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -16021,6 +16021,19 @@
     }, [settings.isNoAutoVODEnabled]);
     reactExports.useEffect(() => {
       if (!settings.isSendLoadBroadEnabled) return;
+      const applyCurrentTab = () => {
+        document.querySelectorAll("#logo > a, #serviceHeader a[target]").forEach((el2) => {
+          el2.removeAttribute("target");
+        });
+      };
+      waitForElementAsync("#logo > a").then((el2) => {
+        if (el2) applyCurrentTab();
+      });
+      const unsub = observeUrlChanges(() => setTimeout(applyCurrentTab, 200));
+      return unsub;
+    }, [settings.isSendLoadBroadEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isSendLoadBroadEnabled) return;
       const handleClick = (e) => {
         var _a2;
         if (e.ctrlKey || e.metaKey) return;
@@ -16463,6 +16476,19 @@
         clearTimeout(timeout);
       };
     }, [settings.isSelectBestQualityEnabled]);
+    reactExports.useEffect(() => {
+      if (!settings.isSendLoadBroadEnabled) return;
+      const applyCurrentTab = () => {
+        document.querySelectorAll("#logo > a, #serviceHeader a[target]").forEach((el2) => {
+          el2.removeAttribute("target");
+        });
+      };
+      waitForElementAsync("#logo > a").then((el2) => {
+        if (el2) applyCurrentTab();
+      });
+      const unsub = observeUrlChanges(() => setTimeout(applyCurrentTab, 200));
+      return unsub;
+    }, [settings.isSendLoadBroadEnabled]);
     reactExports.useEffect(() => {
       if (!settings.isVODHighlightEnabled) return;
       if (highlightItems.length === 0) return;

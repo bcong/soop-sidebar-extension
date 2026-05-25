@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { observer } from "mobx-react-lite";
 import { useSettingsStore } from "@Stores/index";
 import SidebarView from "@Views/SidebarView";
+import { waitForElementAsync, observeUrlChanges } from "@Utils/index";
 
 // ============================================================
 // 드래그·리사이즈 가능 모달 (VOD 하이라이트 뷰어)
@@ -222,6 +223,24 @@ const VodPage: React.FC = observer(() => {
             clearTimeout(timeout);
         };
     }, [settings.isSelectBestQualityEnabled]);
+
+    // ─── 로고/검색 링크 현재 탭으로 열기 ──────────────────────────────
+    useEffect(() => {
+        if (!settings.isSendLoadBroadEnabled) return;
+
+        const applyCurrentTab = () => {
+            document.querySelectorAll<HTMLAnchorElement>("#logo > a, #serviceHeader a[target]").forEach((el) => {
+                el.removeAttribute("target");
+            });
+        };
+
+        waitForElementAsync("#logo > a").then((el) => {
+            if (el) applyCurrentTab();
+        });
+
+        const unsub = observeUrlChanges(() => setTimeout(applyCurrentTab, 200));
+        return unsub;
+    }, [settings.isSendLoadBroadEnabled]);
 
     // VOD 하이라이트 버튼 표시
     useEffect(() => {
