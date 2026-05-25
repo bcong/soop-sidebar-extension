@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260526011744
+// @version      20260526013917
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -13999,7 +13999,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260526011744";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260526013917";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -15597,6 +15597,25 @@
       return window;
     }
   })();
+  function waitForLiveView(timeoutMs = 15e3) {
+    return new Promise((resolve) => {
+      const deadline = Date.now() + timeoutMs;
+      const check = () => {
+        var _a2, _b2;
+        const lv = _uw$1.liveView ?? window.liveView;
+        if ((_b2 = (_a2 = lv == null ? void 0 : lv.Chat) == null ? void 0 : _a2.chatUserListLayer) == null ? void 0 : _b2.reconnect) {
+          resolve();
+          return;
+        }
+        if (Date.now() >= deadline) {
+          resolve();
+          return;
+        }
+        setTimeout(check, 500);
+      };
+      setTimeout(check, 500);
+    });
+  }
   const rankToSvgMap = {
     건빵: "",
     팬: "data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 15 14'%3e%3crect width='14' height='14' x='.615' fill='%2375AA5C' rx='3'/%3e%3cpath fill='%23fff' d='M5.105 3.43h5.02v1.32h-3.45V6.4h2.99v1.22h-2.99v2.95h-1.57V3.43Z'/%3e%3c/svg%3e",
@@ -15956,7 +15975,7 @@ self.onmessage = function(e) {
       fetchFollowingList();
       const startPolling = async () => {
         await waitForElementAsync(".broadcast_information");
-        await waitForElementAsync("#nAllViewer");
+        await waitForLiveView();
         void fetchAndFilter();
       };
       void startPolling();
@@ -15978,7 +15997,7 @@ self.onmessage = function(e) {
           if (el2) setContainer(el2);
         }, 500);
         fetchFollowingList();
-        void fetchAndFilter();
+        void waitForLiveView().then(() => fetchAndFilter());
       });
       return () => {
         if (intervalRef.current) clearInterval(intervalRef.current);

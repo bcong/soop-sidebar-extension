@@ -15,6 +15,26 @@ const _uw: any = (() => {
     }
 })();
 
+/** liveView.Chat.chatUserListLayer 가 실제로 준비될 때까지 폴링 (최대 timeoutMs) */
+function waitForLiveView(timeoutMs = 15000): Promise<void> {
+    return new Promise((resolve) => {
+        const deadline = Date.now() + timeoutMs;
+        const check = () => {
+            const lv = _uw.liveView ?? (window as any).liveView;
+            if ((lv as any)?.Chat?.chatUserListLayer?.reconnect) {
+                resolve();
+                return;
+            }
+            if (Date.now() >= deadline) {
+                resolve();
+                return;
+            }
+            setTimeout(check, 500);
+        };
+        setTimeout(check, 500);
+    });
+}
+
 // ── 원본 sample2.js 와 동일한 rank 관련 상수 ────────────────────────────────
 const rankToSvgMap: Record<string, string> = {
     건빵: "",
@@ -443,8 +463,8 @@ const WatchingStreamers: React.FC = observer(() => {
 
         const startPolling = async () => {
             await waitForElementAsync(".broadcast_information");
-            // nAllViewer 가 나타날 때까지 추가 대기 (liveView/chatUserListLayer 초기화 완료 신호)
-            await waitForElementAsync("#nAllViewer");
+            // chatUserListLayer 가 실제로 준비될 때까지 폴링 대기
+            await waitForLiveView();
             void fetchAndFilter();
         };
         void startPolling();
@@ -469,7 +489,8 @@ const WatchingStreamers: React.FC = observer(() => {
                 if (el) setContainer(el);
             }, 500);
             fetchFollowingList();
-            void fetchAndFilter();
+            // URL 변경 후에도 chatUserListLayer 준비될 때까지 대기
+            void waitForLiveView().then(() => fetchAndFilter());
         });
 
         return () => {
