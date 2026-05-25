@@ -475,8 +475,12 @@ const WatchingStreamers: React.FC = observer(() => {
         };
         void startPolling();
 
-        // 10초 폴백: waitForLiveView 가 너무 일찍 끝났거나 다른 이유로 스캔이 안 됐을 때
-        const fallbackTimer = setTimeout(() => {
+        // 5초 폴백: waitForLiveView 가 너무 일찍 끝났거나 스캔이 안 됐을 때 1차 재시도
+        const fallbackTimer1 = setTimeout(() => {
+            if (!isFetchingRef.current) triggerScan();
+        }, 5000);
+        // 10초 폴백: 5초 폴백도 실패한 경우 2차 재시도
+        const fallbackTimer2 = setTimeout(() => {
             if (!isFetchingRef.current) triggerScan();
         }, 10000);
 
@@ -506,7 +510,8 @@ const WatchingStreamers: React.FC = observer(() => {
 
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
-            clearTimeout(fallbackTimer);
+            clearTimeout(fallbackTimer1);
+            clearTimeout(fallbackTimer2);
             unsub();
         };
     }, [

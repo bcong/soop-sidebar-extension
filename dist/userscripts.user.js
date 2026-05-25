@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SOOP (숲) - 사이드바 UI 변경
 // @namespace    https://github.com/bcong
-// @version      20260526020359
+// @version      20260526022056
 // @author       bcong
 // @description  SOOP 사이드바를 커스텀 UI로 대체합니다. 즐겨찾기/인기/추천 채널, 설정 모달, 플레이어 기능 강화.
 // @license      MIT
@@ -13999,7 +13999,7 @@
       const el2 = (_a3 = bodyRef.current) == null ? void 0 : _a3.querySelector(`#${id2}`);
       if (el2) el2.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260526020359";
+    const version = (typeof GM_info !== "undefined" ? (_a2 = GM_info == null ? void 0 : GM_info.script) == null ? void 0 : _a2.version : "") || "20260526022056";
     const handleExport = async () => {
       const data = {};
       for (const key of EXPORT_KEYS) {
@@ -15983,7 +15983,10 @@ self.onmessage = function(e) {
         triggerScan();
       };
       void startPolling();
-      const fallbackTimer = setTimeout(() => {
+      const fallbackTimer1 = setTimeout(() => {
+        if (!isFetchingRef.current) triggerScan();
+      }, 5e3);
+      const fallbackTimer2 = setTimeout(() => {
         if (!isFetchingRef.current) triggerScan();
       }, 1e4);
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -16008,7 +16011,8 @@ self.onmessage = function(e) {
       });
       return () => {
         if (intervalRef.current) clearInterval(intervalRef.current);
-        clearTimeout(fallbackTimer);
+        clearTimeout(fallbackTimer1);
+        clearTimeout(fallbackTimer2);
         unsub();
       };
     }, [
